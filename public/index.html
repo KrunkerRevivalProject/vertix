@@ -1,7 +1,5 @@
 <html>
-
 <head>
-
     <meta charset="UTF-8">
     <title>Vertix Online</title>
     <meta name="viewport"
@@ -32,7 +30,6 @@
         }(document, "script", "twitter-wjs"));
     </script> -->
 </head>
-
 <body>
     <!-- <script async
         src="//web.archive.org/web/20230531015720js_/https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script> -->
@@ -96,7 +93,6 @@
         </div>
         <canvas tabindex="1" id="cvs" class="noRightClick" oncontextmenu="return false;"></canvas>
     </div>
-
     <div id="gameStatWrapper">
         <p id="nextGameTimer"></p>
         <div id="gameStatsContainer">
@@ -107,7 +103,6 @@
         <div id="voteModeContainer">
         </div>
     </div>
-
     <div id="loadingWrapper">
         <div id="loadSpinner" class="cs-loader-inner">
             <div id="loadText">PLEASE WAIT</div>
@@ -116,11 +111,8 @@
             <label>⬛</label>
         </div>
     </div>
-
     <div id="escMenuWrapper">
-
     </div>
-
     <div id="startMenuWrapper">
         <div id="mainTitleText">VERTIX ONLINE</div>
         <div id="adWrapper">
@@ -188,6 +180,14 @@
                     <h2 style="margin-bottom:5px;">SECRET:</h2>
                     <label> <input id="showTrippy" type="checkbox" onclick="settingShowTrippy(this);">Migraine
                     </label>
+                    <br />
+                    <label>Custom Map:</label><br>
+                    <button id="customMapButton" onclick="document.getElementById('customMapFile').click();">
+                        Select Map
+                    </button>
+                    <button onclick="clearCustomMap();">Clear</button>
+                    <button id="downloadMapButton" style="display:none;" onclick="downloadCustomMap();">Download Map</button>
+                    <input type="file" id="customMapFile" style="display:none;" accept="image/*" onchange="selectedCMap(this)">
                 </ul>
             </div>
             <button id="instructionButton">CONTROLS</button>
@@ -260,10 +260,8 @@
                 </a>
             </div>
         </div>
-
         <!-- RIGHT MENU -->
         <div id="messageWrap">
-
             <!-- MENU TABS -->
             <ul class="tab">
                 <li>
@@ -276,7 +274,6 @@
                     <div class="tablinks" onclick="changeMenuTab(event, 'modTab')">MODS</div>
                 </li>
             </ul>
-
             <!-- LOADOUT TAB -->
             <div id="loadoutTab" class="tabcontent" style="display: block;">
                 <div id="charSelectorCont">
@@ -314,39 +311,33 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="classSelector" style="display:none;">
                     <h3 class="menuHeaderTabbed">SELECT CLASS</h3>
                     <div id="classList">
                     </div>
                 </div>
-
                 <div id="camoSelector" style="display:none;">
                     <h3 class="menuHeaderTabbed" id="camoHeaderAmount">SELECT CAMO</h3>
                     <div id="camoList"></div>
                 </div>
-
                 <div id="hatSelector" style="display:none;">
                     <h3 id="hatHeader" class="menuHeaderTabbed">SELECT HAT</h3>
                     <div id="hatList">
                         <div class="hatSelectItem" id="hatItem-1" onclick="changeHat(-1);">Default</div>
                     </div>
                 </div>
-
                 <div id="shirtSelector" style="display:none;">
                     <h3 id="shirtHeader" class="menuHeaderTabbed">SELECT SHIRT</h3>
                     <div id="shirtList">
                         <div class="hatSelectItem" id="shirtItem-1" onclick="changeShirt(-1);">Default</div>
                     </div>
                 </div>
-
                 <div id="spraySelector" style="display:none;">
                     <h3 class="menuHeaderTabbed">SELECT SPRAY</h3>
                     <div id="sprayList">
                         <div class="hatSelectItem" id="sprayItem1" onclick="changeSpray(1);">Strike</div>
                     </div>
                 </div>
-
                 <div id="lobbySelector" style="display:none;">
                     <h3 class="menuHeaderTabbed2">JOIN SERVER</h3>
                     <input class="menuTextInput" placeholder="Server IP" id="lobbyKey" maxlength="50"
@@ -359,7 +350,6 @@
                     <button class="smallMenuButton" onclick="hideLobbySelector();"
                         style="margin-bottom:0px;margin-top:10px;">BACK</button>
                 </div>
-
                 <div id="lobbyCSelector" style="display:none;">
                     <div id="createServerContainer">
                         <h3 class="menuHeaderTabbed2" style="margin-bottom:8px;">CREATE SERVER</h3>
@@ -400,7 +390,6 @@
                     <button class="smallMenuButton" onclick="hideLobbyCSelector();"
                         style="margin-bottom:0px;margin-top:10px;">BACK</button>
                 </div>
-
                 <div id="lobbySelectorCont" style="margin-top:-3px;margin-bottom:-5px;">
                     <h3 style="margin-top:12px;margin-bottom:3px;">SERVERS</h3>
                     <div class="hatSelectItem" style="display:inline-block; padding-left:0px;color:#76b3e3;"
@@ -411,7 +400,6 @@
                     <div id="serverKeyTxt" class="lobbyKey" style="margin-bottom:8px;display:inline-block;">none</div>
                 </div>
             </div>
-
             <!-- ACCOUNT TAB -->
             <div id="accountTab" class="tabcontent">
                 <!-- NOT LOGGED IN -->
@@ -503,7 +491,6 @@
                         style="margin-top:10px; margin-bottom:0px; margin-left:5px; ">PROFILE</button>
                 </div>
             </div>
-
             <!-- MOD TAB -->
             <div id="modTab" class="tabcontent">
                 <h3 class="menuHeaderTabbed2">LOAD MOD PACK</h3>
@@ -604,7 +591,6 @@
             </div>
         </center>
     </div>
-
     <script>
         var dropUpLinksCount = 5;
         var activeIndex = -1;
@@ -635,6 +621,62 @@
             });
         });
     </script> -->
-</body>
+    <script>
+        // ─────────────────────────────────────────────────────────────
+        // CUSTOM MAP SUPPORT (standalone – no external JS needed)
+        // ─────────────────────────────────────────────────────────────
+        var customMap = null;
 
+        function selectedCMap(input) {
+            if (!input || !input.files || !input.files[0]) return;
+            const fileName = input.value.split('\\').pop().split('/').pop(); // handles both \ and /
+            document.getElementById("customMapButton").innerHTML = fileName || "Map selected";
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+                    customMap = {
+                        width: img.width,
+                        height: img.height,
+                        data: ctx.getImageData(0, 0, img.width, img.height).data
+                    };
+                    console.log(customMap);
+                    document.getElementById('downloadMapButton').style.display = 'inline';
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+
+        function clearCustomMap() {
+            customMap = null;
+            document.getElementById("customMapButton").innerHTML = "Select Map";
+            document.getElementById('downloadMapButton').style.display = 'none';
+            console.log("Custom map cleared");
+        }
+
+        function downloadCustomMap() {
+            if (!customMap) return;
+            const jsonData = {
+                width: customMap.width,
+                height: customMap.height,
+                data: Array.from(customMap.data)
+            };
+            const jsonString = JSON.stringify(jsonData);
+            const blob = new Blob([jsonString], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'customMap.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+        // ─────────────────────────────────────────────────────────────
+    </script>
+</body>
 </html>

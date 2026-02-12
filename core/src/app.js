@@ -3253,7 +3253,7 @@ function doGame(a) {
       maxScreenHeight / 2 +
       -screenSkY +
       target.dOffset * mathSIN(target.f + mathPI);
-    if (fillCounter > 1 && socket) {  
+    if (fillCounter > 1 && socket) {
       socket.emit("kil");
     }
   }
@@ -3877,8 +3877,10 @@ function getSprite(a) {
     console.log("File not Found: " + a + ".png");
   };
   try {
-    tmpPicture = localStorage.getItem(a + ".png");
-    b.src = tmpPicture;
+    //tmpPicture = localStorage.getItem(a + ".png");
+    //b.src = tmpPicture;
+    b.crossOrigin = 'anonymous';
+    b.src = a + ".png";
   } catch (d) {
     console.log(d);
   }
@@ -4889,8 +4891,11 @@ function setModInfoText(a) {
 var fileFormat = "";
 window.loadModPack = loadModPack;
 function loadModPack(a, b) {
+  //work around
+  loadPlayerSprites("/images/sprites/");
+  loadDefaultSprites("/images/sprites/");
   try {
-    if (!loadingTexturePack) {
+    if (loadingTexturePack) { //originally !loadingTexturePack
       function d() {
         this.numFiles;
         this.progress;
@@ -5006,7 +5011,7 @@ function loadModPack(a, b) {
           }
         } else {
           g =
-            "https://web.archive.org/web/20211107033142/https://dl.dropboxusercontent.com/s/" +
+            "https://dl.dropboxusercontent.com/s/" +
             a +
             "/vertixmod.zip";
         }
@@ -6557,7 +6562,7 @@ function Particle() {
   this.checkInWall = function () {
     for (var a = 0; a < gameMap.tiles.length; ++a) {
       if (gameMap.tiles[a].wall && gameMap.tiles[a].hasCollision) {
-        tmpTl = gameMap.tiles[a];
+        var tmpTl = gameMap.tiles[a];
         if (
           this.x >= tmpTl.x &&
           this.x <= tmpTl.x + tmpTl.scale &&
