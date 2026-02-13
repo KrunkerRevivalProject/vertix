@@ -77,7 +77,7 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
   alert("tried to open google play");
   // openGooglePlay(false);
 }
-Number.prototype.round = function (a) {
+Number.prototype.round = function(a) {
   return +this.toFixed(a);
 };
 var previousClass = 0;
@@ -96,7 +96,7 @@ function startGame(a) {
       .substring(0, 25);
     enterGame(a);
     if (inMainMenu) {
-      $("#loadingWrapper").fadeIn(0, () => {});
+      $("#loadingWrapper").fadeIn(0, () => { });
       document.getElementById("loadText").innerHTML = "CONNECTING";
     }
   }
@@ -187,9 +187,9 @@ function selectedCMap(a) {
   document.getElementById("customMapButton").innerHTML = b[b.length - 1];
   if (a.files && a.files[0]) {
     b = new FileReader();
-    b.onload = function (a) {
+    b.onload = function(a) {
       var b = document.createElement("img");
-      b.onload = function (a) {
+      b.onload = function(a) {
         a = document.createElement("canvas");
         a.width = b.width;
         a.height = b.height;
@@ -209,7 +209,7 @@ function clearCustomMap() {
   customMap = null;
   document.getElementById("customMapButton").innerHTML = "Select Map";
 }
-window.onload = function () {
+window.onload = function() {
   if (mobile) {
     document.getElementById("loadText").innerHTML =
       "MOBILE VERSION COMING SOON";
@@ -218,7 +218,7 @@ window.onload = function () {
     document.body.scroll = "no";
     document.getElementById("gameAreaWrapper").style.opacity = 1;
     drawMenuBackground();
-    settingsMenu.onclick = function () {
+    settingsMenu.onclick = function() {
       if (settings.style.maxHeight == "200px") {
         settings.style.maxHeight = "0px";
       } else {
@@ -226,7 +226,7 @@ window.onload = function () {
         howTo.style.maxHeight = "0px";
       }
     };
-    howToMenu.onclick = function () {
+    howToMenu.onclick = function() {
       if (howTo.style.maxHeight == "200px") {
         howTo.style.maxHeight = "0px";
       } else {
@@ -234,10 +234,10 @@ window.onload = function () {
         settings.style.maxHeight = "0px";
       }
     };
-    leaderboardButton.onclick = function () {
+    leaderboardButton.onclick = function() {
       window.open("/leaderboards.html", "_blank");
     };
-    $.get("/getIP", function (a) {
+    $.get("/getIP", function(a) {
       port = a.port;
       if (!socket) {
         socket = io.connect(
@@ -250,7 +250,7 @@ window.onload = function () {
         );
         setupSocket(socket);
       }
-      socket.once("connect", function () {
+      socket.once("connect", function() {
         var a = getCookie("logKey");
         var d = getCookie("userName");
         if (a && a != "" && d && d != "") {
@@ -264,18 +264,18 @@ window.onload = function () {
         } else {
           loadSavedClass();
         }
-        btn.onclick = function () {
+        btn.onclick = function() {
           startGame("player");
         };
-        playerNameInput.addEventListener("keypress", function (a) {
+        playerNameInput.addEventListener("keypress", function(a) {
           if ((a.which || a.keyCode) === 13) {
             startGame("player");
           }
         });
-        btnMod.onclick = function () {
+        btnMod.onclick = function() {
           loadModPack(modURL.value, false);
         };
-        registerButton.onclick = function () {
+        registerButton.onclick = function() {
           socket.emit("dbReg", {
             userName: userNameInput.value,
             userEmail: userEmailInput.value,
@@ -286,10 +286,10 @@ window.onload = function () {
           loginMessage.style.display = "block";
           loginMessage.innerHTML = "Registering...";
         };
-        loginButton.onclick = function () {
+        loginButton.onclick = function() {
           startLogin();
         };
-        logoutButton.onclick = function () {
+        logoutButton.onclick = function() {
           loggedInWrapper.style.display = "none";
           loginWrapper.style.display = "block";
           loginMessage.innerHTML = "";
@@ -301,52 +301,52 @@ window.onload = function () {
           setCookie("userName", "");
           socket.emit("dbLogout");
         };
-        recoverButton.onclick = function () {
+        recoverButton.onclick = function() {
           socket.emit("dbRecov", {
             userMail: userEmailInput.value,
           });
           loginMessage.style.display = "block";
           loginMessage.innerHTML = "Please Wait...";
         };
-        createClanButton.onclick = function () {
+        createClanButton.onclick = function() {
           socket.emit("dbClanCreate", {
             clanName: clanNameInput.value,
           });
           clanDBMessage.style.display = "block";
           clanDBMessage.innerHTML = "Please Wait...";
         };
-        joinClanButton.onclick = function () {
+        joinClanButton.onclick = function() {
           socket.emit("dbClanJoin", {
             clanKey: clanKeyInput.value,
           });
           clanDBMessage.style.display = "block";
           clanDBMessage.innerHTML = "Please Wait...";
         };
-        inviteClanButton.onclick = function () {
+        inviteClanButton.onclick = function() {
           socket.emit("dbClanInvite", {
             userName: clanInviteInput.value,
           });
           clanInvMessage.style.display = "block";
           clanInvMessage.innerHTML = "Please Wait...";
         };
-        kickClanButton.onclick = function () {
+        kickClanButton.onclick = function() {
           socket.emit("dbClanKick", {
             userName: clanInviteInput.value,
           });
           clanInvMessage.style.display = "block";
           clanInvMessage.innerHTML = "Please Wait...";
         };
-        leaveClanButton.onclick = function () {
+        leaveClanButton.onclick = function() {
           socket.emit("dbClanLeave");
         };
-        setChatClanButton.onclick = function () {
+        setChatClanButton.onclick = function() {
           socket.emit("dbClanChatURL", {
             chUrl: clanChatInput.value,
           });
           clanChtMessage.style.display = "inline-block";
           clanChtMessage.innerHTML = "Please Wait...";
         };
-        createServerButton.onclick = function () {
+        createServerButton.onclick = function() {
           var a = document.getElementById("serverPlayers").value;
           var b = document.getElementById("serverHealthMult").value;
           var d = document.getElementById("serverSpeedMult").value;
@@ -368,7 +368,7 @@ window.onload = function () {
             srvModes: m,
           });
         };
-        lobbyButton.onclick = function () {
+        lobbyButton.onclick = function() {
           if (!changingLobby) {
             if (lobbyInput.value.split("/")[0].trim()) {
               lobbyMessage.style.display = "block";
@@ -381,18 +381,18 @@ window.onload = function () {
                   forceNew: true,
                 }
               );
-              b.once("connect", function () {
+              b.once("connect", function() {
                 b.emit("create", {
                   room: lobbyInput.value.split("/")[1],
                   servPass: lobbyPass.value,
                   lgKey: a,
                   userName: d,
                 });
-                b.once("lobbyRes", function (a, d) {
+                b.once("lobbyRes", function(a, d) {
                   lobbyMessage.innerHTML = a.resp || a;
                   if (d) {
                     socket.removeListener("disconnect");
-                    socket.once("disconnect", function () {
+                    socket.once("disconnect", function() {
                       socket.close();
                       changingLobby = false;
                       socket = b;
@@ -406,7 +406,7 @@ window.onload = function () {
                   }
                 });
               });
-              b.on("connect_error", function (a) {
+              b.on("connect_error", function(a) {
                 lobbyMessage.innerHTML = "No Server Found.";
                 changingLobby = false;
                 b.close();
@@ -420,11 +420,11 @@ window.onload = function () {
       });
     });
     hideUI(true);
-    $(".noRightClick").bind("contextmenu", function (a) {
+    $(".noRightClick").bind("contextmenu", function(a) {
       return false;
     });
     resize();
-    $("#loadingWrapper").fadeOut(200, function () {});
+    $("#loadingWrapper").fadeOut(200, function() { });
   }
 };
 function openGooglePlay(a) {
@@ -461,12 +461,12 @@ function updateAccountPage(a) {
   accStatKD.innerHTML = "<b>KD:  </b>" + a.kd;
   accStatWorldRank.innerHTML = "<b>World Rank:  </b>" + a.worldRank;
   accStatLikes.innerHTML = "<b>Likes:  </b>" + a.likes;
-  profileButton.onclick = function () {
+  profileButton.onclick = function() {
     showUserStatPage(player.account.user_name);
   };
   newUsernameInput.value = player.account.user_name;
   youtubeChannelInput.value = player.account.channel;
-  saveAccountData.onclick = function () {
+  saveAccountData.onclick = function() {
     socket.emit("dbEditUser", {
       userName: newUsernameInput.value,
       userChannel: youtubeChannelInput.value,
@@ -619,7 +619,7 @@ function gameInput(a) {
   lastDist = target.d;
   target.d = mathSQRT(
     mathPOW(mouseY - (screenHeight / 2 - b / 2), 2) +
-      mathPOW(mouseX - screenWidth / 2, 2)
+    mathPOW(mouseX - screenWidth / 2, 2)
   );
   target.d *= mathMIN(
     maxScreenWidth / screenWidth,
@@ -747,7 +747,7 @@ function saveKeysToCookie() {
 if (getCookie("customControls") != "") {
   try {
     keysList = JSON.parse(getCookie("customControls"));
-  } catch (a) {}
+  } catch (a) { }
   if (keysList != undefined) {
     updateKeysUI();
   }
@@ -888,7 +888,7 @@ function ChatManager() {
   this.commands = {};
   var a = document.getElementById("chatInput");
   a.addEventListener("keypress", this.sendChat.bind(this));
-  a.addEventListener("keyup", function (b) {
+  a.addEventListener("keyup", function(b) {
     a = document.getElementById("chatInput");
     b = b.which || b.keyCode;
     if (b === 27) {
@@ -900,7 +900,7 @@ function ChatManager() {
 var chatTypeIndex = 0;
 var chatTypes = ["ALL", "TEAM"];
 var currentChatType = chatTypes[0];
-ChatManager.prototype.sendChat = function (a) {
+ChatManager.prototype.sendChat = function(a) {
   var b = document.getElementById("chatInput");
   a = a.which || a.keyCode;
   if (a === 13) {
@@ -947,7 +947,7 @@ function checkProfanityString(a) {
   return a;
 }
 var chatLineCounter = 0;
-ChatManager.prototype.addChatLine = function (a, b, d, e) {
+ChatManager.prototype.addChatLine = function(a, b, d, e) {
   if (!mobile) {
     b = checkProfanityString(b);
     var f = document.createElement("li");
@@ -985,11 +985,11 @@ ChatManager.prototype.addChatLine = function (a, b, d, e) {
     }
   }
 };
-ChatManager.prototype.appendMessage = function (a) {
+ChatManager.prototype.appendMessage = function(a) {
   if (!mobile) {
     for (
       var b = document.getElementById("chatbox"),
-        d = document.getElementById("chatList");
+      d = document.getElementById("chatList");
       b.clientHeight > 260;
 
     ) {
@@ -1318,26 +1318,26 @@ function setupSocket(a) {
   if (pingInterval != null) {
     clearInterval(pingInterval);
   }
-  pingInterval = setInterval(function () {
+  pingInterval = setInterval(function() {
     pingStart = Date.now();
     a.emit("ping1");
   }, 2000);
-  a.on("yourRoom", function (a, d) {
+  a.on("yourRoom", function(a, d) {
     room = a;
     serverKeyTxt.innerHTML = d;
   });
-  a.on("connect_failed", function () {
+  a.on("connect_failed", function() {
     kickPlayer("Connection failed. Please check your internet connection.");
   });
-  a.on("disconnect", function (a) {
+  a.on("disconnect", function(a) {
     kickPlayer("Disconnected. Your connection timed out.");
     console.log(a);
   });
-  a.on("error", function (a) {
+  a.on("error", function(a) {
     console.log("PLEASE NOTIFY THE DEVELOPER OF THE FOLLOWING ERROR");
     console.log("ERROR: " + a);
   });
-  a.on("welcome", function (b, d) {
+  a.on("welcome", function(b, d) {
     player.id = b.id;
     player.room = b.room;
     room = player.room;
@@ -1365,7 +1365,7 @@ function setupSocket(a) {
     }
     resize();
   });
-  a.on("cSrvRes", function (a, d) {
+  a.on("cSrvRes", function(a, d) {
     if (d) {
       serverKeyTxt.innerHTML = a;
       serverCreateMessage.innerHTML = "Success. Created server with IP: " + a;
@@ -1373,13 +1373,13 @@ function setupSocket(a) {
       serverCreateMessage.innerHTML = a;
     }
   });
-  a.on("regRes", function (a, d) {
+  a.on("regRes", function(a, d) {
     if (!d) {
       loginMessage.style.display = "block";
     }
     loginMessage.innerHTML = a;
   });
-  a.on("logRes", function (a, d) {
+  a.on("logRes", function(a, d) {
     if (d) {
       loginMessage.style.display = "none";
       loginMessage.innerHTML = "";
@@ -1402,21 +1402,21 @@ function setupSocket(a) {
     }
     loadSavedClass();
   });
-  a.on("recovRes", function (b, d) {
+  a.on("recovRes", function(b, d) {
     loginMessage.style.display = "block";
     loginMessage.innerHTML = b;
     if (d) {
       document.getElementById("recoverForm").style.display = "block";
       var e = document.getElementById("chngPassKey");
       var f = document.getElementById("chngPassPass");
-      document.getElementById("chngPassButton").onclick = function () {
+      document.getElementById("chngPassButton").onclick = function() {
         loginMessage.style.display = "block";
         loginMessage.innerHTML = "Please Wait...";
         a.emit("dbCngPass", {
           passKey: e.value,
           newPass: f.value,
         });
-        a.on("cngPassRes", function (a, b) {
+        a.on("cngPassRes", function(a, b) {
           loginMessage.style.display = "block";
           loginMessage.innerHTML = a;
           if (b) {
@@ -1426,7 +1426,7 @@ function setupSocket(a) {
       };
     }
   });
-  a.on("dbClanCreateR", function (a, d) {
+  a.on("dbClanCreateR", function(a, d) {
     if (d) {
       clanSignUp.style.display = "none";
       clanStats.style.display = "block";
@@ -1439,7 +1439,7 @@ function setupSocket(a) {
       clanDBMessage.innerHTML = a;
     }
   });
-  a.on("dbClanJoinR", function (a, d) {
+  a.on("dbClanJoinR", function(a, d) {
     if (d) {
       clanSignUp.style.display = "none";
       clanStats.style.display = "block";
@@ -1456,15 +1456,15 @@ function setupSocket(a) {
       clanDBMessage.innerHTML = a;
     }
   });
-  a.on("dbClanInvR", function (a, d) {
+  a.on("dbClanInvR", function(a, d) {
     clanInvMessage.style.display = "block";
     clanInvMessage.innerHTML = a;
   });
-  a.on("dbKickInvR", function (a, d) {
+  a.on("dbKickInvR", function(a, d) {
     clanInvMessage.style.display = "block";
     clanInvMessage.innerHTML = a;
   });
-  a.on("dbClanLevR", function (a, d) {
+  a.on("dbClanLevR", function(a, d) {
     if (d) {
       clanSignUp.style.display = "block";
       clanStats.style.display = "none";
@@ -1474,7 +1474,7 @@ function setupSocket(a) {
       leaveClanButton.style.display = "none";
     }
   });
-  a.on("dbChatR", function (a, d) {
+  a.on("dbChatR", function(a, d) {
     clanChtMessage.style.display = "inline-block";
     clanChtMessage.innerHTML = a.text;
     if (d) {
@@ -1485,7 +1485,7 @@ function setupSocket(a) {
         "<a target='_blank' href='" + a.newURL + "'>Clan Chat</a>";
     }
   });
-  a.on("dbChangeUserR", function (a, d) {
+  a.on("dbChangeUserR", function(a, d) {
     if (d) {
       setCookie("userName", a);
       player.account.user_name = a;
@@ -1494,13 +1494,13 @@ function setupSocket(a) {
       editProfileMessage.innerHTML = a;
     }
   });
-  a.on("dbClanStats", function (a) {
+  a.on("dbClanStats", function(a) {
     updateClanPage(a);
   });
-  a.on("updAccStat", function (a) {
+  a.on("updAccStat", function(a) {
     updateAccountPage(a);
   });
-  a.on("gameSetup", function (a, d, e) {
+  a.on("gameSetup", function(a, d, e) {
     a = JSON.parse(a);
     if (d) {
       gameMap = a.mapData;
@@ -1551,7 +1551,7 @@ function setupSocket(a) {
     }
     updateWeaponUI(player, true);
     if (inMainMenu) {
-      $("#loadingWrapper").fadeOut(0, function () {});
+      $("#loadingWrapper").fadeOut(0, function() { });
       inMainMenu = false;
     }
     startingGame = false;
@@ -1570,10 +1570,10 @@ function setupSocket(a) {
   a.on("crtSpr", createSpray);
   a.on("rem", removeUser);
   a.on("cht", messageFromServer);
-  a.on("kick", function (a) {
+  a.on("kick", function(a) {
     kickPlayer(a);
   });
-  a.on("1", function (a) {
+  a.on("1", function(a) {
     var b = findUserByIndex(a.gID);
     var e = mathABS(a.amount);
     if (
@@ -1640,7 +1640,7 @@ function setupSocket(a) {
   a.on("2", someoneShot);
   a.on("jum", otherJump);
   a.on("ex", createExplosion);
-  a.on("r", function (a) {
+  a.on("r", function(a) {
     var b = findUserByIndex(player.index);
     if (b != null) {
       if (a == 0 && b.weapons[a].maxAmmo > 1) {
@@ -1652,7 +1652,7 @@ function setupSocket(a) {
       updateUiStats(b);
     }
   });
-  a.on("3", function (a) {
+  a.on("3", function(a) {
     var b = findUserByIndex(a.gID);
     var e = findUserByIndex(a.dID);
     b.dead = true;
@@ -1680,18 +1680,18 @@ function setupSocket(a) {
           a.kd <= 1 || a.kd == undefined
             ? "Enemy Killed"
             : a.kd == 2
-            ? "Double Kill"
-            : a.kd == 3
-            ? "Triple Kill"
-            : a.kd == 4
-            ? "Multi Kill"
-            : a.kd == 5
-            ? "Ultra Kill"
-            : a.kd == 6
-            ? "No Way!"
-            : a.kd == 7
-            ? "Stop!"
-            : "Godlike!";
+              ? "Double Kill"
+              : a.kd == 3
+                ? "Triple Kill"
+                : a.kd == 4
+                  ? "Multi Kill"
+                  : a.kd == 5
+                    ? "Ultra Kill"
+                    : a.kd == 6
+                      ? "No Way!"
+                      : a.kd == 7
+                        ? "Stop!"
+                        : "Godlike!";
       } else {
         f = "Team Kill";
         a.sS = "no";
@@ -1717,8 +1717,8 @@ function setupSocket(a) {
       player.dead = true;
       try {
         googletag.pubads().refresh();
-      } catch (h) {}
-      window.setTimeout(function () {
+      } catch (h) { }
+      window.setTimeout(function() {
         if (!gameOver) {
           document.getElementById("startMenuWrapper").style.display = "block";
           document.getElementById("linkBox").style.display = "block";
@@ -1728,7 +1728,7 @@ function setupSocket(a) {
       startSoundTrack(1);
     }
   });
-  a.on("4", function (a, d, e) {
+  a.on("4", function(a, d, e) {
     if (e == 0) {
       if (gameMap != null && a.active != undefined) {
         gameMap.pickups[d].active = a.active;
@@ -1749,7 +1749,7 @@ function setupSocket(a) {
       }
     }
   });
-  a.on("tprt", function (a) {
+  a.on("tprt", function(a) {
     var b = findUserByIndex(a.indx);
     if (b != undefined) {
       b.x = a.newX;
@@ -1774,15 +1774,15 @@ function setupSocket(a) {
       }
     }
   });
-  a.on("5", function (a) {
+  a.on("5", function(a) {
     showNotification(a);
   });
-  a.on("6", function (a, d, e) {
+  a.on("6", function(a, d, e) {
     if (!player.dead) {
       startBigAnimText(a, d, 2000, true, "#ffffff", "#5151d9", true, e);
     }
   });
-  a.on("7", function (a, d, e, f) {
+  a.on("7", function(a, d, e, f) {
     try {
       gameOver = true;
       document.getElementById("startMenuWrapper").style.display = "none";
@@ -1793,9 +1793,9 @@ function setupSocket(a) {
     }
     try {
       googletag.pubads().refresh();
-    } catch (h) {}
+    } catch (h) { }
   });
-  a.on("8", function (a) {
+  a.on("8", function(a) {
     document.getElementById("nextGameTimer").innerHTML =
       a + ": UNTIL NEXT ROUND";
   });
@@ -1806,7 +1806,7 @@ function likePlayerStat(a) {
 function updateVoteStats(a) {
   document.getElementById("votesText" + a.i).innerHTML = a.n + ": " + a.v;
 }
-function showESCMenu() {}
+function showESCMenu() { }
 var buttonCount = 0;
 function showStatTable(a, b, d, e, f, h) {
   buttonCount = 0;
@@ -1855,15 +1855,15 @@ function showStatTable(a, b, d, e, f, h) {
           d.setAttribute("id", "votesText" + g);
           d.innerHTML = b[g].name + ": " + b[g].votes;
           document.getElementById("voteModeContainer").appendChild(d);
-          d.onclick = (function (a, d) {
-            return function () {
+          d.onclick = (function(a, d) {
+            return function() {
               c.focus();
               socket.emit("modeVote", a.indx);
               for (var e = 0; e < b.length; ++e) {
                 if (
                   d == e &&
                   document.getElementById("votesText" + e).className ==
-                    "modeVoteButton"
+                  "modeVoteButton"
                 ) {
                   document.getElementById("votesText" + e).className =
                     "modeVoteButtonA";
@@ -1937,8 +1937,8 @@ function showStatTable(a, b, d, e, f, h) {
                 a[g].index == player.index
                   ? "#fff"
                   : a[g].team != player.team
-                  ? "#d95151"
-                  : "#5151d9",
+                    ? "#d95151"
+                    : "#5151d9",
               id: null,
               userInfo: findUserByIndex(a[g].index),
             },
@@ -2009,15 +2009,15 @@ function showStatTable(a, b, d, e, f, h) {
         hideStatTable();
         hideUI(false);
         animateOverlay = true;
-        window.setTimeout(function () {
+        window.setTimeout(function() {
           gameOverFade = true;
         }, 2500);
-        window.setTimeout(function () {
+        window.setTimeout(function() {
           document.getElementById("gameStatWrapper").style.display = "block";
         }, 4500);
       }
     }
-  } catch (l) {}
+  } catch (l) { }
 }
 function hideStatTable() {
   showUI();
@@ -2045,27 +2045,27 @@ function addRowToStatTable(a, b) {
         l =
           a[f].hoverInfo.type == "hat"
             ? "<image class='itemDisplayImage' src='.././images/hats/" +
-              a[f].hoverInfo.id +
-              "/d.png'></image><div style='color:" +
-              a[f].color +
-              "; font-size:16px; margin-top:5px;'>" +
-              a[f].hoverInfo.name +
-              "</div><div style='color:#ffd100; font-size:12px; margin-top:0px;'>droprate " +
-              a[f].hoverInfo.chance +
-              "%</div>" +
-              (a[f].hoverInfo.duplicate
-                ? "<div style='font-size:8px; color:#e04141; margin-top:1px;'><i>Duplicate</i></div>"
-                : "<div style='font-size:8px; color:#d8d8d8; margin-top:1px;'><i>wearable</i></div>") +
-              "<div style='font-size:12px; margin-top:5px;'>" +
-              a[f].hoverInfo.desc +
-              "</div>" +
-              (a[f].hoverInfo.creator == "EatMyApples"
-                ? ""
-                : "<div style='font-size:8px; color:#d8d8d8; margin-top:5px;'><i>Artist: " +
-                  a[f].hoverInfo.creator +
-                  "</i></div>")
+            a[f].hoverInfo.id +
+            "/d.png'></image><div style='color:" +
+            a[f].color +
+            "; font-size:16px; margin-top:5px;'>" +
+            a[f].hoverInfo.name +
+            "</div><div style='color:#ffd100; font-size:12px; margin-top:0px;'>droprate " +
+            a[f].hoverInfo.chance +
+            "%</div>" +
+            (a[f].hoverInfo.duplicate
+              ? "<div style='font-size:8px; color:#e04141; margin-top:1px;'><i>Duplicate</i></div>"
+              : "<div style='font-size:8px; color:#d8d8d8; margin-top:1px;'><i>wearable</i></div>") +
+            "<div style='font-size:12px; margin-top:5px;'>" +
+            a[f].hoverInfo.desc +
+            "</div>" +
+            (a[f].hoverInfo.creator == "EatMyApples"
+              ? ""
+              : "<div style='font-size:8px; color:#d8d8d8; margin-top:5px;'><i>Artist: " +
+              a[f].hoverInfo.creator +
+              "</i></div>")
             : a[f].hoverInfo.type == "shirt"
-            ? "<image class='shirtDisplayImage' src='.././images/shirts/" +
+              ? "<image class='shirtDisplayImage' src='.././images/shirts/" +
               a[f].hoverInfo.id +
               "/d.png'></image><div style='color:" +
               a[f].color +
@@ -2080,7 +2080,7 @@ function addRowToStatTable(a, b) {
               "<div style='font-size:12px; margin-top:5px;'>" +
               a[f].hoverInfo.desc +
               "</div>"
-            : "<image class='camoDisplayImage' src='.././images/camos/" +
+              : "<image class='camoDisplayImage' src='.././images/camos/" +
               (a[f].hoverInfo.id + 1) +
               ".png'></image><div style='color:" +
               a[f].color +
@@ -2100,7 +2100,7 @@ function addRowToStatTable(a, b) {
       }
       if (h.className == "contL" && a[f].canClick) {
         h.userTarget = a[f].text;
-        h.addEventListener("click", function (a) {
+        h.addEventListener("click", function(a) {
           showUserStatPage(a.target.userTarget);
         });
       }
@@ -2111,7 +2111,7 @@ function addRowToStatTable(a, b) {
       g.setAttribute("type", "button");
       var m = a[f];
       g.tmpCont = m;
-      g.onclick = function () {
+      g.onclick = function() {
         c.focus();
         likePlayerStat(m.pos);
         for (var a = 0; a < buttonCount; ++a) {
@@ -2465,7 +2465,7 @@ function receiveServerData(a) {
         gameObjects[d].onScreen = false;
       }
     }
-    for (d = 0; d < a.length; ) {
+    for (d = 0; d < a.length;) {
       b = a[0 + d];
       tmpUser = findUserByIndex(a[1 + d]);
       if (a[1 + d] == player.index && tmpUser != null) {
@@ -2529,7 +2529,7 @@ function receiveServerData(a) {
             b = thisInput[f].vdt;
             e = mathSQRT(
               thisInput[f].hdt * thisInput[f].hdt +
-                thisInput[f].vdt * thisInput[f].vdt
+              thisInput[f].vdt * thisInput[f].vdt
             );
             if (e != 0) {
               a /= e;
@@ -2594,8 +2594,8 @@ function updateHatList(a, b) {
       (b[e].creator == "EatMyApples"
         ? ""
         : "<div style='font-size:8px; color:#d8d8d8; margin-top:5px;'><i>Artist: " +
-          b[e].creator +
-          "</i></div>") +
+        b[e].creator +
+        "</i></div>") +
       "</div></div>";
   }
   hatList.innerHTML = d;
@@ -2849,7 +2849,7 @@ function updateLeaderboard(a) {
       }
     }
     document.getElementById("status").innerHTML = b;
-  } catch (f) {}
+  } catch (f) { }
 }
 function updateTeamScores(a, b) {
   var d = document.getElementById("redProgress");
@@ -3111,12 +3111,12 @@ function updateGameLoop() {
       ? reason !== ""
         ? renderShadedAnimText(reason, viewMult * 48, "#ffffff", 6, "")
         : renderShadedAnimText(
-            "You were kicked",
-            viewMult * 48,
-            "#ffffff",
-            6,
-            ""
-          )
+          "You were kicked",
+          viewMult * 48,
+          "#ffffff",
+          6,
+          ""
+        )
       : renderShadedAnimText("Disconnected", viewMult * 48, "#ffffff", 6, "");
     if (a != undefined) {
       graph.drawImage(
@@ -3325,7 +3325,7 @@ function drawEdgeShader() {
     }
     graph.fillStyle = grd;
     graph.fillRect(0, 0, maxScreenWidth, maxScreenHeight);
-  } catch (a) {}
+  } catch (a) { }
 }
 var tmpObject = null;
 var tmpBulletGlowWidth = 0;
@@ -3342,7 +3342,7 @@ function FlashGlow() {
   this.initScale = this.scale = this.y = this.x = 0;
   this.active = false;
   this.maxDuration = this.duration = 0;
-  this.update = function (a) {
+  this.update = function(a) {
     if (this.active && this.maxDuration > 0) {
       this.duration += a;
       this.tmpScale = 1 - this.duration / this.maxDuration;
@@ -3356,7 +3356,7 @@ function FlashGlow() {
       }
     }
   };
-  this.draw = function () {
+  this.draw = function() {
     if (this.active) {
       graph.drawImage(
         lightSprite,
@@ -3497,8 +3497,8 @@ function drawMiniMap() {
         gameObjects[a].index == player.index
           ? "#fff"
           : gameObjects[a].isBoss
-          ? "#db4fcd"
-          : "#5151d9";
+            ? "#db4fcd"
+            : "#5151d9";
       mapContext.beginPath();
       mapContext.arc(
         (gameObjects[a].x / gameWidth) * mapScale,
@@ -3543,7 +3543,7 @@ function calculateUIScale() {
       (originalScreenWidth + originalScreenHeight)) *
     1.25;
 }
-function drawMenuBackground() {}
+function drawMenuBackground() { }
 function IsImageOk(a) {
   if (a.complete && a.naturalWidth !== 0) {
     return true;
@@ -3551,7 +3551,7 @@ function IsImageOk(a) {
     return false;
   }
 }
-function drawUI() {}
+function drawUI() { }
 var screenSkX = 0;
 var screenShackeScale = 0;
 var screenSkY = 0;
@@ -3592,7 +3592,7 @@ function createSpray(a, b, d) {
       f.active = false;
       f.xPos = 0;
       f.yPos = 0;
-      f.onload = function () {
+      f.onload = function() {
         cacheSpray(f);
       };
       userSprays.push(f);
@@ -3759,7 +3759,7 @@ var soundList = [
     id: "track1",
     sound: null,
     loop: true,
-    onload: function () {
+    onload: function() {
       tmpList.track1.sound.play();
       if (!player.dead || startingGame) {
         tmpList.track1.sound.mute();
@@ -3773,7 +3773,7 @@ var soundList = [
     id: "track2",
     sound: null,
     loop: true,
-    onload: function () {
+    onload: function() {
       tmpList.track2.sound.play();
       if (player.dead || !gameStart || gameOver) {
         tmpList.track2.sound.mute();
@@ -3806,7 +3806,7 @@ function loadSound(a, b, d) {
     urls: [a],
     format: [d],
     loop: b.loop,
-    onload: b.onload || function () {},
+    onload: b.onload || function() { },
   });
 }
 var currentTrack = 0;
@@ -3867,11 +3867,11 @@ function getSprite(a) {
   b.index = spriteIndex;
   b.flipped = false;
   b.isLoaded = false;
-  b.onload = function () {
+  b.onload = function() {
     b.isLoaded = true;
     b.onload = null;
   };
-  b.onerror = function () {
+  b.onerror = function() {
     b.isLoaded = false;
     console.log("File not Found: " + a + ".png");
   };
@@ -3906,7 +3906,7 @@ function flipSprite(a, b) {
     d.flipped = true;
     d.isLoaded = true;
     return d;
-  } catch (f) {}
+  } catch (f) { }
   return false;
 }
 function Projectile() {
@@ -3922,7 +3922,7 @@ function Projectile() {
     this.y =
     this.startX =
     this.x =
-      0;
+    0;
   this.active = false;
   this.weaponIndex = this.spriteIndex = this.pierceCount = 0;
   this.glowHeight = this.glowWidth = null;
@@ -3941,7 +3941,7 @@ function Projectile() {
   var b = 0;
   var d = 0;
   var e = 0;
-  this.update = function (f) {
+  this.update = function(f) {
     if (this.active) {
       e = currentTime - this.startTime;
       if (this.skipMove) {
@@ -4033,7 +4033,7 @@ function Projectile() {
               h = 0;
               h < gameObjects.length &&
               ((k = gameObjects[h]),
-              k.index == this.owner.index ||
+                k.index == this.owner.index ||
                 !(this.lastHit.indexOf("," + k.index + ",") < 0) ||
                 k.team == this.owner.team ||
                 k.type != "player" ||
@@ -4050,23 +4050,23 @@ function Projectile() {
                   (this.explodeOnDeath
                     ? (this.active = false)
                     : this.dmg > 0 &&
-                      ((this.lastHit += k.index + ","),
+                    ((this.lastHit += k.index + ","),
                       this.spriteIndex != 2 &&
-                        (particleCone(
-                          12,
-                          k.x,
-                          k.y - k.height / 2 - k.jumpY,
-                          this.dir + mathPI,
-                          mathPI / randomInt(5, 7),
-                          0.5,
-                          16,
-                          0,
-                          true
-                        ),
+                      (particleCone(
+                        12,
+                        k.x,
+                        k.y - k.height / 2 - k.jumpY,
+                        this.dir + mathPI,
+                        mathPI / randomInt(5, 7),
+                        0.5,
+                        16,
+                        0,
+                        true
+                      ),
                         createLiquid(k.x, k.y, this.dir, 4)),
                       this.pierceCount > 0 && this.pierceCount--,
                       this.pierceCount <= 0 && (this.active = false))),
-                this.active));
+                  this.active));
               ++h
             );
           }
@@ -4090,7 +4090,7 @@ function Projectile() {
     }
     this.skipMove = false;
   };
-  this.activate = function () {
+  this.activate = function() {
     this.skipMove = true;
     this.lastHit = ",";
     this.active = true;
@@ -4098,15 +4098,15 @@ function Projectile() {
   };
   var f = 0;
   var h = 0;
-  this.canSeeObject = function (a, b) {
+  this.canSeeObject = function(a, b) {
     f = mathABS(this.cEndX - a.x);
     h = mathABS(this.cEndY - a.y);
     return f <= (b + this.height) * 2 && h <= (b + this.height) * 2;
   };
-  this.deactivate = function () {
+  this.deactivate = function() {
     this.active = false;
   };
-  this.hitSomething = function (a, b) {
+  this.hitSomething = function(a, b) {
     if (this.spriteIndex != 2) {
       particleCone(
         10,
@@ -4121,14 +4121,14 @@ function Projectile() {
       );
     }
   };
-  this.bounceDir = function (a) {
+  this.bounceDir = function(a) {
     this.dir = a ? mathPI * 2 - this.dir : mathPI - this.dir;
     this.active = true;
     this.speed *= 0.65;
     this.x = this.cEndX;
     this.y = this.cEndY;
   };
-  this.lineInRect = function (a, b, d, e, f) {
+  this.lineInRect = function(a, b, d, e, f) {
     var g = this.x;
     var h = this.y;
     var k = g;
@@ -4174,11 +4174,11 @@ function Projectile() {
     }
     return true;
   };
-  this.dotInRect = function (a, b, d, e, f, h) {
+  this.dotInRect = function(a, b, d, e, f, h) {
     return a >= d && a <= d + f && b >= e && b <= e + h;
   };
-  this.adjustOnCollision = function (a, b, d, e) {
-    for (var f = 100, h = this.cEndX, g = this.cEndY; f > 0; ) {
+  this.adjustOnCollision = function(a, b, d, e) {
+    for (var f = 100, h = this.cEndX, g = this.cEndY; f > 0;) {
       f--;
       if (this.dotInRect(h, g, a, b, d, e)) {
         f = 0;
@@ -4187,7 +4187,7 @@ function Projectile() {
         g += mathSIN(this.dir + mathPI) * 2;
       }
     }
-    for (f = 100; f > 0; ) {
+    for (f = 100; f > 0;) {
       f--;
       if (this.dotInRect(h, g, a, b, d, e)) {
         h += mathCOS(this.dir + mathPI) * 2;
@@ -4745,11 +4745,11 @@ function loadPlayerSpriteArray(a, b) {
       );
       tmpSprite = b[d].hasDown
         ? getSprite(
-            a + "characters/" + b[d].folderName + "/down" + (tmpIndex + 1)
-          )
+          a + "characters/" + b[d].folderName + "/down" + (tmpIndex + 1)
+        )
         : getSprite(
-            a + "characters/" + b[d].folderName + "/up" + (tmpIndex + 1)
-          );
+          a + "characters/" + b[d].folderName + "/up" + (tmpIndex + 1)
+        );
       f.push(tmpSprite);
       if (tmpIndex >= 2) {
         tmpIndex = 0;
@@ -4900,12 +4900,12 @@ function loadModPack(a, b) {
         this.numFiles;
         this.progress;
         this.reader;
-        this.init = function (a, b) {
+        this.init = function(a, b) {
           this.numFiles = b;
           this.progress = 0;
           this.reader = a;
         };
-        this.close = function () {
+        this.close = function() {
           if (this.reader) {
             this.progress++;
             if (this.numFiles === this.progress) {
@@ -4925,7 +4925,7 @@ function loadModPack(a, b) {
       function e(a) {
         this.typeName = a;
         var b = this;
-        this.process = function (a) {
+        this.process = function(a) {
           try {
             if (b.typeName.indexOf("modinfo") > -1) {
               setModInfoText(a);
@@ -4958,7 +4958,7 @@ function loadModPack(a, b) {
         this.soundAsDataURL = this.tmpLocation = "";
         this.format = b;
         var d = this;
-        this.process = function (a) {
+        this.process = function(a) {
           if ((this.soundAsDataURL = URL.createObjectURL(a))) {
             try {
               this.tmpLocation = d.filename;
@@ -4980,7 +4980,7 @@ function loadModPack(a, b) {
         this.filename = a;
         this.imgAsDataURL = this.tmpLocation = "";
         var b = this;
-        this.process = function (a) {
+        this.process = function(a) {
           if ((this.imgAsDataURL = URL.createObjectURL(a))) {
             try {
               this.tmpLocation = b.filename;
@@ -5024,47 +5024,47 @@ function loadModPack(a, b) {
       const reader = new zip.ZipReader(
         new zip.HttpReader(g)
       );
-      reader.getEntries(function (b) {
-            if (b.length) {
-              zipFileCloser.init(reader, b.length);
-              for (var d = 0; d < b.length; d++) {
-                var g = b[d];
-                if (g.directory) {
-                  zipFileCloser.close();
-                } else {
-                  g.filename = g.filename.replace("vertixmod/", "");
-                  fileFormat =
-                    g.filename.split(".")[g.filename.split(".").length - 1];
-                  l = g.filename.split("/")[0];
-                  if (l == "scripts") {
-                    g.getData(
-                      new zip.TextWriter(),
-                      new e(g.filename).process,
-                      function (a, b) {}
-                    );
-                  } else if (l == "sprites") {
-                    g.getData(
-                      new zip.BlobWriter("image/png"),
-                      new h(g.filename).process,
-                      function (a, b) {}
-                    );
-                  } else if (l == "sounds") {
-                    g.getData(
-                      new zip.BlobWriter("audio/" + fileFormat),
-                      new f(
-                        g.filename.replace("." + fileFormat, ""),
-                        fileFormat
-                      ).process,
-                      function (a, b) {}
-                    );
-                  } else {
-                    loadingTexturePack = false;
-                    setModInfoText("Mod could not be loaded");
-                  }
-                }
+      reader.getEntries(function(b) {
+        if (b.length) {
+          zipFileCloser.init(reader, b.length);
+          for (var d = 0; d < b.length; d++) {
+            var g = b[d];
+            if (g.directory) {
+              zipFileCloser.close();
+            } else {
+              g.filename = g.filename.replace("vertixmod/", "");
+              fileFormat =
+                g.filename.split(".")[g.filename.split(".").length - 1];
+              l = g.filename.split("/")[0];
+              if (l == "scripts") {
+                g.getData(
+                  new zip.TextWriter(),
+                  new e(g.filename).process,
+                  function(a, b) { }
+                );
+              } else if (l == "sprites") {
+                g.getData(
+                  new zip.BlobWriter("image/png"),
+                  new h(g.filename).process,
+                  function(a, b) { }
+                );
+              } else if (l == "sounds") {
+                g.getData(
+                  new zip.BlobWriter("audio/" + fileFormat),
+                  new f(
+                    g.filename.replace("." + fileFormat, ""),
+                    fileFormat
+                  ).process,
+                  function(a, b) { }
+                );
+              } else {
+                loadingTexturePack = false;
+                setModInfoText("Mod could not be loaded");
               }
             }
-          });
+          }
+        }
+      });
     }
   } catch (m) {
     console.log(m);
@@ -5119,7 +5119,7 @@ function getHatSprite(a, b) {
           d.lS.index = spriteIndex;
           spriteIndex++;
           d.lS.src = ".././images/hats/" + tmpAcc.hat.id + "/l.png";
-          d.lS.onload = function () {
+          d.lS.onload = function() {
             d.imgToLoad--;
             d.lS.isLoaded = true;
             d.lS.onload = null;
@@ -5129,7 +5129,7 @@ function getHatSprite(a, b) {
           d.rS.index = spriteIndex;
           spriteIndex++;
           d.rS.src = ".././images/hats/" + tmpAcc.hat.id + "/l.png";
-          d.rS.onload = function () {
+          d.rS.onload = function() {
             d.rS = flipSprite(d.rS, true);
             d.imgToLoad--;
             d.rS.isLoaded = true;
@@ -5142,7 +5142,7 @@ function getHatSprite(a, b) {
           d.uS.index = spriteIndex;
           spriteIndex++;
           d.uS.src = ".././images/hats/" + tmpAcc.hat.id + "/u.png";
-          d.uS.onload = function () {
+          d.uS.onload = function() {
             d.imgToLoad--;
             d.uS.isLoaded = true;
             d.uS.onload = null;
@@ -5153,7 +5153,7 @@ function getHatSprite(a, b) {
         d.dS.index = spriteIndex;
         spriteIndex++;
         d.dS.src = ".././images/hats/" + tmpAcc.hat.id + "/d.png";
-        d.dS.onload = function () {
+        d.dS.onload = function() {
           d.imgToLoad--;
           d.dS.isLoaded = true;
           d.dS.onload = null;
@@ -5214,7 +5214,7 @@ function getShirtSprite(a, b) {
         d.lS.index = spriteIndex;
         spriteIndex++;
         d.lS.src = ".././images/shirts/" + tmpAcc.shirt.id + "/l.png";
-        d.lS.onload = function () {
+        d.lS.onload = function() {
           d.imgToLoad--;
           d.lS.isLoaded = true;
           d.lS.onload = null;
@@ -5224,7 +5224,7 @@ function getShirtSprite(a, b) {
         d.rS.index = spriteIndex;
         spriteIndex++;
         d.rS.src = ".././images/shirts/" + tmpAcc.shirt.id + "/l.png";
-        d.rS.onload = function () {
+        d.rS.onload = function() {
           d.rS = flipSprite(d.rS, true);
           d.imgToLoad--;
           d.rS.isLoaded = true;
@@ -5237,7 +5237,7 @@ function getShirtSprite(a, b) {
         d.uS.index = spriteIndex;
         spriteIndex++;
         d.uS.src = ".././images/shirts/" + tmpAcc.shirt.id + "/u.png";
-        d.uS.onload = function () {
+        d.uS.onload = function() {
           d.imgToLoad--;
           d.uS.isLoaded = true;
           d.uS.onload = null;
@@ -5248,7 +5248,7 @@ function getShirtSprite(a, b) {
       d.dS.index = spriteIndex;
       spriteIndex++;
       d.dS.src = ".././images/shirts/" + tmpAcc.shirt.id + "/d.png";
-      d.dS.onload = function () {
+      d.dS.onload = function() {
         d.imgToLoad--;
         d.dS.isLoaded = true;
         d.dS.onload = null;
@@ -5304,7 +5304,7 @@ function getWeaponSprite(a, b, d) {
         d.wpnImg = tmpSprite;
         d.flip = e.flipped;
         d.tmpInx = tmpIndex;
-        d.onload = function () {
+        d.onload = function() {
           var a = document.createElement("canvas");
           var b = a.getContext("2d");
           b.imageSmoothingEnabled = false;
@@ -6225,7 +6225,7 @@ function AnimText() {
     this.xSpeed =
     this.y =
     this.x =
-      0;
+    0;
   this.active = false;
   this.alpha = 1;
   this.fadeSpeed = 0;
@@ -6235,7 +6235,7 @@ function AnimText() {
   this.textType = "";
   this.color = "#fff";
   this.cachedImage = null;
-  this.update = function (a) {
+  this.update = function(a) {
     if (this.active) {
       this.scale += this.scaleSpeed * a;
       if (this.scaleSpeed > 0) {
@@ -6264,7 +6264,7 @@ function AnimText() {
       }
     }
   };
-  this.draw = function () {
+  this.draw = function() {
     if (this.active) {
       graph.globalAlpha = this.alpha;
       if (this.useStart) {
@@ -6489,14 +6489,14 @@ function Particle() {
     this.speed =
     this.y =
     this.x =
-      0;
+    0;
   this.active = false;
   this.layer = this.spriteIndex = 0;
   this.alpha = 1;
   this.fadeSpeed = 0;
   this.forceShow = this.checkCollisions = false;
   this.tmpScale = this.maxDuration = this.duration = 0;
-  this.update = function (a) {
+  this.update = function(a) {
     if (this.active) {
       if (this.maxDuration > 0) {
         this.duration += a;
@@ -6529,7 +6529,7 @@ function Particle() {
       }
     }
   };
-  this.draw = function () {
+  this.draw = function() {
     if (
       this.active &&
       particleSprites[this.spriteIndex] != null &&
@@ -6559,7 +6559,7 @@ function Particle() {
       }
     }
   };
-  this.checkInWall = function () {
+  this.checkInWall = function() {
     for (var a = 0; a < gameMap.tiles.length; ++a) {
       if (gameMap.tiles[a].wall && gameMap.tiles[a].hasCollision) {
         var tmpTl = gameMap.tiles[a];
@@ -6766,14 +6766,14 @@ function linearInterpolate(a, b, d) {
   }
 }
 var then = Date.now();
-window.requestAnimFrame = (function () {
+window.requestAnimFrame = (function() {
   return (
     window.requestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
     window.mozRequestAnimationFrame ||
     window.oRequestAnimationFrame ||
     window.msRequestAnimationFrame ||
-    function (a, b) {
+    function(a, b) {
       window.setTimeout(a, 1000 / targetFPS);
     }
   );
