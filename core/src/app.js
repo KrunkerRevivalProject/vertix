@@ -4890,10 +4890,6 @@ function setModInfoText(a) {
 var fileFormat = "";
 window.loadModPack = loadModPack;
 function loadModPack(a, b) {
-  //TODO fix reader.GetEntries
-  spriteIndex = 0;
-  loadPlayerSprites("/images/sprites/");
-  loadDefaultSprites("/images/sprites/");
   try {
     if (!loadingTexturePack) {
       function d() {
@@ -5024,7 +5020,8 @@ function loadModPack(a, b) {
       const reader = new zip.ZipReader(
         new zip.HttpReader(g)
       );
-      reader.getEntries(function(b) {
+      reader.getEntries().then(entries => {
+        let b = entries;
         if (b.length) {
           zipFileCloser.init(reader, b.length);
           for (var d = 0; d < b.length; d++) {
@@ -5037,26 +5034,29 @@ function loadModPack(a, b) {
                 g.filename.split(".")[g.filename.split(".").length - 1];
               l = g.filename.split("/")[0];
               if (l == "scripts") {
-                g.getData(
-                  new zip.TextWriter(),
-                  new e(g.filename).process,
-                  function(a, b) { }
-                );
+                let processor = new e(g.filename);
+                g.getData(new zip.TextWriter()).then(a => {
+                  processor.process(a);
+                }).catch(t => {
+                  console.log("Script Read Error: " + t);
+                });
               } else if (l == "sprites") {
-                g.getData(
-                  new zip.BlobWriter("image/png"),
-                  new h(g.filename).process,
-                  function(a, b) { }
-                );
+                let processor = new h(g.filename);
+                g.getData(new zip.BlobWriter("image/png")).then(a => {
+                  processor.process(a);
+                }).catch(n => {
+                  console.log("Image Load Error: " + n);
+                });
               } else if (l == "sounds") {
-                g.getData(
-                  new zip.BlobWriter("audio/" + fileFormat),
-                  new f(
-                    g.filename.replace("." + fileFormat, ""),
-                    fileFormat
-                  ).process,
-                  function(a, b) { }
+                let processor = new f(
+                  g.filename.replace("." + fileFormat, ""),
+                  fileFormat
                 );
+                g.getData(new zip.BlobWriter("audio/" + fileFormat)).then(a => {
+                  processor.process(a);
+                }).catch(r => {
+                  console.log("Sound Load Error: " + r);
+                });
               } else {
                 loadingTexturePack = false;
                 setModInfoText("Mod could not be loaded");
