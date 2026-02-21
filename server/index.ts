@@ -55,12 +55,12 @@ let clutter = [
 ];
 let mapData = {
 	gameMode: {
-		code: "ffa",
-		name: "Free For All",
+		code: "tdm",
+		name: "Team Deathmatch",
 		score: 1500,
-		desc1: "Free For All",
-		desc2: "",
-		teams: false,
+		desc1: "Eliminate the enemy team",
+		desc2: "Eliminate the enemy team",
+		teams: true,
 	},
 	clutter: clutter,
 	genData: genData,
@@ -113,7 +113,7 @@ io.on("connection", (socket: Socket) => {
 		type: "player",
 		targetF: 0,
 		animIndex: 0,
-		//team: "blue/red",
+		team: players.length == 1 ? "blue" : "red" ,
 	};
 	players.push(player);
 
@@ -267,14 +267,26 @@ io.on("connection", (socket: Socket) => {
 			si: -1,
 		});
 		//TODO: damage sync
-		//io.emit("1", {
-		//	dID: player.index,
-		//	gID: otherPlayer.index,
-		//	amount: currentWeapon.dmg,
-		//	bi: bullets[b].serverIndex,
-		//	h: otherPlayer.health - currentWeapon.dmg,
-		//});
-		//io.emit("3", {})
+		const shooter = player
+		const receiver = players[1]
+		io.emit("1", {
+			dID: shooter.index,
+			gID: receiver.index,
+			dir: 0,
+			amount: getCurrentWeapon(shooter).dmg,
+			bi: -1,
+			h: receiver.health -= getCurrentWeapon(shooter).dmg,
+		});
+		const dead = receiver.health <= 0;
+		if (dead) {
+			io.emit("3", {
+				dID: shooter.index,
+				gID: receiver.index,
+				sS: 100,
+			});
+			shooter.score += 100
+			io.emit("upd", { i: shooter.index, s: shooter.score });
+		}
 	});
 	socket.on("4", (data) => {
 		let horizontalDT = data.hdt;
