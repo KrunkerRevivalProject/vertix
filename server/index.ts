@@ -28,6 +28,13 @@ server.get("/getIP", (req, res) => {
 	return { ip: "localhost", region: "...", port: "1119" };
 });
 
+let nextAvailableSid = 0;
+function getNewSid() {
+	const toret = nextAvailableSid;
+	nextAvailableSid++;
+	return toret;
+}
+
 server.listen({ port: 1118 });
 
 const io = new Server({
@@ -82,11 +89,12 @@ setupMap(mapData, mapTileScale);
 io.on("connection", (socket: Socket) => {
 	console.log("con", socket.id);
 
+	const sid = getNewSid();
 	let player = {
 		id: 0,
 		room: "DEV",
-		index: players.length,
-		name: `Guest_${JSON.stringify(players.length)}`,
+		index: sid,
+		name: `Guest_${sid}`,
 		account: { clan: "" },
 		classIndex: 0,
 		currentWeapon: 0,
