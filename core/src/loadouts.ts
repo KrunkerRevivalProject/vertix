@@ -168,7 +168,7 @@ export const weapons = [
 		glowWidth: 50,
 		glowHeight: 100,
 		shake: 0.4,
-		
+
 		reloadTime: 0,
 		spreadIndex: 0,
 		lastShot: 0,
@@ -240,7 +240,7 @@ export const weapons = [
 		glowWidth: 50,
 		glowHeight: 100,
 		shake: 0.4,
-		
+
 		reloadTime: 0,
 		spreadIndex: 0,
 		lastShot: 0,
@@ -276,7 +276,7 @@ export const weapons = [
 		glowWidth: 50,
 		glowHeight: 100,
 		shake: 0.4,
-		
+
 		reloadTime: 0,
 		spreadIndex: 0,
 		lastShot: 0,
@@ -312,7 +312,7 @@ export const weapons = [
 		glowWidth: 50,
 		glowHeight: 100,
 		shake: 0.4,
-		
+
 		reloadTime: 0,
 		spreadIndex: 0,
 		lastShot: 0,
@@ -348,7 +348,7 @@ export const weapons = [
 		glowWidth: 50,
 		glowHeight: 100,
 		shake: 0.4,
-		
+
 		reloadTime: 0,
 		spreadIndex: 0,
 		lastShot: 0,
@@ -384,7 +384,7 @@ export const weapons = [
 		glowWidth: 50,
 		glowHeight: 100,
 		shake: 0.4,
-		
+
 		reloadTime: 0,
 		spreadIndex: 0,
 		lastShot: 0,
@@ -420,7 +420,7 @@ export const weapons = [
 		glowWidth: 50,
 		glowHeight: 100,
 		shake: 0.4,
-		
+
 		reloadTime: 0,
 		spreadIndex: 0,
 		lastShot: 0,
@@ -456,7 +456,7 @@ export const weapons = [
 		glowWidth: 50,
 		glowHeight: 100,
 		shake: 0.4,
-		
+
 		reloadTime: 0,
 		spreadIndex: 0,
 		lastShot: 0,
@@ -492,7 +492,7 @@ export const weapons = [
 		glowWidth: 50,
 		glowHeight: 100,
 		shake: 0.4,
-		
+
 		reloadTime: 0,
 		spreadIndex: 0,
 		lastShot: 0,

@@ -113,7 +113,7 @@ io.on("connection", (socket: Socket) => {
 		type: "player",
 		targetF: 0,
 		animIndex: 0,
-		team: players.length == 1 ? "blue" : "red" ,
+		team: players.length == 1 ? "blue" : "red",
 	};
 	players.push(player);
 
@@ -160,7 +160,7 @@ io.on("connection", (socket: Socket) => {
 			? client.classIndex
 			: player.classIndex;
 		const currentClass = characterClasses[player.classIndex];
-		player.weapons = currentClass.weaponIndexes.map(i => weapons[i]);
+		player.weapons = currentClass.weaponIndexes.map((i) => weapons[i]);
 		player.health = currentClass.health;
 		player.height = currentClass.height;
 		player.width = currentClass.width;
@@ -226,7 +226,7 @@ io.on("connection", (socket: Socket) => {
 	});
 	socket.on("sw", (currentWeapon) => {
 		player.currentWeapon = currentWeapon;
-		io.emit("upd", { i: player.index, wi: player.currentWeapon })
+		io.emit("upd", { i: player.index, wi: player.currentWeapon });
 	});
 	socket.on("r", () => {
 		setTimeout(() => {
@@ -243,22 +243,16 @@ io.on("connection", (socket: Socket) => {
 
 	//TODO: socket.on stuff
 	socket.on("1", (x, y, jumpY, targetF, targetD, currentTime) => {
-		const currentWeapon = getCurrentWeapon(player)
+		const currentWeapon = getCurrentWeapon(player);
 		currentWeapon.spreadIndex++;
-		if (
-			currentWeapon.spreadIndex >=
-			currentWeapon.spread.length
-		) {
+		if (currentWeapon.spreadIndex >= currentWeapon.spread.length) {
 			currentWeapon.spreadIndex = 0;
 		}
-		var d =
-			currentWeapon.spread[currentWeapon.spreadIndex];
+		var d = currentWeapon.spread[currentWeapon.spreadIndex];
 		d = roundNumber(targetF + Math.PI + d, 2);
 		var e = currentWeapon.holdDist + currentWeapon.bDist;
 		var f = Math.round(x + e * Math.cos(d));
-		e = Math.round(
-			y - currentWeapon.yOffset - jumpY + e * Math.sin(d),
-		);
+		e = Math.round(y - currentWeapon.yOffset - jumpY + e * Math.sin(d));
 		io.emit("2", {
 			i: player.index,
 			x: f,
@@ -267,15 +261,15 @@ io.on("connection", (socket: Socket) => {
 			si: -1,
 		});
 		//TODO: damage sync
-		const shooter = player
-		const receiver = players[1]
+		const shooter = player;
+		const receiver = players[1];
 		io.emit("1", {
 			dID: shooter.index,
 			gID: receiver.index,
 			dir: 0,
 			amount: getCurrentWeapon(shooter).dmg,
 			bi: -1,
-			h: receiver.health -= getCurrentWeapon(shooter).dmg,
+			h: (receiver.health -= getCurrentWeapon(shooter).dmg),
 		});
 		const dead = receiver.health <= 0;
 		if (dead) {
@@ -284,7 +278,7 @@ io.on("connection", (socket: Socket) => {
 				gID: receiver.index,
 				sS: 100,
 			});
-			shooter.score += 100
+			shooter.score += 100;
 			io.emit("upd", { i: shooter.index, s: shooter.score });
 		}
 	});

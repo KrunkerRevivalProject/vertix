@@ -2844,7 +2844,8 @@ function updateGameLoop() {
 				} else {
 					f = Math.abs(b) + Math.abs(d);
 					if (gameObjects[e].index != player.index) {
-						f = Math.abs(gameObjects[e].xSpeed) + Math.abs(gameObjects[e].ySpeed);
+						f =
+							Math.abs(gameObjects[e].xSpeed) + Math.abs(gameObjects[e].ySpeed);
 					}
 					if (f > 0) {
 						gameObjects[e].frameCountdown -= delta / 4;
@@ -6376,7 +6377,8 @@ function createSmokePuff(a, b, d, e, f) {
 	for (let i = 0; i < 30; ++i) {
 		tmpParticle = getReadyParticle();
 		tmpParticle.dir =
-			Math.round(randomFloat(-Math.PI, Math.PI) / (Math.PI / 3)) * (Math.PI / 3);
+			Math.round(randomFloat(-Math.PI, Math.PI) / (Math.PI / 3)) *
+			(Math.PI / 3);
 		tmpParticle.forceShow = true;
 		tmpParticle.spriteIndex = 2;
 		tmpParticle.checkCollisions = true;
