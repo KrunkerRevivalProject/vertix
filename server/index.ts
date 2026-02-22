@@ -87,7 +87,6 @@ let mapData = {
 };
 setupMap(mapData, mapTileScale);
 
-
 let scoreRed = 0;
 let scoreBlue = 0;
 

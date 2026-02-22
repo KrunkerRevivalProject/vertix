@@ -1,10 +1,3 @@
-export function findServerBullet(bullets, bulletIndex: number) {
-	for (let b = 0; b < bullets.length; ++b) {
-		if (bullets[b].serverIndex === bulletIndex) {
-			return bullets[b];
-		}
-	}
-}
 export function setupMap(a: any, mapTileScale: number) {
 	var b = a.genData;
 	var d = -(mapTileScale * 2);
