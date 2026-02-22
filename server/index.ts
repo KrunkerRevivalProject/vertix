@@ -112,6 +112,8 @@ io.on("connection", (socket: Socket) => {
 		gravityStrength: 0.0058,
 		jumpCountdown: 0,
 		frameCountdown: 0,
+		kills: 0,
+		deaths: 0,
 		score: 0,
 		angle: 0,
 		x: 0,
@@ -209,6 +211,10 @@ io.on("connection", (socket: Socket) => {
 			]),
 		);
 		io.emit("lb", players.flatMap((pl) => [pl.index]))
+		io.emit("ts", 
+			player.team == "red" ? scoreRed : scoreBlue,
+			player.team == "red" ? scoreBlue : scoreBlue
+		)
 	});
 	// socket.on("ftc", (playerIdx) => {
 	// 	io.emit("rsd", [
@@ -291,11 +297,12 @@ io.on("connection", (socket: Socket) => {
 				sS: 100,
 			});
 			shooter.score += 100;
-			io.emit("upd", { i: shooter.index, s: shooter.score });
+			io.emit("upd", { i: shooter.index, s: shooter.score, kil: shooter.kills += 1 });
+			io.emit("upd", { i: receiver.index, dea: receiver.deaths += 1 });
 			io.emit("lb", players.flatMap((pl) => [pl.index]));
 			io.emit("ts", 
 				receiver.team == "red" ? scoreRed : scoreBlue,
-				shooter.team == "blue" ? scoreBlue += 1 : scoreRed += 1
+				shooter.team == "red" ? scoreRed += 1 : scoreBlue += 1
 			)
 		}
 	});

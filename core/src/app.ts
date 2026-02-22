@@ -660,7 +660,7 @@ var keyCodeMap = {
 	9: "tab",
 	13: "enter",
 	16: "shift",
-	17: "ctrl",
+	//17: "ctrl",
 	18: "alt",
 	19: "pausebreak",
 	20: "capslock",
@@ -689,7 +689,7 @@ var keyCodeMap = {
 	120: "f9",
 	121: "f10",
 	122: "f11",
-	123: "f12",
+	//123: "f12",
 	144: "numlock",
 	145: "scrolllock",
 };
