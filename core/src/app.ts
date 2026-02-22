@@ -6,6 +6,7 @@ import { characterClasses, specialClasses, weaponNames } from "./loadouts.ts";
 import * as utils from "./utils.ts";
 
 const {
+	findServerBullet,
 	setupMap,
 	wallCol,
 	getCurrentWeapon,
@@ -1597,7 +1598,7 @@ function setupSocket(a: Socket) {
 			}
 		}
 		if (a.bi != null) {
-			e = findServerBullet(a.bi);
+			e = findServerBullet(bullets, a.bi);
 			if (e != undefined && e.owner.index != player.index) {
 				if (b.onScreen && a.amount < 0) {
 					particleCone(
@@ -2323,13 +2324,13 @@ function receiveServerData(a) {
 					} else {
 						a = thisInput[f].hdt;
 						b = thisInput[f].vdt;
-						wepAngle = Math.sqrt(
+						const e = Math.sqrt(
 							thisInput[f].hdt * thisInput[f].hdt +
 								thisInput[f].vdt * thisInput[f].vdt,
 						);
-						if (wepAngle != 0) {
-							a /= wepAngle;
-							b /= wepAngle;
+						if (e != 0) {
+							a /= e;
+							b /= e;
 						}
 						gameObjects[d].oldX = gameObjects[d].x;
 						gameObjects[d].oldY = gameObjects[d].y;
@@ -4114,13 +4115,6 @@ function playerReload(player, shouldEmit: boolean) {
 			getCurrentWeapon(player).reloadTime,
 			true,
 		);
-	}
-}
-function findServerBullet(bulletIndex) {
-	for (let b = 0; b < bullets.length; ++b) {
-		if (bullets[b].serverIndex === bulletIndex) {
-			return bullets[b];
-		}
 	}
 }
 function someoneShot(a) {

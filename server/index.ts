@@ -44,6 +44,7 @@ const io = new Server({
 	},
 });
 
+let bullets = [];
 let players = [];
 let mapTileScale = 256;
 // biome-ignore format: temp map data
@@ -85,6 +86,7 @@ let mapData = {
 	height: (genData.height - 4) * mapTileScale,
 };
 setupMap(mapData, mapTileScale);
+
 
 let scoreRed = 0;
 let scoreBlue = 0;
@@ -211,7 +213,7 @@ io.on("connection", (socket: Socket) => {
 			]),
 		);
 		io.emit("lb", players.flatMap((pl) => [pl.index]))
-		io.emit("ts", 
+		io.emit("ts",
 			player.team == "red" ? scoreRed : scoreBlue,
 			player.team == "red" ? scoreBlue : scoreBlue
 		)
@@ -281,29 +283,31 @@ io.on("connection", (socket: Socket) => {
 		//TODO: damage sync
 		const shooter = player;
 		const receiver = players[1];
-		io.emit("1", {
-			dID: shooter.index,
-			gID: receiver.index,
-			dir: 0,
-			amount: -getCurrentWeapon(shooter).dmg,
-			bi: -1,
-			h: (receiver.health -= getCurrentWeapon(shooter).dmg),
-		});
-		const dead = receiver.health <= 0;
-		if (dead) {
-			io.emit("3", {
+		if (receiver) {
+			io.emit("1", {
 				dID: shooter.index,
 				gID: receiver.index,
-				sS: 100,
+				dir: 0,
+				amount: -getCurrentWeapon(shooter).dmg,
+				bi: -1,
+				h: (receiver.health -= getCurrentWeapon(shooter).dmg),
 			});
-			shooter.score += 100;
-			io.emit("upd", { i: shooter.index, s: shooter.score, kil: shooter.kills += 1 });
-			io.emit("upd", { i: receiver.index, dea: receiver.deaths += 1 });
-			io.emit("lb", players.flatMap((pl) => [pl.index]));
-			io.emit("ts", 
-				receiver.team == "red" ? scoreRed : scoreBlue,
-				shooter.team == "red" ? scoreRed += 1 : scoreBlue += 1
-			)
+			const dead = receiver.health <= 0;
+			if (dead) {
+				io.emit("3", {
+					dID: shooter.index,
+					gID: receiver.index,
+					sS: 100,
+				});
+				shooter.score += 100;
+				io.emit("upd", { i: shooter.index, s: shooter.score, kil: shooter.kills += 1 });
+				io.emit("upd", { i: receiver.index, dea: receiver.deaths += 1 });
+				io.emit("lb", players.flatMap((pl) => [pl.index]));
+				io.emit("ts",
+					receiver.team == "red" ? scoreRed : scoreBlue,
+					shooter.team == "red" ? scoreRed += 1 : scoreBlue += 1
+				)
+			}
 		}
 	});
 	socket.on("4", (data) => {
@@ -336,7 +340,7 @@ io.on("connection", (socket: Socket) => {
 		);
 		//console.log("4", horizontalDT, verticalDT, currentTime, inputNumber, space, delta);
 	});
-	socket.on("create", (lobby) => {});
+	socket.on("create", (lobby) => { });
 });
 
 io.listen(1119);
