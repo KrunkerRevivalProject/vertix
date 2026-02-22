@@ -86,6 +86,9 @@ let mapData = {
 };
 setupMap(mapData, mapTileScale);
 
+let scoreRed = 0;
+let scoreBlue = 0;
+
 io.on("connection", (socket: Socket) => {
 	console.log("con", socket.id);
 
@@ -121,7 +124,7 @@ io.on("connection", (socket: Socket) => {
 		type: "player",
 		targetF: 0,
 		animIndex: 0,
-		team: players.length == 1 ? "blue" : "red",
+		team: (players.length % 2) == 0 ? "blue" : "red",
 	};
 	players.push(player);
 
@@ -205,6 +208,7 @@ io.on("connection", (socket: Socket) => {
 				player.angle,
 			]),
 		);
+		io.emit("lb", players.flatMap((pl) => [pl.index]))
 	});
 	// socket.on("ftc", (playerIdx) => {
 	// 	io.emit("rsd", [
@@ -275,7 +279,7 @@ io.on("connection", (socket: Socket) => {
 			dID: shooter.index,
 			gID: receiver.index,
 			dir: 0,
-			amount: getCurrentWeapon(shooter).dmg,
+			amount: -getCurrentWeapon(shooter).dmg,
 			bi: -1,
 			h: (receiver.health -= getCurrentWeapon(shooter).dmg),
 		});
@@ -288,6 +292,11 @@ io.on("connection", (socket: Socket) => {
 			});
 			shooter.score += 100;
 			io.emit("upd", { i: shooter.index, s: shooter.score });
+			io.emit("lb", players.flatMap((pl) => [pl.index]));
+			io.emit("ts", 
+				receiver.team == "red" ? scoreRed : scoreBlue,
+				shooter.team == "blue" ? scoreBlue += 1 : scoreRed += 1
+			)
 		}
 	});
 	socket.on("4", (data) => {
