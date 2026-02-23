@@ -1,7 +1,7 @@
 import path from "node:path";
-import cors from "@fastify/cors";
-import statc from "@fastify/static";
-import Fastify from "fastify";
+import { serve } from "@hono/node-server";
+import { serveStatic } from "@hono/node-server/serve-static";
+import { Hono } from "hono";
 import { Server, type Socket } from "socket.io";
 import {
 	setupMap,
@@ -11,21 +11,16 @@ import {
 } from "core/src/utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
 
-const server = Fastify({
-	logger: {
-		name: "static",
-		level: "warn",
-	},
-});
-server.register(cors, {
-	origin: /localhost:1118|localhost:1119/,
-});
-server.register(statc, {
-	root: path.join(import.meta.dirname, "..", "public"),
+const app = new Hono();
+app.use(serveStatic({ root: path.join(import.meta.dirname, "..", "public") }));
+
+app.get("/getIP", (c) => {
+	return c.json({ ip: "localhost", region: "...", port: "1119" });
 });
 
-server.get("/getIP", (req, res) => {
-	return { ip: "localhost", region: "...", port: "1119" };
+const server = serve({
+	fetch: app.fetch,
+	port: 1118,
 });
 
 let nextAvailableSid = 0;
@@ -34,8 +29,6 @@ function getNewSid() {
 	nextAvailableSid++;
 	return toret;
 }
-
-server.listen({ port: 1118 });
 
 const io = new Server({
 	cors: {
@@ -87,7 +80,6 @@ let mapData = {
 };
 setupMap(mapData, mapTileScale);
 
-
 let scoreRed = 0;
 let scoreBlue = 0;
 
@@ -128,7 +120,7 @@ io.on("connection", (socket: Socket) => {
 		type: "player",
 		targetF: 0,
 		animIndex: 0,
-		team: (players.length % 2) == 0 ? "blue" : "red",
+		team: players.length % 2 == 0 ? "blue" : "red",
 	};
 	players.push(player);
 
@@ -212,11 +204,15 @@ io.on("connection", (socket: Socket) => {
 				player.angle,
 			]),
 		);
-		io.emit("lb", players.flatMap((pl) => [pl.index]))
-		io.emit("ts",
+		io.emit(
+			"lb",
+			players.flatMap((pl) => [pl.index]),
+		);
+		io.emit(
+			"ts",
 			player.team == "red" ? scoreRed : scoreBlue,
-			player.team == "red" ? scoreBlue : scoreBlue
-		)
+			player.team == "red" ? scoreBlue : scoreBlue,
+		);
 	});
 	// socket.on("ftc", (playerIdx) => {
 	// 	io.emit("rsd", [
@@ -300,13 +296,21 @@ io.on("connection", (socket: Socket) => {
 					sS: 100,
 				});
 				shooter.score += 100;
-				io.emit("upd", { i: shooter.index, s: shooter.score, kil: shooter.kills += 1 });
-				io.emit("upd", { i: receiver.index, dea: receiver.deaths += 1 });
-				io.emit("lb", players.flatMap((pl) => [pl.index]));
-				io.emit("ts",
+				io.emit("upd", {
+					i: shooter.index,
+					s: shooter.score,
+					kil: (shooter.kills += 1),
+				});
+				io.emit("upd", { i: receiver.index, dea: (receiver.deaths += 1) });
+				io.emit(
+					"lb",
+					players.flatMap((pl) => [pl.index]),
+				);
+				io.emit(
+					"ts",
 					receiver.team == "red" ? scoreRed : scoreBlue,
-					shooter.team == "red" ? scoreRed += 1 : scoreBlue += 1
-				)
+					shooter.team == "red" ? (scoreRed += 1) : (scoreBlue += 1),
+				);
 			}
 		}
 	});
@@ -340,7 +344,13 @@ io.on("connection", (socket: Socket) => {
 		);
 		//console.log("4", horizontalDT, verticalDT, currentTime, inputNumber, space, delta);
 	});
-	socket.on("create", (lobby) => { });
+	socket.on("create", (lobby) => {});
 });
 
 io.listen(1119);
+
+process.on("SIGINT", () => {
+	server.close();
+	io.close();
+	process.exit(0);
+});
