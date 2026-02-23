@@ -3580,14 +3580,13 @@ function startSoundTrack(a) {
 	}
 }
 var maxHearDist = 1500;
-var tmpDist = 0;
 function playSound(a, b, d) {
 	if (!kicked && doSounds) {
 		try {
-			tmpDist = getDistance(player.x, player.y, b, d);
+			let tmpDist = getDistance(player.x, player.y, b, d);
 			if (tmpDist <= maxHearDist) {
 				tmpSound = tmpList[a];
-				if (tmpSound != undefined) {
+				if (tmpSound !== undefined) {
 					tmpSound = tmpSound.sound;
 					tmpSound.volume(Math.round((1 - tmpDist / maxHearDist) * 10) / 10);
 					tmpSound.play();
@@ -6258,14 +6257,13 @@ function createLiquid(a, b, d, e) {
 	tmpParticle.forceShow = false;
 	tmpParticle.active = true;
 }
-var tmpDist = 0;
 var maxShakeDist = 2000;
 var maxExplosionDuration = 400;
 var maxShake = 9;
 var tmpShake = 0;
 var tmpDir = 0;
 function createExplosion(a, b, d) {
-	tmpDist = getDistance(a, b, player.x, player.y);
+	let tmpDist = getDistance(a, b, player.x, player.y);
 	if (tmpDist <= maxShakeDist) {
 		tmpDir = getAngle(a, player.x, b, player.y);
 		screenShake(d * maxShake * (1 - tmpDist / maxShakeDist), tmpDir);
@@ -6301,20 +6299,20 @@ function createSmokePuff(a, b, d, e, f) {
 			tmpParticle.spriteIndex = 6;
 			tmpParticle.layer = 0;
 		} else if (i <= 10) {
-			tmpDist = i * d;
+			let tmpDist = i * d;
 			tmpParticle.x = a + tmpDist * Math.cos(tmpParticle.dir);
 			tmpParticle.y = b + tmpDist * Math.sin(tmpParticle.dir);
 			tmpParticle.initScale = randomFloat(30, 33) * d;
 			tmpParticle.initSpeed = (3 / tmpParticle.initScale) * d * f;
 			tmpParticle.maxDuration = maxExplosionDuration * 0.8;
 		} else {
-			tmpDist = randomFloat(0, 10) * d;
+			let tmpDist = randomFloat(0, 10) * d;
 			tmpParticle.x = a + tmpDist * Math.cos(tmpParticle.dir);
 			tmpParticle.y = b + tmpDist * Math.sin(tmpParticle.dir);
-			var g = randomFloat(0.7, 1.4);
-			tmpParticle.initScale = d * 11 * g;
-			tmpParticle.initSpeed = (((12 / tmpParticle.initScale) * d) / g) * f;
-			tmpParticle.maxDuration = maxExplosionDuration * g;
+			let rand = randomFloat(0.7, 1.4);
+			tmpParticle.initScale = d * 11 * rand;
+			tmpParticle.initSpeed = (((12 / tmpParticle.initScale) * d) / rand) * f;
+			tmpParticle.maxDuration = maxExplosionDuration * rand;
 		}
 		tmpParticle.scale = tmpParticle.initScale;
 		tmpParticle.active = true;
