@@ -800,27 +800,6 @@
 				</div>
 			</center>
 		</div>
-
-		<script>
-		var dropUpLinksCount = 5;
-		var activeIndex = -1;
-		function clickDropUpLink(index) {
-			for (let i = 0; i < dropUpLinksCount; ++i) {
-				const tmpIndex = i + 1;
-				try {
-					if (tmpIndex === index && activeIndex !== index) {
-						activeIndex = index;
-						document.getElementById(`di${tmpIndex}`).style.opacity = "1";
-						document.getElementById(`di${tmpIndex}`).style.pointerEvents = "auto";
-					} else {
-						document.getElementById(`di${tmpIndex}`).style.opacity = "0";
-						document.getElementById(`di${tmpIndex}`).style.pointerEvents = "none";
-						if (tmpIndex === index) activeIndex = -1;
-					}
-				} catch (e) {}
-			}
-		}
-		</script>
 		<script src="./js/app.js" type="module"></script>
 	</body>
 </html>

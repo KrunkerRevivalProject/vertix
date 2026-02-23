@@ -181,6 +181,26 @@ var lobbyButton = document.getElementById("joinLobbyButton");
 var createServerButton = document.getElementById("createServerButton");
 var serverCreateMessage = document.getElementById("serverCreateMessage");
 var serverKeyTxt = document.getElementById("serverKeyTxt");
+
+let dropUpLinksCount = 5;
+let activeIndex = -1;
+window.clickDropUpLink = (index) => {
+	for (let i = 0; i < dropUpLinksCount; ++i) {
+		const tmpIndex = i + 1;
+		try {
+			if (tmpIndex === index && activeIndex !== index) {
+				activeIndex = index;
+				document.getElementById(`di${tmpIndex}`).style.opacity = "1";
+				document.getElementById(`di${tmpIndex}`).style.pointerEvents = "auto";
+			} else {
+				document.getElementById(`di${tmpIndex}`).style.opacity = "0";
+				document.getElementById(`di${tmpIndex}`).style.pointerEvents = "none";
+				if (tmpIndex === index) activeIndex = -1;
+			}
+		} catch (_) {}
+	}
+};
+
 var loginTimeOut = null;
 function startLogin() {
 	if (socket) {
