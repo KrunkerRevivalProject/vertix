@@ -10,11 +10,10 @@
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
-		"@fastify/cors": "^11.0.1",
-		"@fastify/static": "^8.2.0",
-		"fastify": "^5.3.3",
-		"socket.io": "^4.8.1",
-		"core": "workspace:*"
+		"@hono/node-server": "^1.19.9",
+		"core": "workspace:*",
+		"hono": "^4.12.2",
+		"socket.io": "^4.8.1"
 	},
 	"type": "module"
 }

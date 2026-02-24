@@ -173,13 +173,33 @@ var leaderboardButton = document.getElementById("leaderButton");
 var btn = document.getElementById("startButton");
 var btnMod = document.getElementById("texturePackButton");
 var modURL = document.getElementById("textureModInput");
-var lobbyInput = document.getElementById("lobbyKey");
+var lobbyInput: HTMLInputElement = document.getElementById("lobbyKey");
 var lobbyPass = document.getElementById("lobbyPass");
 var lobbyMessage = document.getElementById("lobbyMessage");
 var lobbyButton = document.getElementById("joinLobbyButton");
 var createServerButton = document.getElementById("createServerButton");
 var serverCreateMessage = document.getElementById("serverCreateMessage");
 var serverKeyTxt = document.getElementById("serverKeyTxt");
+
+let dropUpLinksCount = 5;
+let activeIndex = -1;
+window.clickDropUpLink = (index) => {
+	for (let i = 0; i < dropUpLinksCount; ++i) {
+		const tmpIndex = i + 1;
+		try {
+			if (tmpIndex === index && activeIndex !== index) {
+				activeIndex = index;
+				document.getElementById(`di${tmpIndex}`).style.opacity = "1";
+				document.getElementById(`di${tmpIndex}`).style.pointerEvents = "auto";
+			} else {
+				document.getElementById(`di${tmpIndex}`).style.opacity = "0";
+				document.getElementById(`di${tmpIndex}`).style.pointerEvents = "none";
+				if (tmpIndex === index) activeIndex = -1;
+			}
+		} catch (_) {}
+	}
+};
+
 var loginTimeOut = null;
 function startLogin() {
 	if (socket) {
@@ -190,7 +210,7 @@ function startLogin() {
 		loginUserNm = userNameInput.value;
 		loginUserPs = userPassInput.value;
 		loginMessage.style.display = "block";
-		loginMessage.innerHTML = "Please Wait...";
+		loginMessage.textContent = "Please Wait...";
 	}
 }
 var customMap = null;
@@ -280,8 +300,8 @@ window.onload = () => {
 				btn.onclick = () => {
 					startGame("player");
 				};
-				playerNameInput.addEventListener("keypress", (a) => {
-					if ((a.which || a.keyCode) === 13) {
+				playerNameInput.addEventListener("keypress", (event) => {
+					if (event.code === "Enter") {
 						startGame("player");
 					}
 				});
@@ -360,66 +380,61 @@ window.onload = () => {
 					clanChtMessage.textContent = "Please Wait...";
 				};
 				createServerButton.onclick = () => {
-					var a = document.getElementById("serverPlayers").value;
-					var b = document.getElementById("serverHealthMult").value;
-					var d = document.getElementById("serverSpeedMult").value;
-					var g = document.getElementById("serverPass").value;
-					var l = document.getElementById("clanWarEnabled").checked;
-					var m = [];
+					var modes = [];
 					for (let i = 0; i < 9; ++i) {
 						if (document.getElementById(`serverMode${i}`).checked) {
-							m.push(i);
+							modes.push(i);
 						}
 					}
 					socket.emit("cSrv", {
-						srvPlayers: a,
-						srvHealthMult: b,
-						srvSpeedMult: d,
-						srvPass: g,
+						srvPlayers: document.getElementById("serverPlayers").value,
+						srvHealthMult: document.getElementById("serverHealthMult").value,
+						srvSpeedMult: document.getElementById("serverSpeedMult").value,
+						srvPass: document.getElementById("serverPass").value,
 						srvMap: customMap,
-						srvClnWr: l,
-						srvModes: m,
+						srvClnWr: document.getElementById("clanWarEnabled").checked,
+						srvModes: modes,
 					});
 				};
 				lobbyButton.onclick = () => {
 					if (!changingLobby) {
 						if (lobbyInput.value.split("/")[0].trim()) {
 							lobbyMessage.style.display = "block";
-							lobbyMessage.innerHTML = "Please wait...";
+							lobbyMessage.textContent = "Please wait...";
 							changingLobby = true;
-							const b = io(`http://${lobbyInput.value.split("/")[0]}:${port}`, {
+							const s = io(`http://${lobbyInput.value.split("/")[0]}:${port}`, {
 								reconnection: true,
 								forceNew: true,
 							});
-							b.once("connect", () => {
-								b.emit("create", {
+							s.once("connect", () => {
+								s.emit("create", {
 									room: lobbyInput.value.split("/")[1],
 									servPass: lobbyPass.value,
 									lgKey: a,
 									userName: d,
 								});
-								b.once("lobbyRes", (a, d) => {
+								s.once("lobbyRes", (a, d) => {
 									lobbyMessage.innerHTML = a.resp || a;
 									if (d) {
 										socket.removeListener("disconnect");
 										socket.once("disconnect", () => {
 											socket.close();
 											changingLobby = false;
-											socket = b;
+											socket = s;
 											setupSocket(socket);
 										});
 										socket.disconnect();
 									} else {
 										changingLobby = false;
-										b.disconnect();
-										b.close();
+										s.disconnect();
+										s.close();
 									}
 								});
 							});
-							b.on("connect_error", (a) => {
-								lobbyMessage.innerHTML = "No Server Found.";
+							s.on("connect_error", (a) => {
+								lobbyMessage.textContent = "No Server Found.";
 								changingLobby = false;
-								b.close();
+								s.close();
 							});
 						} else {
 							lobbyMessage.style.display = "block";
@@ -435,14 +450,8 @@ window.onload = () => {
 		$("#loadingWrapper").fadeOut(200, () => {});
 	}
 };
-function openGooglePlay(a) {
-	window.open(
-		"https://web.archive.org/web/20211107033142/https://play.google.com/store/apps/details?id=tbs.vertix.io",
-		a ? "_blank" : "_self",
-	);
-}
+
 var accStatKills = document.getElementById("accStatKills");
-console.log("test");
 var accStatDeaths = document.getElementById("accStatDeaths");
 var accStatLikes = document.getElementById("accStatLikes");
 var accStatKD = document.getElementById("accStatKD");
@@ -3570,14 +3579,13 @@ function startSoundTrack(a) {
 	}
 }
 var maxHearDist = 1500;
-var tmpDist = 0;
 function playSound(a, b, d) {
 	if (!kicked && doSounds) {
 		try {
-			tmpDist = getDistance(player.x, player.y, b, d);
+			let tmpDist = getDistance(player.x, player.y, b, d);
 			if (tmpDist <= maxHearDist) {
 				tmpSound = tmpList[a];
-				if (tmpSound != undefined) {
+				if (tmpSound !== undefined) {
 					tmpSound = tmpSound.sound;
 					tmpSound.volume(Math.round((1 - tmpDist / maxHearDist) * 10) / 10);
 					tmpSound.play();
@@ -4204,103 +4212,6 @@ function updateBullets(a) {
 	h = null;
 }
 
-var characterClasses = [
-	{
-		classN: "Triggerman",
-		weaponIndexes: [0, 5],
-		pWeapon: "Machine Gun",
-		sWeapon: "Grenade Launcher",
-		folderName: "triggerman",
-		hasDown: false,
-	},
-	{
-		classN: "Detective",
-		weaponIndexes: [1, 5],
-		pWeapon: "Desert Eagle",
-		sWeapon: "Grenade Launcher",
-		folderName: "detective",
-		hasDown: false,
-	},
-	{
-		classN: "Hunter",
-		weaponIndexes: [2, 7],
-		pWeapon: "Sniper",
-		sWeapon: "Machine Pistol",
-		folderName: "hunter",
-		hasDown: true,
-	},
-	{
-		classN: "Run 'N Gun",
-		weaponIndexes: [3],
-		pWeapon: "Toy Blaster",
-		sWeapon: "None",
-		folderName: "billy",
-		hasDown: false,
-	},
-	{
-		classN: "Vince",
-		weaponIndexes: [4, 5],
-		pWeapon: "Shotgun",
-		sWeapon: "Grenade Launcher",
-		folderName: "vinc",
-		hasDown: true,
-	},
-	{
-		classN: "Rocketeer",
-		name: "General Weiss",
-		weaponIndexes: [6],
-		pWeapon: "Rocket Launcher",
-		sWeapon: "None",
-		folderName: "rocketeer",
-		hasDown: false,
-	},
-	{
-		classN: "Spray N' Pray",
-		weaponIndexes: [8],
-		pWeapon: "Minigun",
-		sWeapon: "None",
-		folderName: "mbob",
-		hasDown: true,
-	},
-	{
-		classN: "Arsonist",
-		weaponIndexes: [9],
-		pWeapon: "Flamethrower",
-		sWeapon: "None",
-		folderName: "pyro",
-		hasDown: true,
-	},
-	{
-		classN: "Duck",
-		weaponIndexes: [9],
-		pWeapon: "Jump",
-		sWeapon: "None",
-		folderName: "boss2",
-		hasDown: true,
-	},
-	{
-		classN: "Nademan",
-		weaponIndexes: [5],
-		pWeapon: "Nade Launcher",
-		sWeapon: "None",
-		folderName: "demo",
-		hasDown: false,
-	},
-];
-var specialClasses = [
-	{
-		pWeapon: "???",
-		sWeapon: "???",
-		folderName: "boss1",
-		hasDown: false,
-	},
-	{
-		pWeapon: "???",
-		sWeapon: "???",
-		folderName: "boss2",
-		hasDown: false,
-	},
-];
 var currentClassID = 0;
 var currentClass = document.getElementById("currentClass");
 var classList = document.getElementById("classList");
@@ -4423,7 +4334,7 @@ function getCamoURL(a) {
 	return `.././images/camos/${a + 1}.png`;
 }
 function changeCamo(a, b, d) {
-	if (socket != undefined) {
+	if (socket) {
 		socket.emit("cCamo", {
 			weaponID: a,
 			camoID: b,
@@ -4696,7 +4607,8 @@ function loadModPack(a, b) {
 				this.imgAsDataURL = this.tmpLocation = "";
 				var b = this;
 				this.process = function (a) {
-					if ((this.imgAsDataURL = URL.createObjectURL(a))) {
+					this.imgAsDataURL = URL.createObjectURL(a);
+					if (this.imgAsDataURL) {
 						try {
 							this.tmpLocation = b.filename;
 							localStorage.setItem(this.tmpLocation, this.imgAsDataURL);
@@ -4826,7 +4738,7 @@ function getHatSprite(a, b) {
 		if (tmpAcc.hat != null) {
 			tmpSprite = cachedHats[tmpAcc.hat.id];
 			if (tmpSprite == undefined) {
-				var d = {
+				let d = {
 					lS: null,
 					uS: null,
 					rS: null,
@@ -4921,7 +4833,7 @@ function getShirtSprite(a, b) {
 	if (tmpAcc != undefined && tmpAcc.shirt != null && a.classIndex != 8) {
 		tmpSprite = cachedShirts[tmpAcc.shirt.id];
 		if (tmpSprite == undefined) {
-			var d = {
+			let d = {
 				lS: null,
 				uS: null,
 				rS: null,
@@ -5482,7 +5394,7 @@ function getCachedWall(a) {
 			0,
 			0,
 		);
-		if (a.left == 1) {
+		if (a.left === 1) {
 			drawSprite(
 				e,
 				darkFillerSprite,
@@ -5497,7 +5409,7 @@ function getCachedWall(a) {
 				0,
 			);
 		}
-		if (a.right == 1) {
+		if (a.right === 1) {
 			drawSprite(
 				e,
 				darkFillerSprite,
@@ -5512,7 +5424,7 @@ function getCachedWall(a) {
 				0,
 			);
 		}
-		if (a.top == 1) {
+		if (a.top === 1) {
 			drawSprite(
 				e,
 				darkFillerSprite,
@@ -5527,7 +5439,7 @@ function getCachedWall(a) {
 				0,
 			);
 		}
-		if (a.bottom == 1) {
+		if (a.bottom === 1) {
 			drawSprite(
 				e,
 				darkFillerSprite,
@@ -5542,10 +5454,10 @@ function getCachedWall(a) {
 				0,
 			);
 		}
-		if (!a.hasCollision || (a.topLeft == 1 && a.top == 1 && a.left == 1)) {
+		if (!a.hasCollision || (a.topLeft === 1 && a.top === 1 && a.left === 1)) {
 			drawSprite(e, darkFillerSprite, 0, 0, 12, 12, 0, false, 0, 0, 0);
 		}
-		if (!a.hasCollision || (a.topRight == 1 && a.top == 1 && a.right == 1)) {
+		if (!a.hasCollision || (a.topRight === 1 && a.top === 1 && a.right === 1)) {
 			drawSprite(
 				e,
 				darkFillerSprite,
@@ -5562,7 +5474,7 @@ function getCachedWall(a) {
 		}
 		if (
 			!a.hasCollision ||
-			(a.bottomLeft == 1 && a.bottom == 1 && a.left == 1)
+			(a.bottomLeft === 1 && a.bottom === 1 && a.left === 1)
 		) {
 			drawSprite(
 				e,
@@ -5580,7 +5492,7 @@ function getCachedWall(a) {
 		}
 		if (
 			!a.hasCollision ||
-			(a.bottomRight == 1 && a.bottom == 1 && a.right == 1)
+			(a.bottomRight === 1 && a.bottom === 1 && a.right === 1)
 		) {
 			drawSprite(
 				e,
@@ -5616,36 +5528,34 @@ function getCachedFloor(a) {
 		a.topLeft +
 		"" +
 		a.topRight;
-	var d = cachedFloors[b];
-	if (d == undefined && sideWalkSprite != null && sideWalkSprite.isLoaded) {
-		var d = document.createElement("canvas");
-		var e = d.getContext("2d");
-		e.imageSmoothingEnabled = false;
-		e.webkitImageSmoothingEnabled = false;
-		e.mozImageSmoothingEnabled = false;
-		d.width = a.scale;
-		d.height = a.scale * (a.bottom ? 0.51 : 1);
-		e.drawImage(floorSprites[a.spriteIndex], 0, 0, a.scale, a.scale);
+	if (cachedFloors[b] === undefined && sideWalkSprite != null && sideWalkSprite.isLoaded) {
+		let tmpCanvas: HTMLCanvasElement = document.createElement("canvas");
+		let ctx = tmpCanvas.getContext("2d");
+		ctx.imageSmoothingEnabled = false;
+
+		tmpCanvas.width = a.scale;
+		tmpCanvas.height = a.scale * (a.bottom ? 0.51 : 1);
+		ctx.drawImage(floorSprites[a.spriteIndex], 0, 0, a.scale, a.scale);
 		var f = a.scale / tilesPerFloorTile;
-		if (a.topLeft == 1) {
-			renderSideWalks(e, 1, f, 0, 0, 0, 0, 0);
+		if (a.topLeft === 1) {
+			renderSideWalks(ctx, 1, f, 0, 0, 0, 0, 0);
 		}
-		if (a.topRight == 1) {
-			renderSideWalks(e, 1, f, Math.PI, a.scale - f, 0, 0, 0);
+		if (a.topRight === 1) {
+			renderSideWalks(ctx, 1, f, Math.PI, a.scale - f, 0, 0, 0);
 		}
-		if (a.left == 1) {
-			if (a.top == 1) {
-				renderSideWalks(e, 2, f, null, 0, 0, 0, f);
-				renderSideWalks(e, tilesPerFloorTile - 2, f, 0, 0, f * 2, 0, f);
+		if (a.left === 1) {
+			if (a.top === 1) {
+				renderSideWalks(ctx, 2, f, null, 0, 0, 0, f);
+				renderSideWalks(ctx, tilesPerFloorTile - 2, f, 0, 0, f * 2, 0, f);
 			} else {
-				renderSideWalks(e, tilesPerFloorTile, f, 0, 0, 0, 0, f);
+				renderSideWalks(ctx, tilesPerFloorTile, f, 0, 0, 0, 0, f);
 			}
 		}
-		if (a.right == 1) {
-			if (a.top == 1) {
-				renderSideWalks(e, 2, f, null, a.scale - f, 2, 0, f);
+		if (a.right === 1) {
+			if (a.top === 1) {
+				renderSideWalks(ctx, 2, f, null, a.scale - f, 2, 0, f);
 				renderSideWalks(
-					e,
+					ctx,
 					tilesPerFloorTile - 2,
 					f,
 					Math.PI,
@@ -5655,21 +5565,21 @@ function getCachedFloor(a) {
 					f,
 				);
 			} else {
-				renderSideWalks(e, tilesPerFloorTile, f, Math.PI, a.scale - f, 0, 0, f);
+				renderSideWalks(ctx, tilesPerFloorTile, f, Math.PI, a.scale - f, 0, 0, f);
 			}
 		}
-		if (a.top == 1) {
-			renderSideWalks(e, tilesPerFloorTile, f, Math.PI / 2, 0, 0, f, 0);
+		if (a.top === 1) {
+			renderSideWalks(ctx, tilesPerFloorTile, f, Math.PI / 2, 0, 0, f, 0);
 		}
-		if (a.bottom == 1) {
-			renderSideWalks(e, tilesPerFloorTile, f, 0, 0, a.scale - f, f, 0);
+		if (a.bottom === 1) {
+			renderSideWalks(ctx, tilesPerFloorTile, f, 0, 0, a.scale - f, f, 0);
 		}
-		cachedFloors[b] = d;
+		cachedFloors[b] = tmpCanvas;
 	}
 	return d;
 }
 function renderSideWalks(a, b, d, e, f, h, g, l) {
-	for (var m = 0; m < b; ++m) {
+	for (let i = 0; i < b; ++i) {
 		a.drawImage(sideWalkSprite, f, h, d, d);
 		if (e != null) {
 			a.save();
@@ -5684,22 +5594,21 @@ function renderSideWalks(a, b, d, e, f, h, g, l) {
 }
 var tmpTlSprite = null;
 function drawMap(a) {
-	var b;
 	if (gameMap != null) {
-		for (var d = 0; d < gameMap.tiles.length; ++d) {
-			b = gameMap.tiles[d];
-			if (a == 0) {
+		for (let i = 0; i < gameMap.tiles.length; ++i) {
+			let tile = gameMap.tiles[i];
+			if (a === 0) {
 				if (
-					!b.wall &&
-					canSee(b.x - startX, b.y - startY, mapTileScale, mapTileScale)
+					!tile.wall &&
+					canSee(tile.x - startX, tile.y - startY, mapTileScale, mapTileScale)
 				) {
-					tmpTlSprite = getCachedFloor(b);
-					if (tmpTlSprite != undefined) {
+					tmpTlSprite = getCachedFloor(tile);
+					if (tmpTlSprite !== undefined) {
 						drawSprite(
 							graph,
 							tmpTlSprite,
-							b.x - startX,
-							b.y - startY,
+							tile.x - startX,
+							tile.y - startY,
 							tmpTlSprite.width,
 							tmpTlSprite.height,
 							0,
@@ -5710,48 +5619,48 @@ function drawMap(a) {
 						);
 					}
 				}
-			} else if (a == 1) {
+			} else if (a === 1) {
 				if (
-					b.wall &&
-					!b.bottom &&
+					tile.wall &&
+					!tile.bottom &&
 					canSee(
-						b.x - startX,
-						b.y - startY + mapTileScale * 0.5,
+						tile.x - startX,
+						tile.y - startY + mapTileScale * 0.5,
 						mapTileScale,
 						mapTileScale * 0.75,
 					)
 				) {
 					drawSprite(
 						graph,
-						wallSpritesSeg[b.spriteIndex],
-						b.x - startX,
-						b.y + Math.round(mapTileScale / 2) - startY,
+						wallSpritesSeg[tile.spriteIndex],
+						tile.x - startX,
+						tile.y + Math.round(mapTileScale / 2) - startY,
 						mapTileScale,
 						mapTileScale / 2,
 						0,
 						true,
-						-(b.scale / 2),
+						-(tile.scale / 2),
 						0.5,
-						b.scale,
+						tile.scale,
 					);
 				}
 			} else if (
-				a == 2 &&
-				b.wall &&
+				a === 2 &&
+				tile.wall &&
 				canSee(
-					b.x - startX,
-					b.y - startY - mapTileScale * 0.5,
+					tile.x - startX,
+					tile.y - startY - mapTileScale * 0.5,
 					mapTileScale,
 					mapTileScale,
 				)
 			) {
-				tmpTlSprite = getCachedWall(b);
-				if (tmpTlSprite != undefined) {
+				tmpTlSprite = getCachedWall(tile);
+				if (tmpTlSprite !== undefined) {
 					drawSprite(
 						graph,
 						tmpTlSprite,
-						b.x - startX,
-						Math.round(b.y - mapTileScale / 2 - startY),
+						tile.x - startX,
+						Math.round(tile.y - mapTileScale / 2 - startY),
 						mapTileScale,
 						mapTileScale,
 						0,
@@ -5815,7 +5724,7 @@ function drawSprite(a, b, d, e, f, h, g, l, m, k, p) {
 			a.globalAlpha = 1;
 			a.translate(0, m);
 			tmpShadow = getCachedShadow(b, f, h + p, k);
-			if (tmpShadow != null && tmpShadow != undefined) {
+			if (tmpShadow != null && tmpShadow !== undefined) {
 				a.drawImage(tmpShadow, d, e + h);
 			}
 			a.rotate(-g);
@@ -5825,20 +5734,18 @@ function drawSprite(a, b, d, e, f, h, g, l, m, k, p) {
 }
 var shadowIntensity = 0.16;
 function getCachedShadow(a, b, d, e) {
-	var f = cachedShadows[a.index];
-	if (f == undefined && b != 0 && a != undefined && a.isLoaded) {
-		var f = document.createElement("canvas");
-		var h = f.getContext("2d");
-		h.imageSmoothingEnabled = false;
-		h.webkitImageSmoothingEnabled = false;
-		h.mozImageSmoothingEnabled = false;
-		f.width = b;
-		f.height = d;
-		h.globalAlpha = e == 0.5 ? shadowIntensity : shadowIntensity * 0.75;
-		h.scale(1, -e);
-		h.transform(1, 0, 0, 1, 0, 0);
-		h.drawImage(a, 0, -d, b, d);
-		b = h.getImageData(0, 0, f.width, f.height);
+	if (cachedShadows[a.index] === undefined && b !== 0 && a !== undefined && a.isLoaded) {
+		let tmpCanvas = document.createElement("canvas");
+		let ctx = tmpCanvas.getContext("2d");
+		ctx.imageSmoothingEnabled = false;
+
+		tmpCanvas.width = b;
+		tmpCanvas.height = d;
+		ctx.globalAlpha = e === 0.5 ? shadowIntensity : shadowIntensity * 0.75;
+		ctx.scale(1, -e);
+		ctx.transform(1, 0, 0, 1, 0, 0);
+		ctx.drawImage(a, 0, -d, b, d);
+		b = ctx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height);
 		d = b.data;
 		e = 0;
 		for (var g = d.length; e < g; e += 4) {
@@ -5847,8 +5754,8 @@ function getCachedShadow(a, b, d, e) {
 			d[e + 2] = 0;
 			d[e + 3] = d[e + 3];
 		}
-		h.putImageData(b, 0, 0);
-		cachedShadows[a.index] = f;
+		ctx.putImageData(b, 0, 0);
+		cachedShadows[a.index] = tmpCanvas;
 	}
 	return f;
 }
@@ -6149,55 +6056,54 @@ function renderShadedAnimText(a, b, d, e, f) {
 	tmpIndex = `${a}${b}${d}${f}`;
 	cachedText = cachedTextRenders[tmpIndex];
 	if (cachedText == undefined) {
-		var h = document.createElement("canvas");
-		var g = h.getContext("2d");
-		g.imageSmoothingEnabled = false;
-		g.webkitImageSmoothingEnabled = false;
-		g.mozImageSmoothingEnabled = false;
-		g.textAlign = "center";
-		g.font = `${f + b}px mainFont`;
-		h.width = g.measureText(a).width * 1.08;
-		h.height = b * 1.8 + e;
-		g.fillStyle = shadeColor(d, -18);
-		g.font = `${f + b}px mainFont`;
-		g.textBaseline = "middle";
-		g.textAlign = "center";
-		for (var l = 1; l < e; ++l) {
-			g.fillText(a, h.width / 2, h.height / 2 + l);
+		let tmpCanvas = document.createElement("canvas");
+		let ctx = tmpCanvas.getContext("2d");
+		ctx.imageSmoothingEnabled = false;
+		
+		ctx.textAlign = "center";
+		ctx.font = `${f + b}px mainFont`;
+		tmpCanvas.width = ctx.measureText(a).width * 1.08;
+		tmpCanvas.height = b * 1.8 + e;
+		ctx.fillStyle = shadeColor(d, -18);
+		ctx.font = `${f + b}px mainFont`;
+		ctx.textBaseline = "middle";
+		ctx.textAlign = "center";
+		for (let i = 1; i < e; ++i) {
+			ctx.fillText(a, tmpCanvas.width / 2, tmpCanvas.height / 2 + i);
 		}
-		g.fillStyle = d;
-		g.font = `${f + b}px mainFont`;
-		g.textBaseline = "middle";
-		g.textAlign = "center";
-		g.fillText(a, h.width / 2, h.height / 2);
-		cachedText = h;
+		ctx.fillStyle = d;
+		ctx.font = `${f + b}px mainFont`;
+		ctx.textBaseline = "middle";
+		ctx.textAlign = "center";
+		ctx.fillText(a, tmpCanvas.width / 2, tmpCanvas.height / 2);
+		cachedText = tmpCanvas;
 		cachedTextRenders[tmpIndex] = cachedText;
 	}
 	return cachedText;
 }
 var cachedParticles = [];
 var particleIndex = 0;
-for (var i = 0; i < 700; ++i) {
+for (let i = 0; i < 700; ++i) {
 	cachedParticles.push(new Particle());
 }
 function updateParticles(a, b) {
-	for (var d = 0; d < cachedParticles.length; ++d) {
+	for (let i = 0; i < cachedParticles.length; ++i) {
 		if (
-			(showParticles || cachedParticles[d].forceShow) &&
-			cachedParticles[d].active &&
+			(showParticles || cachedParticles[i].forceShow) &&
+			cachedParticles[i].active &&
 			canSee(
-				cachedParticles[d].x - startX,
-				cachedParticles[d].y - startY,
-				cachedParticles[d].scale,
-				cachedParticles[d].scale,
+				cachedParticles[i].x - startX,
+				cachedParticles[i].y - startY,
+				cachedParticles[i].scale,
+				cachedParticles[i].scale,
 			)
 		) {
-			if (b == cachedParticles[d].layer) {
-				cachedParticles[d].update(a);
-				cachedParticles[d].draw();
+			if (b === cachedParticles[i].layer) {
+				cachedParticles[i].update(a);
+				cachedParticles[i].draw();
 			}
 		} else {
-			cachedParticles[d].active = false;
+			cachedParticles[i].active = false;
 		}
 	}
 	graph.globalAlpha = 1;
@@ -6357,14 +6263,13 @@ function createLiquid(a, b, d, e) {
 	tmpParticle.forceShow = false;
 	tmpParticle.active = true;
 }
-var tmpDist = 0;
 var maxShakeDist = 2000;
 var maxExplosionDuration = 400;
 var maxShake = 9;
 var tmpShake = 0;
 var tmpDir = 0;
 function createExplosion(a, b, d) {
-	tmpDist = getDistance(a, b, player.x, player.y);
+	let tmpDist = getDistance(a, b, player.x, player.y);
 	if (tmpDist <= maxShakeDist) {
 		tmpDir = getAngle(a, player.x, b, player.y);
 		screenShake(d * maxShake * (1 - tmpDist / maxShakeDist), tmpDir);
@@ -6400,20 +6305,20 @@ function createSmokePuff(a, b, d, e, f) {
 			tmpParticle.spriteIndex = 6;
 			tmpParticle.layer = 0;
 		} else if (i <= 10) {
-			tmpDist = i * d;
+			let tmpDist = i * d;
 			tmpParticle.x = a + tmpDist * Math.cos(tmpParticle.dir);
 			tmpParticle.y = b + tmpDist * Math.sin(tmpParticle.dir);
 			tmpParticle.initScale = randomFloat(30, 33) * d;
 			tmpParticle.initSpeed = (3 / tmpParticle.initScale) * d * f;
 			tmpParticle.maxDuration = maxExplosionDuration * 0.8;
 		} else {
-			tmpDist = randomFloat(0, 10) * d;
+			let tmpDist = randomFloat(0, 10) * d;
 			tmpParticle.x = a + tmpDist * Math.cos(tmpParticle.dir);
 			tmpParticle.y = b + tmpDist * Math.sin(tmpParticle.dir);
-			var g = randomFloat(0.7, 1.4);
-			tmpParticle.initScale = d * 11 * g;
-			tmpParticle.initSpeed = (((12 / tmpParticle.initScale) * d) / g) * f;
-			tmpParticle.maxDuration = maxExplosionDuration * g;
+			let rand = randomFloat(0.7, 1.4);
+			tmpParticle.initScale = d * 11 * rand;
+			tmpParticle.initSpeed = (((12 / tmpParticle.initScale) * d) / rand) * f;
+			tmpParticle.maxDuration = maxExplosionDuration * rand;
 		}
 		tmpParticle.scale = tmpParticle.initScale;
 		tmpParticle.active = true;

@@ -204,74 +204,73 @@ export function setupMap(a: any, mapTileScale: number) {
 		}
 	}
 }
-function canPlaceFlag(a, b) {
+function canPlaceFlag(tile, b) {
 	if (b) {
-		return a !== undefined && !a.wall && !a.hardPoint;
+		return tile !== undefined && !tile.wall && !tile.hardPoint;
 	} else {
-		return a !== undefined && !a.hardPoint;
+		return tile !== undefined && !tile.hardPoint;
 	}
 }
-export function wallCol(a, gameMap, gameObjects) {
-	if (a.dead) return;
-	var b = null;
-	for (var d = (a.nameYOffset = 0); d < gameMap.tiles.length; ++d) {
-		if (gameMap.tiles[d].wall && gameMap.tiles[d].hasCollision) {
-			b = gameMap.tiles[d];
+export function wallCol(player, gameMap, gameObjects) {
+	if (player.dead) return;
+	player.nameYOffset = 0;
+	for (let i = 0; i < gameMap.tiles.length; ++i) {
+		if (gameMap.tiles[i].wall && gameMap.tiles[i].hasCollision) {
+			const tmpTile = gameMap.tiles[i];
 			if (
-				a.x + a.width / 2 >= b.x &&
-				a.x - a.width / 2 <= b.x + b.scale &&
-				a.y >= b.y &&
-				a.y <= b.y + b.scale
+				player.x + player.width / 2 >= tmpTile.x &&
+				player.x - player.width / 2 <= tmpTile.x + tmpTile.scale &&
+				player.y >= tmpTile.y &&
+				player.y <= tmpTile.y + tmpTile.scale
 			) {
-				if (a.oldX <= b.x) {
-					a.x = b.x - a.width / 2 - 2;
-				} else if (a.oldX - a.width / 2 >= b.x + b.scale) {
-					a.x = b.x + b.scale + a.width / 2 + 2;
+				if (player.oldX <= tmpTile.x) {
+					player.x = tmpTile.x - player.width / 2 - 2;
+				} else if (player.oldX - player.width / 2 >= tmpTile.x + tmpTile.scale) {
+					player.x = tmpTile.x + tmpTile.scale + player.width / 2 + 2;
 				}
-				if (a.oldY <= b.y) {
-					a.y = b.y - 2;
-				} else if (a.oldY >= b.y + b.scale) {
-					a.y = b.y + b.scale + 2;
+				if (player.oldY <= tmpTile.y) {
+					player.y = tmpTile.y - 2;
+				} else if (player.oldY >= tmpTile.y + tmpTile.scale) {
+					player.y = tmpTile.y + tmpTile.scale + 2;
 				}
 			}
 			if (
-				!b.hardPoint &&
-				a.x > b.x &&
-				a.x < b.x + b.scale &&
-				a.y - a.jumpY - a.height * 0.85 > b.y - b.scale / 2 &&
-				a.y - a.jumpY - a.height * 0.85 <= b.y
+				!tmpTile.hardPoint &&
+				player.x > tmpTile.x &&
+				player.x < tmpTile.x + tmpTile.scale &&
+				player.y - player.jumpY - player.height * 0.85 > tmpTile.y - tmpTile.scale / 2 &&
+				player.y - player.jumpY - player.height * 0.85 <= tmpTile.y
 			) {
-				a.nameYOffset = Math.round(
-					a.y - a.jumpY - a.height * 0.85 - (b.y - b.scale / 2),
+				player.nameYOffset = Math.round(
+					player.y - player.jumpY - player.height * 0.85 - (tmpTile.y - tmpTile.scale / 2),
 				);
 			}
 		}
 	}
-	for (d = 0; d < gameObjects.length; ++d) {
-		if (gameObjects[d].type === "clutter" && gameObjects[d].active) {
-			b = gameObjects[d];
+	for (let i = 0; i < gameObjects.length; ++i) {
+		if (gameObjects[i].type === "clutter" && gameObjects[i].active) {
+			const tmpObj = gameObjects[i];
 			if (
-				b.hc &&
+				tmpObj.hc &&
 				//canSee(b.x - startX, b.y - startY, b.w, b.h) &&
-				a.x + a.width / 2 >= b.x &&
-				a.x - a.width / 2 <= b.x + b.w &&
-				a.y >= b.y - b.h * b.tp &&
-				a.y <= b.y
+				player.x + player.width / 2 >= tmpObj.x &&
+				player.x - player.width / 2 <= tmpObj.x + tmpObj.w &&
+				player.y >= tmpObj.y - tmpObj.h * tmpObj.tp &&
+				player.y <= tmpObj.y
 			) {
-				if (a.oldX + a.width / 2 <= b.x) {
-					a.x = b.x - a.width / 2 - 1;
-				} else if (a.oldX - a.width / 2 >= b.x + b.w) {
-					a.x = b.x + b.w + a.width / 2 + 1;
+				if (player.oldX + player.width / 2 <= tmpObj.x) {
+					player.x = tmpObj.x - player.width / 2 - 1;
+				} else if (player.oldX - player.width / 2 >= tmpObj.x + tmpObj.w) {
+					player.x = tmpObj.x + tmpObj.w + player.width / 2 + 1;
 				}
-				if (a.oldY >= b.y) {
-					a.y = b.y + 1;
-				} else if (a.oldY <= b.y - b.h * b.tp) {
-					a.y = b.y - b.h * b.tp - 1;
+				if (player.oldY >= tmpObj.y) {
+					player.y = tmpObj.y + 1;
+				} else if (player.oldY <= tmpObj.y - tmpObj.h * tmpObj.tp) {
+					player.y = tmpObj.y - tmpObj.h * tmpObj.tp - 1;
 				}
 			}
 		}
 	}
-	b = null;
 }
 export function getCurrentWeapon(player) {
 	if (
@@ -286,7 +285,7 @@ export function getCurrentWeapon(player) {
 export function roundNumber(num: number, fractionDigits: number) {
 	return +num.toFixed(fractionDigits);
 }
-export function getAngleDifference(angleA, angleB) {
+export function getAngleDifference(angleA: number, angleB: number) {
 	const anglDif = Math.abs(angleB - angleA) % (Math.PI * 2);
 	if (anglDif > Math.PI) {
 		return Math.PI * 2 - anglDif;

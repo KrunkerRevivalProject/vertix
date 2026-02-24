@@ -1,4 +1,5 @@
-export const characterClasses = [
+// biome-ignore lint/style/useConst: reassigned when loading mod packs
+export let characterClasses = [
 	{
 		classN: "Triggerman",
 		health: 100,
@@ -499,4 +500,4 @@ export const weapons = [
 	},
 ];
 
-export const weaponNames = weapons.map((w) => [w.name]).flat();
+export const weaponNames = weapons.map((w) => w.name);
