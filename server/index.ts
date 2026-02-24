@@ -87,9 +87,6 @@ let mapData = {
 	height: (genData.height - 4) * mapTileScale,
 };
 setupMap(mapData, mapTileScale);
-//for (let i = 0; i < 100; ++i) {
-//	bullets.push(new Projectile());
-//}
 
 let scoreRed = 0;
 let scoreBlue = 0;
@@ -283,6 +280,7 @@ io.on("connection", (socket: Socket) => {
 			d: d,
 			si: -1,
 		});
+		bullets.push(new Projectile(currentTime, clutter, tiles, players, player));
 		shootNextBullet(
 			{
 				i: player.index,
@@ -296,6 +294,7 @@ io.on("connection", (socket: Socket) => {
 			currentTime,
 			bullets
 		)
+		callUpdate();
 		//TODO: damage sync
 		//const shooter = player;
 		//const receiver = players[1];
@@ -359,4 +358,21 @@ io.on("connection", (socket: Socket) => {
 	socket.on("create", (lobby) => { });
 });
 
+var currentTime;
+var oldTime = Date.now();
+let targetFPS = 30
+var then = Date.now();
+let elapsed;
+function callUpdate() {
+	currentTime = Date.now();
+	elapsed = currentTime - then;
+	if (elapsed > 1000 / targetFPS) {
+		then = currentTime - (elapsed % (1000 / targetFPS));
+		let delta = currentTime - oldTime;
+		oldTime = currentTime;
+		for (var i = 0; i < bullets.length; i++) {
+			bullets[i].update(delta)
+		}
+	}
+}
 io.listen(1119);

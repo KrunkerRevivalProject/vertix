@@ -6,7 +6,7 @@ const {
 	randomFloat,
 } = utils;
 
-export function Projectile() {
+export function Projectile(currentTime, clutter, tiles, players, player) {
 	this.speed =
 		this.width =
 		this.height =
@@ -38,7 +38,7 @@ export function Projectile() {
 	var b = 0;
 	var d = 0;
 	var e = 0;
-	this.update = function (f) {
+	this.update = function (delta: number) {
 		if (this.active) {
 			e = currentTime - this.startTime;
 			if (this.skipMove) {
@@ -46,7 +46,7 @@ export function Projectile() {
 				this.startTime = currentTime;
 			}
 			for (var g = 0; g < this.updateAccuracy; ++g) {
-				var h = this.speed * f;
+				var h = this.speed * delta;
 				if (this.active) {
 					a = (h * Math.cos(this.dir)) / this.updateAccuracy;
 					b = (h * Math.sin(this.dir)) / this.updateAccuracy;
@@ -67,8 +67,8 @@ export function Projectile() {
 					this.cEndY =
 						this.y +
 						((h + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
-					for (h = 0; h < gameObjects.length; ++h) {
-						k = gameObjects[h];
+					for (h = 0; h < clutter.length; ++h) {
+						k = clutter[h];
 						if (
 							this.active &&
 							k.type == "clutter" &&
@@ -90,9 +90,9 @@ export function Projectile() {
 					}
 					if (this.active) {
 						var k;
-						for (var h = 0; h < gameMap.tiles.length; ++h) {
+						for (var h = 0; h < tiles.length; ++h) {
 							if (this.active) {
-								k = gameMap.tiles[h];
+								k = tiles[h];
 								if (k.wall && k.hasCollision && this.canSeeObject(k, k.scale)) {
 									if (k.bottom) {
 										if (this.lineInRect(k.x, k.y, k.scale, k.scale, true)) {
@@ -128,13 +128,13 @@ export function Projectile() {
 					if (this.active && this.owner.index == player.index) {
 						for (
 							h = 0;
-							h < gameObjects.length &&
-							((k = gameObjects[h]),
+							h < players.length &&
+							((k = players[h]),
 							k.index == this.owner.index ||
 								!(this.lastHit.indexOf(`,${k.index},`) < 0) ||
 								k.team == this.owner.team ||
 								k.type != "player" ||
-								!k.onScreen ||
+								k.onScreen ||
 								k.dead ||
 								(this.lineInRect(
 									k.x - k.width / 2,
@@ -149,6 +149,7 @@ export function Projectile() {
 										: this.dmg > 0 &&
 											((this.lastHit += `${k.index},`),
 											this.spriteIndex != 2 &&
+												console.log("HIT!!!"),
 												//(particleCone(
 												//	12,
 												//	k.x,
@@ -173,14 +174,14 @@ export function Projectile() {
 				}
 			}
 			if (this.spriteIndex == 1) {
-				d -= f;
+				d -= delta;
 				if (d <= 0) {
 					//stillDustParticle(this.x, this.y, true);
 					d = 20;
 				}
 			}
 		} else if (!this.active && this.trailAlpha > 0) {
-			this.trailAlpha -= f * 0.001;
+			this.trailAlpha -= delta * 0.001;
 			if (this.trailAlpha <= 0) {
 				this.trailAlpha = 0;
 			}
@@ -299,19 +300,19 @@ export function Projectile() {
 	};
 }
 var bulletIndex = 0;
-function getNextBullet(bullets) {
+function getNextBullet(bullets: any) {
 	bulletIndex++;
 	if (bulletIndex >= bullets.length) {
 		bulletIndex = 0;
 	}
 	return bullets[bulletIndex];
 }
-export function shootNextBullet(a, player, targetD, currentTime, bullets) {
+export function shootNextBullet(a: any, player: any, targetD, currentTime, bullets: any) {
 	var d = getNextBullet(bullets);
 	if (d !== undefined) {
 		d.serverIndex = a.si;
 		d.x = a.x - 1;
-		d.startX = a.x;
+		d.startX = a.x;	
 		d.y = a.y;
 		d.startY = a.y;
 		d.dir = a.d;
