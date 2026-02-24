@@ -6,7 +6,7 @@ const {
 	randomFloat,
 } = utils;
 
-export function Projectile(currentTime, clutter, tiles, players, player) {
+export function Projectile() {
 	this.speed =
 		this.width =
 		this.height =
@@ -38,7 +38,7 @@ export function Projectile(currentTime, clutter, tiles, players, player) {
 	var b = 0;
 	var d = 0;
 	var e = 0;
-	this.update = function (delta: number) {
+	this.update = function (delta: number, currentTime, clutter, tiles, players, player) {
 		if (this.active) {
 			e = currentTime - this.startTime;
 			if (this.skipMove) {
@@ -147,7 +147,7 @@ export function Projectile(currentTime, clutter, tiles, players, player) {
 									(this.explodeOnDeath
 										? (this.active = false)
 										: this.dmg > 0 &&
-											((this.lastHit += `${k.index},`),
+											((this.lastHit = `${k.index},`),
 											this.spriteIndex != 2 &&
 												console.log("HIT!!!"),
 												//(particleCone(
