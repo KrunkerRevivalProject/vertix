@@ -131,7 +131,7 @@ export function Projectile() {
 							h < players.length &&
 							((k = players[h]),
 							k.index == this.owner.index ||
-								!(this.lastHit.indexOf(`,${k.index},`) < 0) ||
+								this.lastHit !== "" ||
 								k.team == this.owner.team ||
 								k.type != "player" ||
 								k.onScreen ||
@@ -147,9 +147,8 @@ export function Projectile() {
 									(this.explodeOnDeath
 										? (this.active = false)
 										: this.dmg > 0 &&
-											((this.lastHit = `${k.index},`),
+											((this.lastHit = `${k.index}`),
 											this.spriteIndex != 2 &&
-												console.log("HIT!!!"),
 												//(particleCone(
 												//	12,
 												//	k.x,
@@ -190,7 +189,7 @@ export function Projectile() {
 	};
 	this.activate = function () {
 		this.skipMove = true;
-		this.lastHit = ",";
+		this.lastHit = "";
 		this.active = true;
 		//playSound(`shot${this.weaponIndex}`, this.x, this.y);
 	};

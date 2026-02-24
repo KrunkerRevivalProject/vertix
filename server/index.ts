@@ -45,7 +45,6 @@ const io = new Server({
 	},
 });
 
-let oldTime;
 let bullets = [];
 let players = [];
 let mapTileScale = 256;
@@ -300,10 +299,9 @@ io.on("connection", (socket: Socket) => {
 		)
 		for (let i = 0; i < 100; i++) {
 			bullets[i].update(player.delta, currentTime, clutter, tiles, players, player)
-			if (bullets[i].lastHit && bullets[i].lastHit != "," && bullets[i].active) {
-				let parts = bullets[i].lastHit.split(',');
-				console.log(parts)
-				let idx = parseInt(parts[0], 10)
+			if (bullets[i].lastHit !== "" && bullets[i].active && bullets[i].owner.index == player.index) {
+				bullets[i].active = false;
+				let idx = bullets[i].lastHit
 				console.log(idx)
 				const shooter = player;
 				const receiver = players[idx];
@@ -343,7 +341,7 @@ io.on("connection", (socket: Socket) => {
 		let inputNumber = data.isn;
 		let space = data.s;
 		let delta = data.delta;
-		player.delta = delta
+		player.delta = delta;
 		var e = Math.sqrt(horizontalDT * horizontalDT + verticalDT * verticalDT);
 		if (e !== 0) {
 			horizontalDT /= e;
