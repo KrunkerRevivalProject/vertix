@@ -3907,7 +3907,8 @@ function Projectile() {
 	this.dotInRect = (a, b, d, e, f, h) =>
 		a >= d && a <= d + f && b >= e && b <= e + h;
 	this.adjustOnCollision = function (a, b, d, e) {
-		let h = this.cEndX, g = this.cEndY;
+		let h = this.cEndX,
+			g = this.cEndY;
 		for (let f = 100; f > 0; ) {
 			f--;
 			if (this.dotInRect(h, g, a, b, d, e)) {

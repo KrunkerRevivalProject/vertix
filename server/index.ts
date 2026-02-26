@@ -292,13 +292,17 @@ io.on("connection", (socket: Socket) => {
 			player,
 			targetD,
 			currentTime,
-			bullets
-		)
+			bullets,
+		);
 		for (let i = 0; i < 100; i++) {
 			bullets[i].update(player.delta, currentTime, clutter, tiles, players);
-			if (bullets[i].lastHit !== "" && bullets[i].active && bullets[i].owner.index == player.index) {
+			if (
+				bullets[i].lastHit !== "" &&
+				bullets[i].active &&
+				bullets[i].owner.index == player.index
+			) {
 				bullets[i].deactivate();
-				let idx = bullets[i].lastHit
+				let idx = bullets[i].lastHit;
 				const shooter = player;
 				const receiver = players[idx];
 				if (receiver && !receiver.dead) {
@@ -312,20 +316,28 @@ io.on("connection", (socket: Socket) => {
 					});
 					const dead = receiver.health <= 0;
 					if (dead) {
-						receiver.dead = true
+						receiver.dead = true;
 						io.emit("3", {
 							dID: shooter.index,
 							gID: receiver.index,
 							sS: 100,
 						});
 						shooter.score += 100;
-						io.emit("upd", { i: shooter.index, s: shooter.score, kil: shooter.kills += 1 });
-						io.emit("upd", { i: receiver.index, dea: receiver.deaths += 1 });
-						io.emit("lb", players.flatMap((pl) => [pl.index]));
-						io.emit("ts",
+						io.emit("upd", {
+							i: shooter.index,
+							s: shooter.score,
+							kil: (shooter.kills += 1),
+						});
+						io.emit("upd", { i: receiver.index, dea: (receiver.deaths += 1) });
+						io.emit(
+							"lb",
+							players.flatMap((pl) => [pl.index]),
+						);
+						io.emit(
+							"ts",
 							receiver.team == "red" ? scoreRed : scoreBlue,
-							shooter.team == "red" ? scoreRed += 1 : scoreBlue += 1
-						)
+							shooter.team == "red" ? (scoreRed += 1) : (scoreBlue += 1),
+						);
 					}
 				}
 			}

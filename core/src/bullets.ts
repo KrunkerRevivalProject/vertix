@@ -1,10 +1,6 @@
 import * as utils from "./utils.ts";
 
-const {
-	getCurrentWeapon,
-	getDistance,
-	randomFloat,
-} = utils;
+const { getCurrentWeapon, getDistance, randomFloat } = utils;
 
 export function Projectile() {
 	this.speed =
@@ -161,7 +157,8 @@ export function Projectile() {
 												//	true,
 												//),
 												//createLiquid(k.x, k.y, this.dir, 4)),
-											this.pierceCount > 0 && this.pierceCount--,
+												this.pierceCount > 0 &&
+												this.pierceCount--,
 											this.pierceCount <= 0 && (this.active = false))),
 								this.active));
 							++h
@@ -306,13 +303,19 @@ function getNextBullet(bullets: any) {
 	}
 	return bullets[bulletIndex];
 }
-export function shootNextBullet(init: any, player: any, targetD: number, currentTime: number, bullets: any) {
+export function shootNextBullet(
+	init: any,
+	player: any,
+	targetD: number,
+	currentTime: number,
+	bullets: any,
+) {
 	let bullet = getNextBullet(bullets);
 	let weapon = getCurrentWeapon(player);
 	if (bullet !== undefined) {
 		bullet.serverIndex = init.si;
 		bullet.x = init.x - 1;
-		bullet.startX = init.x;	
+		bullet.startX = init.x;
 		bullet.y = init.y;
 		bullet.startY = init.y;
 		bullet.dir = init.d;
@@ -325,8 +328,7 @@ export function shootNextBullet(init: any, player: any, targetD: number, current
 			randScale = randomFloat(randScale[0], randScale[1]);
 			bullet.width *= randScale;
 			bullet.height *= randScale;
-			bullet.speed *=
-				1 + weapon.spread[weapon.spreadIndex];
+			bullet.speed *= 1 + weapon.spread[weapon.spreadIndex];
 		}
 		bullet.trailWidth = bullet.width * 0.7;
 		bullet.trailMaxLength = Math.round(bullet.height * 5);

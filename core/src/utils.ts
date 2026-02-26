@@ -225,7 +225,10 @@ export function wallCol(player, gameMap, gameObjects) {
 			) {
 				if (player.oldX <= tmpTile.x) {
 					player.x = tmpTile.x - player.width / 2 - 2;
-				} else if (player.oldX - player.width / 2 >= tmpTile.x + tmpTile.scale) {
+				} else if (
+					player.oldX - player.width / 2 >=
+					tmpTile.x + tmpTile.scale
+				) {
 					player.x = tmpTile.x + tmpTile.scale + player.width / 2 + 2;
 				}
 				if (player.oldY <= tmpTile.y) {
@@ -238,11 +241,15 @@ export function wallCol(player, gameMap, gameObjects) {
 				!tmpTile.hardPoint &&
 				player.x > tmpTile.x &&
 				player.x < tmpTile.x + tmpTile.scale &&
-				player.y - player.jumpY - player.height * 0.85 > tmpTile.y - tmpTile.scale / 2 &&
+				player.y - player.jumpY - player.height * 0.85 >
+					tmpTile.y - tmpTile.scale / 2 &&
 				player.y - player.jumpY - player.height * 0.85 <= tmpTile.y
 			) {
 				player.nameYOffset = Math.round(
-					player.y - player.jumpY - player.height * 0.85 - (tmpTile.y - tmpTile.scale / 2),
+					player.y -
+						player.jumpY -
+						player.height * 0.85 -
+						(tmpTile.y - tmpTile.scale / 2),
 				);
 			}
 		}
