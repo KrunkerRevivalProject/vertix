@@ -38,7 +38,7 @@ export function Projectile() {
 	var b = 0;
 	var d = 0;
 	var e = 0;
-	this.update = function (delta: number, currentTime, clutter, tiles, players, player) {
+	this.update = function (delta: number, currentTime, clutter, tiles, players) {
 		if (this.active) {
 			e = currentTime - this.startTime;
 			if (this.skipMove) {
@@ -125,7 +125,7 @@ export function Projectile() {
 							}
 						}
 					}
-					if (this.active && this.owner.index == player.index) {
+					if (this.active) {
 						for (
 							h = 0;
 							h < players.length &&

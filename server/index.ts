@@ -83,7 +83,6 @@ setupMap(mapData, mapTileScale);
 for (let i = 0; i < 100; i++) {
 	bullets.push(new Projectile());
 }
-
 let scoreRed = 0;
 let scoreBlue = 0;
 
@@ -296,14 +295,13 @@ io.on("connection", (socket: Socket) => {
 			bullets
 		)
 		for (let i = 0; i < 100; i++) {
-			bullets[i].update(player.delta, currentTime, clutter, tiles, players, player)
+			bullets[i].update(player.delta, currentTime, clutter, tiles, players);
 			if (bullets[i].lastHit !== "" && bullets[i].active && bullets[i].owner.index == player.index) {
-				bullets[i].active = false;
+				bullets[i].deactivate();
 				let idx = bullets[i].lastHit
-				console.log(idx)
 				const shooter = player;
 				const receiver = players[idx];
-				if (receiver) {
+				if (receiver && !receiver.dead) {
 					io.emit("1", {
 						dID: shooter.index,
 						gID: receiver.index,
@@ -314,6 +312,7 @@ io.on("connection", (socket: Socket) => {
 					});
 					const dead = receiver.health <= 0;
 					if (dead) {
+						receiver.dead = true
 						io.emit("3", {
 							dID: shooter.index,
 							gID: receiver.index,
