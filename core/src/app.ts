@@ -1506,7 +1506,7 @@ function setupSocket(a: Socket) {
 			gameHeight = gameMap.height;
 			mapTileScale = a.tileScale;
 			gameObjects = a.usersInRoom;
-			for (d = 0; d < gameObjects.length; ++d) {
+			for (let d = 0; d < gameObjects.length; ++d) {
 				gameObjects[d].type = "player";
 			}
 			gameMode = gameMap.gameMode;
@@ -1516,7 +1516,7 @@ function setupSocket(a: Socket) {
 				document.getElementById("gameModeText").innerHTML = gameMode.desc1;
 			}
 			currentLikeButton = "";
-			for (d = 0; d < gameMap.clutter.length; ++d) {
+			for (let d = 0; d < gameMap.clutter.length; ++d) {
 				const b = gameMap.clutter[d];
 				b.type = "clutter";
 				gameObjects.push(b);
@@ -1524,7 +1524,7 @@ function setupSocket(a: Socket) {
 			setupMap(gameMap, mapTileScale);
 			cachedMiniMap = null;
 			deactivateSprays();
-			for (d = 0; d < 100; ++d) {
+			for (let d = 0; d < 100; ++d) {
 				bullets.push(new Projectile());
 			}
 		}
@@ -2269,7 +2269,7 @@ function receiveServerData(a) {
 				gameObjects[d].onScreen = false;
 			}
 		}
-		for (d = 0; d < a.length; ) {
+		for (let d = 0; d < a.length; ) {
 			b = a[0 + d];
 			const tmpUser = findUserByIndex(a[1 + d]);
 			if (a[1 + d] === player.index && tmpUser != null) {
@@ -2319,7 +2319,7 @@ function receiveServerData(a) {
 			d += b;
 		}
 	}
-	for (d = 0; d < gameObjects.length; d++) {
+	for (let d = 0; d < gameObjects.length; d++) {
 		if (gameObjects[d].index == player.index) {
 			if (gameObjects[d].dead || gameOver || thisInput.length > 80) {
 				thisInput.length = 0;
@@ -3205,7 +3205,7 @@ function getCachedMiniMap() {
 		e.globalAlpha = 0.1;
 		e.drawImage(a, 0, 0);
 		e.globalAlpha = 1;
-		for (d = 0; d < gameMap.tiles.length; ++d) {
+		for (let d = 0; d < gameMap.tiles.length; ++d) {
 			if (gameMap.tiles[d].hardPoint) {
 				e.fillStyle =
 					gameMap.tiles[d].objTeam == player.team ? "#5151d9" : "#d95151";
@@ -3985,7 +3985,7 @@ function updateWeaponUI(a, force) {
 			}
 		}
 	} else {
-		for (d = 0; d < a.weapons.length; ++d) {
+		for (let d = 0; d < a.weapons.length; ++d) {
 			tmpDiv = document.getElementById(`actionContainer${d}`);
 			tmpDiv.className =
 				d === a.currentWeapon ? "actionContainerActive" : "actionContainer";
