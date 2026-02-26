@@ -306,47 +306,48 @@ function getNextBullet(bullets: any) {
 	}
 	return bullets[bulletIndex];
 }
-export function shootNextBullet(a: any, player: any, targetD, currentTime, bullets: any) {
-	var d = getNextBullet(bullets);
-	if (d !== undefined) {
-		d.serverIndex = a.si;
-		d.x = a.x - 1;
-		d.startX = a.x;	
-		d.y = a.y;
-		d.startY = a.y;
-		d.dir = a.d;
-		d.speed = getCurrentWeapon(player).bSpeed;
-		d.updateAccuracy = getCurrentWeapon(player).cAcc;
-		d.width = getCurrentWeapon(player).bWidth;
-		d.height = getCurrentWeapon(player).bHeight;
-		var e = getCurrentWeapon(player).bRandScale;
-		if (e != null) {
-			e = randomFloat(e[0], e[1]);
-			d.width *= e;
-			d.height *= e;
-			d.speed *=
-				1 + getCurrentWeapon(player).spread[getCurrentWeapon(player).spreadIndex];
+export function shootNextBullet(init: any, player: any, targetD: number, currentTime: number, bullets: any) {
+	let bullet = getNextBullet(bullets);
+	let weapon = getCurrentWeapon(player);
+	if (bullet !== undefined) {
+		bullet.serverIndex = init.si;
+		bullet.x = init.x - 1;
+		bullet.startX = init.x;	
+		bullet.y = init.y;
+		bullet.startY = init.y;
+		bullet.dir = init.d;
+		bullet.speed = weapon.bSpeed;
+		bullet.updateAccuracy = weapon.cAcc;
+		bullet.width = weapon.bWidth;
+		bullet.height = weapon.bHeight;
+		var randScale = weapon.bRandScale;
+		if (randScale != null) {
+			randScale = randomFloat(randScale[0], randScale[1]);
+			bullet.width *= randScale;
+			bullet.height *= randScale;
+			bullet.speed *=
+				1 + weapon.spread[weapon.spreadIndex];
 		}
-		d.trailWidth = d.width * 0.7;
-		d.trailMaxLength = Math.round(d.height * 5);
-		d.trailAlpha = getCurrentWeapon(player).bTrail;
-		d.weaponIndex = getCurrentWeapon(player).weaponIndex;
-		d.spriteIndex = getCurrentWeapon(player).bSprite;
-		d.yOffset = getCurrentWeapon(player).yOffset;
-		d.jumpY = player.jumpY;
-		d.owner = player;
-		d.dmg = getCurrentWeapon(player).dmg;
-		d.bounce = getCurrentWeapon(player).bounce;
-		d.startTime = currentTime;
-		d.maxLifeTime = getCurrentWeapon(player).maxLife;
-		if (getCurrentWeapon(player).distBased) {
-			d.maxLifeTime = targetD / d.speed;
+		bullet.trailWidth = bullet.width * 0.7;
+		bullet.trailMaxLength = Math.round(bullet.height * 5);
+		bullet.trailAlpha = weapon.bTrail;
+		bullet.weaponIndex = weapon.weaponIndex;
+		bullet.spriteIndex = weapon.bSprite;
+		bullet.yOffset = weapon.yOffset;
+		bullet.jumpY = player.jumpY;
+		bullet.owner = player;
+		bullet.dmg = weapon.dmg;
+		bullet.bounce = weapon.bounce;
+		bullet.startTime = currentTime;
+		bullet.maxLifeTime = weapon.maxLife;
+		if (weapon.distBased) {
+			bullet.maxLifeTime = targetD / bullet.speed;
 		}
-		d.glowWidth = getCurrentWeapon(player).glowWidth;
-		d.glowHeight = getCurrentWeapon(player).glowHeight;
-		d.explodeOnDeath = getCurrentWeapon(player).explodeOnDeath;
-		d.pierceCount = getCurrentWeapon(player).pierce;
-		d.activate();
+		bullet.glowWidth = weapon.glowWidth;
+		bullet.glowHeight = weapon.glowHeight;
+		bullet.explodeOnDeath = weapon.explodeOnDeath;
+		bullet.pierceCount = weapon.pierce;
+		bullet.activate();
 	}
-	d = null;
+	bullet = null;
 }
