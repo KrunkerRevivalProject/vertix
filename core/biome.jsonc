@@ -4,7 +4,9 @@
 	"extends": "//",
 	"linter": {
 		"rules": {
-			// "recommended": false // todo
+			"style": {
+				"useConst": "off"
+			}
 		}
 	}
 }

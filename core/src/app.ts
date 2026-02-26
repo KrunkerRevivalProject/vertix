@@ -2,7 +2,12 @@
 import * as zip from "@zip.js/zip.js";
 import $ from "jquery";
 import { io, type Socket } from "socket.io-client";
-import { characterClasses, specialClasses, weaponNames } from "./loadouts.ts";
+import {
+	characterClasses,
+	setCharacterClasses,
+	specialClasses,
+	weaponNames,
+} from "./loadouts.ts";
 import * as utils from "./utils.ts";
 
 const {
@@ -610,10 +615,7 @@ let lastTarget;
 function gameInput(a) {
 	a.preventDefault();
 	a.stopPropagation();
-	var b = 0;
-	if (getCurrentWeapon(player) !== undefined) {
-		b = getCurrentWeapon(player).yOffset;
-	}
+	var b = getCurrentWeapon(player)?.yOffset ?? 0;
 	mouseX = a.clientX;
 	mouseY = a.clientY;
 	lastAngle = target.f;
@@ -928,20 +930,17 @@ function toggleTeamChat() {
 	document.getElementById("chatType").innerHTML = currentChatType;
 	mainCanvas.focus();
 }
-var profanityList =
-	"cunt whore shit fuck faggot nigger nigga dick vagina minge cock rape cum sex tits gay dumb penis clit pussy meatcurtain jizz prune douche wanker jerk".split(
-		" ",
-	);
+var profanityList = []; // emptied
 var tmpString = "";
 function checkProfanityString(a) {
 	if (showProfanity) {
-		for (var b = 0; b < profanityList.length; ++b) {
-			if (a.indexOf(profanityList[b]) > -1) {
+		for (let i = 0; i < profanityList.length; ++i) {
+			if (a.indexOf(profanityList[i]) > -1) {
 				tmpString = "";
-				for (var d = 0; d < profanityList[b].length; ++d) {
+				for (var d = 0; d < profanityList[i].length; ++d) {
 					tmpString += "*";
 				}
-				a = a.replace(new RegExp(profanityList[b], "g"), tmpString);
+				a = a.replace(new RegExp(profanityList[i], "g"), tmpString);
 			}
 		}
 	}
@@ -3044,8 +3043,6 @@ function resize() {
 	document.getElementById("gameStatWrapper").style.transform =
 		`perspective(1px) translate(-50%, -50%) scale(${uiScale})`;
 	graph.imageSmoothingEnabled = false;
-	graph.webkitImageSmoothingEnabled = false;
-	graph.mozImageSmoothingEnabled = false;
 	drawMenuBackground();
 }
 resize();
@@ -3104,7 +3101,6 @@ class FlashGlow {
 	}
 }
 
-var tmpObject = null;
 var tmpBulletGlowWidth = 0;
 var tmpBulletGlowHeight = 0;
 var lightX = 0;
@@ -3136,8 +3132,8 @@ function drawGameLights(a) {
 		graph.globalCompositeOperation = "lighter";
 		graph.globalAlpha = 0.2;
 		for (let i = 0; i < bullets.length; i++) {
-			tmpObject = bullets[i];
-			if (showGlows && tmpObject.spriteIndex != 2 && tmpObject.active) {
+			let tmpObject = bullets[i];
+			if (showGlows && tmpObject.spriteIndex !== 2 && tmpObject.active) {
 				tmpBulletGlowWidth =
 					tmpObject.glowWidth || Math.min(200, tmpObject.width * 14);
 				tmpBulletGlowHeight = tmpObject.glowHeight || tmpObject.height * 2.5;
@@ -3166,7 +3162,7 @@ function drawGameLights(a) {
 		if (showGlows) {
 			graph.globalAlpha = 0.2;
 			for (let i = 0; i < flashGlows.length; ++i) {
-				tmpObject = flashGlows[i];
+				let tmpObject = flashGlows[i];
 				tmpObject.update(a);
 				tmpObject.draw();
 			}
@@ -3334,16 +3330,16 @@ function createSpray(a, b, d) {
 			}
 		}
 		if (tmpSpray == null) {
-			var f = new Image();
-			f.owner = a;
-			f.active = false;
-			f.xPos = 0;
-			f.yPos = 0;
-			f.onload = () => {
-				cacheSpray(f);
+			const img = new Image();
+			img.owner = a;
+			img.active = false;
+			img.xPos = 0;
+			img.yPos = 0;
+			img.onload = () => {
+				cacheSpray(img);
 			};
-			userSprays.push(f);
-			tmpSpray = f;
+			userSprays.push(img);
+			tmpSpray = img;
 		}
 		tmpSpray.active = true;
 		tmpSpray.scale = tmpPlayer.spray.info.scale;
@@ -3364,9 +3360,8 @@ function deactivateSprays() {
 		userSprays[i].active = false;
 	}
 }
-var tmpIndex = 0;
 function cacheSpray(a) {
-	tmpIndex = `${a.src}`;
+	const tmpIndex = a.src;
 	tmpSpray = cachedSprays[tmpIndex];
 	if (tmpSpray == undefined && a.width !== 0) {
 		var b = document.createElement("canvas");
@@ -3379,8 +3374,6 @@ function cacheSpray(a) {
 		d.width = a.scale;
 		d.height = a.scale;
 		e.imageSmoothingEnabled = false;
-		e.webkitImageSmoothingEnabled = false;
-		e.mozImageSmoothingEnabled = false;
 		e.globalAlpha = a.alpha;
 		e.drawImage(b, 0, 0, a.scale, a.scale);
 		tmpSpray = d;
@@ -3638,8 +3631,6 @@ function flipSprite(a, b) {
 		d.width = a.width;
 		d.height = a.height;
 		e.imageSmoothingEnabled = false;
-		e.webkitImageSmoothingEnabled = false;
-		e.mozImageSmoothingEnabled = false;
 		if (b) {
 			e.scale(-1, 1);
 			e.drawImage(a, -d.width, 0, d.width, d.height);
@@ -3682,41 +3673,38 @@ function Projectile() {
 	this.explodeOnDeath = false;
 	this.updateAccuracy = 3;
 	this.bounce = false;
-	var a = 0;
-	var b = 0;
-	var d = 0;
-	var e = 0;
-	this.update = function (f) {
+	this.dustTimer = 0;
+	this.update = function (delta) {
 		if (this.active) {
-			e = currentTime - this.startTime;
+			let lifetime = currentTime - this.startTime;
 			if (this.skipMove) {
-				e = 0;
+				lifetime = 0;
 				this.startTime = currentTime;
 			}
-			for (var g = 0; g < this.updateAccuracy; ++g) {
-				var h = this.speed * f;
+			for (let g = 0; g < this.updateAccuracy; ++g) {
+				let vel = this.speed * delta;
 				if (this.active) {
-					a = (h * Math.cos(this.dir)) / this.updateAccuracy;
-					b = (h * Math.sin(this.dir)) / this.updateAccuracy;
+					let changeX = (vel * Math.cos(this.dir)) / this.updateAccuracy;
+					let changeY = (vel * Math.sin(this.dir)) / this.updateAccuracy;
 					if (this.active && !this.skipMove && this.speed > 0) {
-						this.x += a;
-						this.y += b;
+						this.x += changeX;
+						this.y += changeY;
 						if (
 							getDistance(this.startX, this.startY, this.x, this.y) >=
 							this.trailMaxLength
 						) {
-							this.startX += a;
-							this.startY += b;
+							this.startX += changeX;
+							this.startY += changeY;
 						}
 					}
 					this.cEndX =
 						this.x +
-						((h + this.height) * Math.cos(this.dir)) / this.updateAccuracy;
+						((vel + this.height) * Math.cos(this.dir)) / this.updateAccuracy;
 					this.cEndY =
 						this.y +
-						((h + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
-					for (h = 0; h < gameObjects.length; ++h) {
-						k = gameObjects[h];
+						((vel + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
+					for (vel = 0; vel < gameObjects.length; ++vel) {
+						k = gameObjects[vel];
 						if (
 							this.active &&
 							k.type == "clutter" &&
@@ -3738,9 +3726,9 @@ function Projectile() {
 					}
 					if (this.active) {
 						var k;
-						for (var h = 0; h < gameMap.tiles.length; ++h) {
+						for (var h = 0; vel < gameMap.tiles.length; ++vel) {
 							if (this.active) {
-								k = gameMap.tiles[h];
+								k = gameMap.tiles[vel];
 								if (k.wall && k.hasCollision && this.canSeeObject(k, k.scale)) {
 									if (k.bottom) {
 										if (this.lineInRect(k.x, k.y, k.scale, k.scale, true)) {
@@ -3775,9 +3763,9 @@ function Projectile() {
 					}
 					if (this.active && this.owner.index == player.index) {
 						for (
-							h = 0;
-							h < gameObjects.length &&
-							((k = gameObjects[h]),
+							vel = 0;
+							vel < gameObjects.length &&
+							((k = gameObjects[vel]),
 							k.index == this.owner.index ||
 								!(this.lastHit.indexOf(`,${k.index},`) < 0) ||
 								k.team == this.owner.team ||
@@ -3812,23 +3800,23 @@ function Projectile() {
 											this.pierceCount > 0 && this.pierceCount--,
 											this.pierceCount <= 0 && (this.active = false))),
 								this.active));
-							++h
+							++vel
 						);
 					}
-					if (this.maxLifeTime != null && e >= this.maxLifeTime) {
+					if (this.maxLifeTime != null && lifetime >= this.maxLifeTime) {
 						this.active = false;
 					}
 				}
 			}
-			if (this.spriteIndex == 1) {
-				d -= f;
-				if (d <= 0) {
+			if (this.spriteIndex === 1) {
+				this.dustTimer -= delta;
+				if (this.dustTimer <= 0) {
 					stillDustParticle(this.x, this.y, true);
-					d = 20;
+					this.dustTimer = 20;
 				}
 			}
 		} else if (!this.active && this.trailAlpha > 0) {
-			this.trailAlpha -= f * 0.001;
+			this.trailAlpha -= delta * 0.001;
 			if (this.trailAlpha <= 0) {
 				this.trailAlpha = 0;
 			}
@@ -3841,18 +3829,16 @@ function Projectile() {
 		this.active = true;
 		playSound(`shot${this.weaponIndex}`, this.x, this.y);
 	};
-	var f = 0;
-	var h = 0;
 	this.canSeeObject = function (a, b) {
-		f = Math.abs(this.cEndX - a.x);
-		h = Math.abs(this.cEndY - a.y);
+		let f = Math.abs(this.cEndX - a.x);
+		let h = Math.abs(this.cEndY - a.y);
 		return f <= (b + this.height) * 2 && h <= (b + this.height) * 2;
 	};
 	this.deactivate = function () {
 		this.active = false;
 	};
 	this.hitSomething = function (a, b) {
-		if (this.spriteIndex != 2) {
+		if (this.spriteIndex !== 2) {
 			particleCone(
 				10,
 				this.cEndX,
@@ -3922,7 +3908,8 @@ function Projectile() {
 	this.dotInRect = (a, b, d, e, f, h) =>
 		a >= d && a <= d + f && b >= e && b <= e + h;
 	this.adjustOnCollision = function (a, b, d, e) {
-		for (var f = 100, h = this.cEndX, g = this.cEndY; f > 0; ) {
+		let h = this.cEndX, g = this.cEndY;
+		for (let f = 100; f > 0; ) {
 			f--;
 			if (this.dotInRect(h, g, a, b, d, e)) {
 				f = 0;
@@ -3931,7 +3918,7 @@ function Projectile() {
 				g += Math.sin(this.dir + Math.PI) * 2;
 			}
 		}
-		for (f = 100; f > 0; ) {
+		for (let f = 100; f > 0; ) {
 			f--;
 			if (this.dotInRect(h, g, a, b, d, e)) {
 				h += Math.cos(this.dir + Math.PI) * 2;
@@ -3973,120 +3960,127 @@ function playerEquipWeapon(a, b) {
 }
 var actionBar = document.getElementById("actionBar");
 var tmpDiv = null;
-function updateWeaponUI(a, b) {
+function updateWeaponUI(a, force) {
 	if (weaponSpriteSheet[0] == undefined || a.weapons == undefined) {
 		return false;
 	}
-	if (b) {
+	if (force) {
 		actionBar.innerHTML = "";
 	}
-	if (actionBar.innerHTML == "") {
-		for (var d = 0; d < a.weapons.length; ++d) {
-			var e = document.createElement("div");
-			e.id = `actionContainer${d}`;
-			e.className =
-				d == a.currentWeapon ? "actionContainerActive" : "actionContainer";
-			tmpDiv = weaponSpriteSheet[a.weapons[d].weaponIndex].icon;
+	if (actionBar.innerHTML === "") {
+		for (let i = 0; i < a.weapons.length; ++i) {
+			let actionContainer = document.createElement("div");
+			actionContainer.id = `actionContainer${i}`;
+			actionContainer.className =
+				i === a.currentWeapon ? "actionContainerActive" : "actionContainer";
+			tmpDiv = weaponSpriteSheet[a.weapons[i].weaponIndex].icon;
 			if (tmpDiv != undefined) {
 				tmpDiv.className = "actionItem";
-				var f = document.createElement("div");
-				f.id = `actionCooldown${d}`;
-				f.className = "actionCooldown";
-				e.appendChild(f);
-				e.appendChild(tmpDiv);
-				actionBar.appendChild(e);
+				let actionCooldown = document.createElement("div");
+				actionCooldown.id = `actionCooldown${i}`;
+				actionCooldown.className = "actionCooldown";
+				actionContainer.appendChild(actionCooldown);
+				actionContainer.appendChild(tmpDiv);
+				actionBar.appendChild(actionContainer);
 			}
 		}
 	} else {
 		for (d = 0; d < a.weapons.length; ++d) {
 			tmpDiv = document.getElementById(`actionContainer${d}`);
 			tmpDiv.className =
-				d == a.currentWeapon ? "actionContainerActive" : "actionContainer";
+				d === a.currentWeapon ? "actionContainerActive" : "actionContainer";
 		}
 	}
 	updateUiStats(a);
 }
-function setCooldownAnimation(a, b, d) {
-	tmpDiv = document.getElementById(`actionCooldown${a}`);
+function setCooldownAnimation(weaponIdx, time, d) {
+	tmpDiv = document.getElementById(`actionCooldown${weaponIdx}`);
 	if (d) {
 		tmpDiv.style.height = "100%";
-		$(`#actionCooldown${a}`).animate(
+		$(`#actionCooldown${weaponIdx}`).animate(
 			{
 				height: "0%",
 			},
-			b,
+			time,
 		);
 	} else {
 		tmpDiv.style.height = "0%";
 	}
 }
-function shootNextBullet(a, b) {
-	var d = getNextBullet();
-	if (d !== undefined) {
-		d.serverIndex = a.si;
-		d.x = a.x - 1;
-		d.startX = a.x;
-		d.y = a.y;
-		d.startY = a.y;
-		d.dir = a.d;
-		d.speed = getCurrentWeapon(b).bSpeed;
-		d.updateAccuracy = getCurrentWeapon(b).cAcc;
-		d.width = getCurrentWeapon(b).bWidth;
-		d.height = getCurrentWeapon(b).bHeight;
-		var e = getCurrentWeapon(b).bRandScale;
-		if (e != null) {
-			e = randomFloat(e[0], e[1]);
-			d.width *= e;
-			d.height *= e;
-			d.speed *=
-				1 + getCurrentWeapon(b).spread[getCurrentWeapon(b).spreadIndex];
+function shootNextBullet(init, source) {
+	let bullet = getNextBullet();
+	if (bullet !== undefined) {
+		bullet.serverIndex = init.si;
+		bullet.x = init.x - 1;
+		bullet.startX = init.x;
+		bullet.y = init.y;
+		bullet.startY = init.y;
+		bullet.dir = init.d;
+		bullet.speed = getCurrentWeapon(source).bSpeed;
+		bullet.updateAccuracy = getCurrentWeapon(source).cAcc;
+		bullet.width = getCurrentWeapon(source).bWidth;
+		bullet.height = getCurrentWeapon(source).bHeight;
+		let randScale = getCurrentWeapon(source).bRandScale;
+		if (randScale != null) {
+			randScale = randomFloat(randScale[0], randScale[1]);
+			bullet.width *= randScale;
+			bullet.height *= randScale;
+			bullet.speed *=
+				1 +
+				getCurrentWeapon(source).spread[getCurrentWeapon(source).spreadIndex];
 		}
-		d.trailWidth = d.width * 0.7;
-		d.trailMaxLength = Math.round(d.height * 5);
-		d.trailAlpha = getCurrentWeapon(b).bTrail;
-		d.weaponIndex = getCurrentWeapon(b).weaponIndex;
-		d.spriteIndex = getCurrentWeapon(b).bSprite;
-		d.yOffset = getCurrentWeapon(b).yOffset;
-		d.jumpY = b.jumpY;
-		d.owner = b;
-		d.dmg = getCurrentWeapon(b).dmg;
-		d.bounce = getCurrentWeapon(b).bounce;
-		d.startTime = currentTime;
-		d.maxLifeTime = getCurrentWeapon(b).maxLife;
-		if (b.index === player.index && getCurrentWeapon(b).distBased) {
-			d.maxLifeTime = target.d / d.speed;
+		bullet.trailWidth = bullet.width * 0.7;
+		bullet.trailMaxLength = Math.round(bullet.height * 5);
+		bullet.trailAlpha = getCurrentWeapon(source).bTrail;
+		bullet.weaponIndex = getCurrentWeapon(source).weaponIndex;
+		bullet.spriteIndex = getCurrentWeapon(source).bSprite;
+		bullet.yOffset = getCurrentWeapon(source).yOffset;
+		bullet.jumpY = source.jumpY;
+		bullet.owner = source;
+		bullet.dmg = getCurrentWeapon(source).dmg;
+		bullet.bounce = getCurrentWeapon(source).bounce;
+		bullet.startTime = currentTime;
+		bullet.maxLifeTime = getCurrentWeapon(source).maxLife;
+		if (source.index === player.index && getCurrentWeapon(source).distBased) {
+			bullet.maxLifeTime = target.d / bullet.speed;
 		}
-		d.glowWidth = getCurrentWeapon(b).glowWidth;
-		d.glowHeight = getCurrentWeapon(b).glowHeight;
-		d.explodeOnDeath = getCurrentWeapon(b).explodeOnDeath;
-		d.pierceCount = getCurrentWeapon(b).pierce;
-		d.activate();
+		bullet.glowWidth = getCurrentWeapon(source).glowWidth;
+		bullet.glowHeight = getCurrentWeapon(source).glowHeight;
+		bullet.explodeOnDeath = getCurrentWeapon(source).explodeOnDeath;
+		bullet.pierceCount = getCurrentWeapon(source).pierce;
+		bullet.activate();
 	}
-	d = null;
+	bullet = null;
 }
-function shootBullet(a) {
+function shootBullet(source) {
 	if (
-		!a.dead &&
-		getCurrentWeapon(a) !== undefined &&
-		a.spawnProtection === 0 &&
-		getCurrentWeapon(a).weaponIndex >= 0 &&
-		getCurrentWeapon(a).reloadTime <= 0 &&
-		getCurrentWeapon(a).ammo > 0
+		!source.dead &&
+		getCurrentWeapon(source) !== undefined &&
+		source.spawnProtection === 0 &&
+		getCurrentWeapon(source).weaponIndex >= 0 &&
+		getCurrentWeapon(source).reloadTime <= 0 &&
+		getCurrentWeapon(source).ammo > 0
 	) {
-		screenShake(getCurrentWeapon(a).shake, target.f);
-		for (let b = 0; b < getCurrentWeapon(a).bulletsPerShot; ++b) {
-			getCurrentWeapon(a).spreadIndex++;
+		screenShake(getCurrentWeapon(source).shake, target.f);
+		for (let b = 0; b < getCurrentWeapon(source).bulletsPerShot; ++b) {
+			getCurrentWeapon(source).spreadIndex++;
 			if (
-				getCurrentWeapon(a).spreadIndex >= getCurrentWeapon(a).spread.length
+				getCurrentWeapon(source).spreadIndex >=
+				getCurrentWeapon(source).spread.length
 			) {
-				getCurrentWeapon(a).spreadIndex = 0;
+				getCurrentWeapon(source).spreadIndex = 0;
 			}
-			var d = getCurrentWeapon(a).spread[getCurrentWeapon(a).spreadIndex];
+			var d =
+				getCurrentWeapon(source).spread[getCurrentWeapon(source).spreadIndex];
 			var d = utils.roundNumber(target.f + Math.PI + d, 2);
-			var e = getCurrentWeapon(a).holdDist + getCurrentWeapon(a).bDist;
-			var f = Math.round(a.x + e * Math.cos(d));
+			var e =
+				getCurrentWeapon(source).holdDist + getCurrentWeapon(source).bDist;
+			var f = Math.round(source.x + e * Math.cos(d));
 			var e = Math.round(
-				a.y - getCurrentWeapon(a).yOffset - a.jumpY + e * Math.sin(d),
+				source.y -
+					getCurrentWeapon(source).yOffset -
+					source.jumpY +
+					e * Math.sin(d),
 			);
 			shootNextBullet(
 				{
@@ -4095,16 +4089,24 @@ function shootBullet(a) {
 					d: d,
 					si: -1,
 				},
-				a,
+				source,
 			);
 		}
-		socket.emit("1", a.x, a.y, a.jumpY, target.f, target.d, currentTime);
-		getCurrentWeapon(a).lastShot = currentTime;
-		getCurrentWeapon(a).ammo--;
-		if (getCurrentWeapon(a).ammo <= 0) {
-			playerReload(a, true);
+		socket.emit(
+			"1",
+			source.x,
+			source.y,
+			source.jumpY,
+			target.f,
+			target.d,
+			currentTime,
+		);
+		getCurrentWeapon(source).lastShot = currentTime;
+		getCurrentWeapon(source).ammo--;
+		if (getCurrentWeapon(source).ammo <= 0) {
+			playerReload(source, true);
 		}
-		updateUiStats(a);
+		updateUiStats(source);
 	}
 }
 function playerReload(player, shouldEmit: boolean) {
@@ -4256,10 +4258,14 @@ function pickedCharacter(a) {
 		"</div>";
 	setCookie("previousClass", a);
 	if (loggedIn) {
-		for (var b = 0; b < characterClasses[a].weaponIndexes.length; ++b) {
-			var d = getCookie(`wpnSkn${characterClasses[a].weaponIndexes[b]}`);
-			if (d != "") {
-				changeCamo(characterClasses[a].weaponIndexes[b], parseInt(d), false);
+		for (let i = 0; i < characterClasses[a].weaponIndexes.length; ++i) {
+			let skinPref = getCookie(`wpnSkn${characterClasses[a].weaponIndexes[i]}`);
+			if (skinPref != "") {
+				changeCamo(
+					characterClasses[a].weaponIndexes[i],
+					parseInt(skinPref),
+					false,
+				);
 			}
 		}
 		if (getCookie("previousHat") != "") {
@@ -4296,20 +4302,19 @@ function showWeaponSelector(a) {
 		a +
 		",0,true);'>Default</div>";
 	if (loggedIn && camoDataList != null && camoDataList[a] != undefined) {
-		var d;
-		for (var e = 0; e < camoDataList[a].length; ++e) {
-			d = camoDataList[a][e];
+		for (let i = 0; i < camoDataList[a].length; ++i) {
+			let camo = camoDataList[a][i];
 			b +=
 				"<div class='hatSelectItem' style='color:" +
-				getItemRarityColor(d.chance) +
+				getItemRarityColor(camo.chance) +
 				"' onclick='changeCamo(" +
 				a +
 				"," +
-				d.id +
+				camo.id +
 				",true);'>" +
-				d.name +
+				camo.name +
 				" x" +
-				(parseInt(d.count) + 1) +
+				(parseInt(camo.count) + 1) +
 				"</div>";
 		}
 		document.getElementById("camoHeaderAmount").innerHTML =
@@ -4560,10 +4565,11 @@ function loadModPack(a, b) {
 							updateMenuInfo(f.name);
 						} else if (b.typeName.indexOf("charinfo") > -1) {
 							var h = a.replace(/(\r\n|\n|\r)/gm, "").split("|");
-							characterClasses = [];
+							let tmp = [];
 							for (a = 0; a < h.length; ++a) {
-								characterClasses.push(JSON.parse(h[a]));
+								tmp.push(JSON.parse(h[a]));
 							}
+							setCharacterClasses(tmp);
 							createClassList();
 							pickedCharacter(currentClassID);
 						}
@@ -4895,9 +4901,8 @@ function getShirtSprite(a, b) {
 	return null;
 }
 tmpSprite = null;
-tmpIndex = "";
 function getWeaponSprite(a, b, d) {
-	tmpIndex = `${a}${b}${d}`;
+	let tmpIndex = `${a}${b}${d}`;
 	tmpSprite = cachedWeaponSprites[tmpIndex];
 	if (tmpSprite == undefined) {
 		var e = null;
@@ -4918,8 +4923,6 @@ function getWeaponSprite(a, b, d) {
 			d = document.createElement("canvas");
 			a = d.getContext("2d");
 			a.imageSmoothingEnabled = false;
-			a.webkitImageSmoothingEnabled = false;
-			a.mozImageSmoothingEnabled = false;
 			d.width = e.width;
 			d.height = e.height;
 			a.drawImage(e, 0, 0, d.width, d.height);
@@ -4934,8 +4937,6 @@ function getWeaponSprite(a, b, d) {
 					var a = document.createElement("canvas");
 					var b = a.getContext("2d");
 					b.imageSmoothingEnabled = false;
-					b.webkitImageSmoothingEnabled = false;
-					b.mozImageSmoothingEnabled = false;
 					a.width = this.width;
 					a.height = this.height;
 					this.onload = null;
@@ -4965,22 +4966,20 @@ function drawGameObjects(a) {
 		playerCanvas.width = Math.round(300);
 		playerCanvas.height = Math.round(500);
 		playerContext.imageSmoothingEnabled = false;
-		playerContext.webkitImageSmoothingEnabled = false;
-		playerContext.mozImageSmoothingEnabled = false;
 		initPlayerCanv = true;
 	}
-	var b = null;
-	var d = null;
 	var e = null;
 	var f = null;
-	var h;
-	var g;
-	for (var l = 0; l < gameObjects.length; l++) {
-		b = gameObjects[l];
-		if (b.type == "player") {
-			if (!b.dead && (b.index == player.index || b.onScreen)) {
-				if (b.jumpY == undefined) {
-					b.jumpY = 0;
+	var d = null;
+	for (let i = 0; i < gameObjects.length; i++) {
+		let tmpObject = gameObjects[i];
+		if (tmpObject.type === "player") {
+			if (
+				!tmpObject.dead &&
+				(tmpObject.index === player.index || tmpObject.onScreen)
+			) {
+				if (tmpObject.jumpY == undefined) {
+					tmpObject.jumpY = 0;
 				}
 				playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
 				playerContext.save();
@@ -4989,42 +4988,45 @@ function drawGameObjects(a) {
 					playerCanvas.width / 2,
 					playerCanvas.height / 2,
 				);
-				var m = (Math.PI / 180) * b.angle;
-				var k = Math.round((b.angle % 360) / 90) * 90;
-				h = b.x - startX;
-				g = b.y - b.jumpY - startY;
-				if (b.animIndex == 1) {
+				var m = (Math.PI / 180) * tmpObject.angle;
+				var k = Math.round((tmpObject.angle % 360) / 90) * 90;
+				let h = tmpObject.x - startX;
+				let g = tmpObject.y - tmpObject.jumpY - startY;
+				if (tmpObject.animIndex === 1) {
 					g -= 3;
 				}
-				if (b.weapons.length > 0) {
+				if (tmpObject.weapons.length > 0) {
 					e = getWeaponSprite(
-						getCurrentWeapon(b).weaponIndex,
-						getCurrentWeapon(b).camo,
+						getCurrentWeapon(tmpObject).weaponIndex,
+						getCurrentWeapon(tmpObject).camo,
 						k,
 					);
-					f = classSpriteSheets[b.classIndex];
+					f = classSpriteSheets[tmpObject.classIndex];
 					if (f != undefined) {
 						f = f.arm;
 					}
-					if (!getCurrentWeapon(b).front && e != undefined) {
+					if (!getCurrentWeapon(tmpObject).front && e != undefined) {
 						playerContext.save();
-						playerContext.translate(0, -getCurrentWeapon(b).yOffset);
+						playerContext.translate(0, -getCurrentWeapon(tmpObject).yOffset);
 						playerContext.rotate(m);
-						playerContext.translate(0, getCurrentWeapon(b).holdDist);
+						playerContext.translate(0, getCurrentWeapon(tmpObject).holdDist);
 						drawSprite(
 							playerContext,
 							e,
-							-(getCurrentWeapon(b).width / 2),
+							-(getCurrentWeapon(tmpObject).width / 2),
 							0,
-							getCurrentWeapon(b).width,
-							getCurrentWeapon(b).length,
+							getCurrentWeapon(tmpObject).width,
+							getCurrentWeapon(tmpObject).length,
 							0,
 							false,
 							0,
 							0,
 							0,
 						);
-						playerContext.translate(0, -getCurrentWeapon(b).holdDist + 6);
+						playerContext.translate(
+							0,
+							-getCurrentWeapon(tmpObject).holdDist + 6,
+						);
 						if (f != undefined && f != null) {
 							playerContext.translate(3, -10);
 							drawSprite(playerContext, f, 0, 0, 8, 32, 0, false, 0, 0, 0);
@@ -5035,64 +5037,64 @@ function drawGameObjects(a) {
 					}
 				}
 				playerContext.globalAlpha = 1;
-				d = getPlayerSprite(b.classIndex, k, b.animIndex + 1);
+				d = getPlayerSprite(tmpObject.classIndex, k, tmpObject.animIndex + 1);
 				if (d != null) {
 					drawSprite(
 						playerContext,
 						d,
-						-(b.width / 2),
-						-(b.height * 0.318),
-						b.width,
-						b.height * 0.318,
+						-(tmpObject.width / 2),
+						-(tmpObject.height * 0.318),
+						tmpObject.width,
+						tmpObject.height * 0.318,
 						0,
 						true,
-						b.jumpY * 1.5,
+						tmpObject.jumpY * 1.5,
 						0.5,
 						0,
 					);
 				}
-				d = getPlayerSprite(b.classIndex, k, 0);
+				d = getPlayerSprite(tmpObject.classIndex, k, 0);
 				if (d != null) {
 					drawSprite(
 						playerContext,
 						d,
-						-(b.width / 2),
-						-b.height,
-						b.width,
-						b.height * 0.6819999999999999,
+						-(tmpObject.width / 2),
+						-tmpObject.height,
+						tmpObject.width,
+						tmpObject.height * 0.6819999999999999,
 						0,
 						true,
-						b.jumpY * 1.5 + b.height * 0.477,
+						tmpObject.jumpY * 1.5 + tmpObject.height * 0.477,
 						0.5,
 						0,
 					);
 				}
-				d = getShirtSprite(b, k);
+				d = getShirtSprite(tmpObject, k);
 				if (d != null) {
 					playerContext.globalAlpha = 0.9;
 					drawSprite(
 						playerContext,
 						d,
-						-(b.width / 2),
-						-b.height,
-						b.width,
-						b.height * 0.6819999999999999,
+						-(tmpObject.width / 2),
+						-tmpObject.height,
+						tmpObject.width,
+						tmpObject.height * 0.6819999999999999,
 						0,
 						true,
-						b.jumpY * 1.5 + b.height * 0.477,
+						tmpObject.jumpY * 1.5 + tmpObject.height * 0.477,
 						0.5,
 						0,
 					);
 					playerContext.globalAlpha = 1;
 				}
-				var p = b.width * 0.833;
-				var d = getHatSprite(b, k);
+				var p = tmpObject.width * 0.833;
+				d = getHatSprite(tmpObject, k);
 				if (d != null) {
 					drawSprite(
 						playerContext,
 						d,
 						-(p / 2),
-						-(b.height + p * 0.045),
+						-(tmpObject.height + p * 0.045),
 						//-(b.height + p * 0.095),
 						p,
 						p,
@@ -5103,38 +5105,47 @@ function drawGameObjects(a) {
 						0,
 					);
 				}
-				if (b.weapons.length > 0) {
+				if (tmpObject.weapons.length > 0) {
 					playerContext.globalAlpha = 0.9;
-					if (getCurrentWeapon(b).front && e != undefined) {
+					if (getCurrentWeapon(tmpObject).front && e != undefined) {
 						playerContext.save();
-						playerContext.translate(0, -getCurrentWeapon(b).yOffset);
+						playerContext.translate(0, -getCurrentWeapon(tmpObject).yOffset);
 						playerContext.rotate(m);
-						playerContext.translate(0, getCurrentWeapon(b).holdDist);
+						playerContext.translate(0, getCurrentWeapon(tmpObject).holdDist);
 						drawSprite(
 							playerContext,
 							e,
-							-(getCurrentWeapon(b).width / 2),
+							-(getCurrentWeapon(tmpObject).width / 2),
 							0,
-							getCurrentWeapon(b).width,
-							getCurrentWeapon(b).length,
+							getCurrentWeapon(tmpObject).width,
+							getCurrentWeapon(tmpObject).length,
 							0,
 							false,
 							0,
 							0,
 							0,
 						);
-						playerContext.translate(0, -getCurrentWeapon(b).holdDist + 10);
+						playerContext.translate(
+							0,
+							-getCurrentWeapon(tmpObject).holdDist + 10,
+						);
 						if (f != undefined && f != null) {
 							if (k == 270) {
 								playerContext.restore();
 								playerContext.save();
-								playerContext.translate(-4, -getCurrentWeapon(b).yOffset + 8);
+								playerContext.translate(
+									-4,
+									-getCurrentWeapon(tmpObject).yOffset + 8,
+								);
 								playerContext.rotate(m);
 								drawSprite(playerContext, f, 0, 0, 8, 32, 0, false, 0, 0, 0);
 							} else if (k == 90) {
 								playerContext.restore();
 								playerContext.save();
-								playerContext.translate(0, -getCurrentWeapon(b).yOffset);
+								playerContext.translate(
+									0,
+									-getCurrentWeapon(tmpObject).yOffset,
+								);
 								playerContext.rotate(m);
 								drawSprite(playerContext, f, 0, 0, 8, 32, 0, false, 0, 0, 0);
 							} else {
@@ -5151,10 +5162,10 @@ function drawGameObjects(a) {
 						}
 					}
 				}
-				if (b.spawnProtection > 0) {
+				if (tmpObject.spawnProtection > 0) {
 					playerContext.globalCompositeOperation = "source-atop";
 					playerContext.fillStyle =
-						b.team != player.team
+						tmpObject.team != player.team
 							? "rgba(255,179,179,0.5)"
 							: "rgba(179,231,255,0.5)";
 					playerContext.fillRect(
@@ -5165,9 +5176,9 @@ function drawGameObjects(a) {
 					);
 					playerContext.globalCompositeOperation = "source-over";
 				}
-				if (b.hitFlash != undefined && b.hitFlash > 0) {
+				if (tmpObject.hitFlash != undefined && tmpObject.hitFlash > 0) {
 					playerContext.globalCompositeOperation = "source-atop";
-					playerContext.fillStyle = `rgba(255, 255, 255, ${b.hitFlash})`;
+					playerContext.fillStyle = `rgba(255, 255, 255, ${tmpObject.hitFlash})`;
 					playerContext.fillRect(
 						-playerCanvas.width / 2,
 						-playerCanvas.height / 2,
@@ -5175,9 +5186,9 @@ function drawGameObjects(a) {
 						playerCanvas.height,
 					);
 					playerContext.globalCompositeOperation = "source-over";
-					b.hitFlash -= a * 0.01;
-					if (b.hitFlash < 0) {
-						b.hitFlash = 0;
+					tmpObject.hitFlash -= a * 0.01;
+					if (tmpObject.hitFlash < 0) {
+						tmpObject.hitFlash = 0;
 					}
 				}
 				drawSprite(
@@ -5195,22 +5206,22 @@ function drawGameObjects(a) {
 				);
 				playerContext.restore();
 			}
-		} else if (b.type == "flag") {
-			b.ac--;
-			if (b.ac <= 0) {
-				b.ac = 5;
-				b.ai++;
-				if (b.ai > 2) {
-					b.ai = 0;
+		} else if (tmpObject.type === "flag") {
+			tmpObject.ac--;
+			if (tmpObject.ac <= 0) {
+				tmpObject.ac = 5;
+				tmpObject.ai++;
+				if (tmpObject.ai > 2) {
+					tmpObject.ai = 0;
 				}
 			}
 			drawSprite(
 				graph,
-				flagSprites[b.ai + (b.team == player.team ? 0 : 3)],
-				b.x - b.w / 2 - startX,
-				b.y - b.h - startY,
-				b.w,
-				b.h,
+				flagSprites[tmpObject.ai + (tmpObject.team == player.team ? 0 : 3)],
+				tmpObject.x - tmpObject.w / 2 - startX,
+				tmpObject.y - tmpObject.h - startY,
+				tmpObject.w,
+				tmpObject.h,
 				0,
 				true,
 				0,
@@ -5218,19 +5229,24 @@ function drawGameObjects(a) {
 				0,
 			);
 		} else if (
-			b.type == "clutter" &&
-			b.active &&
-			canSee(b.x - startX, b.y - startY, b.w, b.h)
+			tmpObject.type === "clutter" &&
+			tmpObject.active &&
+			canSee(
+				tmpObject.x - startX,
+				tmpObject.y - startY,
+				tmpObject.w,
+				tmpObject.h,
+			)
 		) {
 			drawSprite(
 				graph,
-				clutterSprites[b.i],
-				b.x - startX,
-				b.y - b.h - startY,
-				b.w,
-				b.h,
+				clutterSprites[tmpObject.i],
+				tmpObject.x - startX,
+				tmpObject.y - tmpObject.h - startY,
+				tmpObject.w,
+				tmpObject.h,
 				0,
-				b.s,
+				tmpObject.s,
 				0,
 				0.5,
 				0,
@@ -5238,10 +5254,9 @@ function drawGameObjects(a) {
 		}
 	}
 	graph.globalAlpha = 1;
-	b = null;
-	d = null;
 	e = null;
 	f = null;
+	d = null;
 }
 function drawPlayerNames() {
 	var a = null;
@@ -5257,24 +5272,24 @@ function drawPlayerNames() {
 	graph.miterLimit = 1;
 	graph.lineJoin = "round";
 	graph.globalAlpha = 1;
-	for (var l = 0; l < gameObjects.length; l++) {
-		tmpObject = gameObjects[l];
+	for (let i = 0; i < gameObjects.length; i++) {
+		let tmpObject = gameObjects[i];
 		if (
-			tmpObject.type == "player" &&
+			tmpObject.type === "player" &&
 			!tmpObject.dead &&
-			(tmpObject.index == player.index || !!tmpObject.onScreen)
+			(tmpObject.index === player.index || !!tmpObject.onScreen)
 		) {
 			d = tmpObject.height / 3.2;
 			e = Math.min(200, (tmpObject.maxHealth / 100) * 100);
 			shapeX = tmpObject.x - startX;
 			shapeY = tmpObject.y - tmpObject.jumpY - tmpObject.nameYOffset - startY;
-			if (tmpObject.account != undefined && tmpObject.account.hat != null) {
+			if (tmpObject.account !== undefined && tmpObject.account.hat != null) {
 				shapeY -= tmpObject.account.hat.nameY;
 			}
 			b = tmpObject.name;
 			f = tmpObject.loggedIn ? tmpObject.account.rank : "";
 			h = graph.measureText(b);
-			g = tmpObject.team != player.team ? "#d95151" : "#5151d9";
+			g = tmpObject.team !== player.team ? "#d95151" : "#5151d9";
 			if (showNames) {
 				a = renderShadedAnimText(b, d * textSizeMult, "#ffffff", 5, "");
 				if (a != undefined) {
@@ -5370,8 +5385,6 @@ function getCachedWall(a) {
 		var d = document.createElement("canvas");
 		var e = d.getContext("2d");
 		e.imageSmoothingEnabled = false;
-		e.webkitImageSmoothingEnabled = false;
-		e.mozImageSmoothingEnabled = false;
 		d.width = a.scale;
 		d.height = a.scale;
 		e.drawImage(wallSprite, 0, 0, a.scale, a.scale);
@@ -5508,7 +5521,7 @@ function getCachedWall(a) {
 }
 var tilesPerFloorTile = 8;
 function getCachedFloor(a) {
-	var b =
+	var tmpIndex =
 		a.spriteIndex +
 		"" +
 		a.left +
@@ -5522,7 +5535,11 @@ function getCachedFloor(a) {
 		a.topLeft +
 		"" +
 		a.topRight;
-	if (cachedFloors[b] === undefined && sideWalkSprite != null && sideWalkSprite.isLoaded) {
+	if (
+		cachedFloors[tmpIndex] === undefined &&
+		sideWalkSprite != null &&
+		sideWalkSprite.isLoaded
+	) {
 		let tmpCanvas: HTMLCanvasElement = document.createElement("canvas");
 		let ctx = tmpCanvas.getContext("2d");
 		ctx.imageSmoothingEnabled = false;
@@ -5559,7 +5576,16 @@ function getCachedFloor(a) {
 					f,
 				);
 			} else {
-				renderSideWalks(ctx, tilesPerFloorTile, f, Math.PI, a.scale - f, 0, 0, f);
+				renderSideWalks(
+					ctx,
+					tilesPerFloorTile,
+					f,
+					Math.PI,
+					a.scale - f,
+					0,
+					0,
+					f,
+				);
 			}
 		}
 		if (a.top === 1) {
@@ -5568,9 +5594,9 @@ function getCachedFloor(a) {
 		if (a.bottom === 1) {
 			renderSideWalks(ctx, tilesPerFloorTile, f, 0, 0, a.scale - f, f, 0);
 		}
-		cachedFloors[b] = tmpCanvas;
+		cachedFloors[tmpIndex] = tmpCanvas;
 	}
-	return d;
+	return cachedFloors[tmpIndex];
 }
 function renderSideWalks(a, b, d, e, f, h, g, l) {
 	for (let i = 0; i < b; ++i) {
@@ -5667,8 +5693,8 @@ function drawMap(a) {
 			}
 		}
 		if (a === 0) {
-			for (d = 0; d < gameMap.pickups.length; ++d) {
-				b = gameMap.pickups[d];
+			for (let d = 0; d < gameMap.pickups.length; ++d) {
+				let b = gameMap.pickups[d];
 				if (b.active && canSee(b.x - startX, b.y - startY, 0, 0)) {
 					if (b.type === "healthpack") {
 						drawSprite(
@@ -5728,7 +5754,12 @@ function drawSprite(a, b, d, e, f, h, g, l, m, k, p) {
 }
 var shadowIntensity = 0.16;
 function getCachedShadow(a, b, d, e) {
-	if (cachedShadows[a.index] === undefined && b !== 0 && a !== undefined && a.isLoaded) {
+	if (
+		cachedShadows[a.index] === undefined &&
+		b !== 0 &&
+		a !== undefined &&
+		a.isLoaded
+	) {
 		let tmpCanvas = document.createElement("canvas");
 		let ctx = tmpCanvas.getContext("2d");
 		ctx.imageSmoothingEnabled = false;
@@ -5751,7 +5782,7 @@ function getCachedShadow(a, b, d, e) {
 		ctx.putImageData(b, 0, 0);
 		cachedShadows[a.index] = tmpCanvas;
 	}
-	return f;
+	return cachedShadows[a.index];
 }
 function canSee(a, b, d, e) {
 	return a + d > 0 && b + e > 0 && a < maxScreenWidth && b < maxScreenHeight;
@@ -6045,15 +6076,14 @@ function deactiveAllAnimTexts() {
 	}
 }
 var cachedTextRenders = [];
-var cachedText = (tmpIndex = null);
 function renderShadedAnimText(a, b, d, e, f) {
-	tmpIndex = `${a}${b}${d}${f}`;
-	cachedText = cachedTextRenders[tmpIndex];
-	if (cachedText == undefined) {
+	let tmpIndex = `${a}${b}${d}${f}`;
+	let cachedText = cachedTextRenders[tmpIndex];
+	if (cachedText === undefined) {
 		let tmpCanvas = document.createElement("canvas");
 		let ctx = tmpCanvas.getContext("2d");
 		ctx.imageSmoothingEnabled = false;
-		
+
 		ctx.textAlign = "center";
 		ctx.font = `${f + b}px mainFont`;
 		tmpCanvas.width = ctx.measureText(a).width * 1.08;

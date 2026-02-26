@@ -1,4 +1,3 @@
-// biome-ignore lint/style/useConst: reassigned when loading mod packs
 export let characterClasses = [
 	{
 		classN: "Triggerman",
@@ -122,6 +121,9 @@ export let characterClasses = [
 		hasDown: false,
 	},
 ];
+export function setCharacterClasses(newArr: typeof characterClasses) {
+	characterClasses = newArr;
+}
 export const specialClasses = [
 	{
 		pWeapon: "???",
