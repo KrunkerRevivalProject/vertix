@@ -11,7 +11,6 @@ import {
 import * as utils from "./utils.ts";
 
 const {
-	findServerBullet,
 	setupMap,
 	wallCol,
 	getCurrentWeapon,
@@ -1605,7 +1604,7 @@ function setupSocket(a: Socket) {
 			}
 		}
 		if (a.bi != null) {
-			e = findServerBullet(bullets, a.bi);
+			e = findServerBullet(a.bi);
 			if (e != undefined && e.owner.index != player.index) {
 				if (b.onScreen && a.amount < 0) {
 					particleCone(
@@ -4125,6 +4124,13 @@ function playerReload(player, shouldEmit: boolean) {
 			getCurrentWeapon(player).reloadTime,
 			true,
 		);
+	}
+}
+function findServerBullet(bulletIndex) {
+	for (let b = 0; b < bullets.length; ++b) {
+		if (bullets[b].serverIndex === bulletIndex) {
+			return bullets[b];
+		}
 	}
 }
 function someoneShot(a) {
