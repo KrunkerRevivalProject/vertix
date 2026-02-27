@@ -173,7 +173,7 @@ io.on("connection", (socket: Socket) => {
 		player.name = client.name ? client.name : player.name;
 		player.classIndex = client.classIndex
 			? client.classIndex
-			: player.classIndex;
+			: 0;
 		const currentClass = characterClasses[player.classIndex];
 		player.weapons = currentClass.weaponIndexes.map((i) => weapons[i]);
 		player.health = currentClass.health;

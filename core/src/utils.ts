@@ -27,7 +27,7 @@ export function Projectile() {
 	this.updateAccuracy = 3;
 	this.bounce = false;
 	this.dustTimer = 0;
-	this.update = function (delta: number, currentTime, clutter, tiles, players) {
+	this.update = function (delta: number, currentTime: number, clutter: any, tiles: any, players: any) {
 		if (this.active) {
 			let lifetime = currentTime - this.startTime;
 			if (this.skipMove) {
@@ -297,12 +297,12 @@ export function getNextBullet(bullets: any) {
 }
 export function shootNextBullet(
 	init: any,
-	player: any,
+	source: any,
 	targetD: number,
 	currentTime: number,
 	bullet: any,
 ) {
-	let weapon = getCurrentWeapon(player);
+	let weapon = getCurrentWeapon(source);
 	if (bullet !== undefined) {
 		bullet.serverIndex = init.si;
 		bullet.x = init.x - 1;
@@ -327,8 +327,8 @@ export function shootNextBullet(
 		bullet.weaponIndex = weapon.weaponIndex;
 		bullet.spriteIndex = weapon.bSprite;
 		bullet.yOffset = weapon.yOffset;
-		bullet.jumpY = player.jumpY;
-		bullet.owner = player;
+		bullet.jumpY = source.jumpY;
+		bullet.owner = source;
 		bullet.dmg = weapon.dmg;
 		bullet.bounce = weapon.bounce;
 		bullet.startTime = currentTime;

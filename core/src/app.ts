@@ -11,6 +11,8 @@ import {
 import * as utils from "./utils.ts";
 
 const {
+	shootNextBullet,
+	getNextBullet,
 	setupMap,
 	wallCol,
 	getCurrentWeapon,
@@ -3932,14 +3934,6 @@ function Projectile() {
 		this.y = this.cEndY;
 	};
 }
-var bulletIndex = 0;
-function getNextBullet() {
-	bulletIndex++;
-	if (bulletIndex >= bullets.length) {
-		bulletIndex = 0;
-	}
-	return bullets[bulletIndex];
-}
 function playerSwapWeapon(a, b) {
 	if (a != null && !a.dead) {
 		a.currentWeapon += b;
@@ -4006,51 +4000,6 @@ function setCooldownAnimation(weaponIdx, time, d) {
 		tmpDiv.style.height = "0%";
 	}
 }
-function shootNextBullet(init, source) {
-	let bullet = getNextBullet();
-	if (bullet !== undefined) {
-		bullet.serverIndex = init.si;
-		bullet.x = init.x - 1;
-		bullet.startX = init.x;
-		bullet.y = init.y;
-		bullet.startY = init.y;
-		bullet.dir = init.d;
-		bullet.speed = getCurrentWeapon(source).bSpeed;
-		bullet.updateAccuracy = getCurrentWeapon(source).cAcc;
-		bullet.width = getCurrentWeapon(source).bWidth;
-		bullet.height = getCurrentWeapon(source).bHeight;
-		let randScale = getCurrentWeapon(source).bRandScale;
-		if (randScale != null) {
-			randScale = randomFloat(randScale[0], randScale[1]);
-			bullet.width *= randScale;
-			bullet.height *= randScale;
-			bullet.speed *=
-				1 +
-				getCurrentWeapon(source).spread[getCurrentWeapon(source).spreadIndex];
-		}
-		bullet.trailWidth = bullet.width * 0.7;
-		bullet.trailMaxLength = Math.round(bullet.height * 5);
-		bullet.trailAlpha = getCurrentWeapon(source).bTrail;
-		bullet.weaponIndex = getCurrentWeapon(source).weaponIndex;
-		bullet.spriteIndex = getCurrentWeapon(source).bSprite;
-		bullet.yOffset = getCurrentWeapon(source).yOffset;
-		bullet.jumpY = source.jumpY;
-		bullet.owner = source;
-		bullet.dmg = getCurrentWeapon(source).dmg;
-		bullet.bounce = getCurrentWeapon(source).bounce;
-		bullet.startTime = currentTime;
-		bullet.maxLifeTime = getCurrentWeapon(source).maxLife;
-		if (source.index === player.index && getCurrentWeapon(source).distBased) {
-			bullet.maxLifeTime = target.d / bullet.speed;
-		}
-		bullet.glowWidth = getCurrentWeapon(source).glowWidth;
-		bullet.glowHeight = getCurrentWeapon(source).glowHeight;
-		bullet.explodeOnDeath = getCurrentWeapon(source).explodeOnDeath;
-		bullet.pierceCount = getCurrentWeapon(source).pierce;
-		bullet.activate();
-	}
-	bullet = null;
-}
 function shootBullet(source) {
 	if (
 		!source.dead &&
@@ -4089,6 +4038,9 @@ function shootBullet(source) {
 					si: -1,
 				},
 				source,
+				target.d,
+				currentTime,
+				getNextBullet(bullets),
 			);
 		}
 		socket.emit(
@@ -4137,7 +4089,7 @@ function someoneShot(a) {
 	if (a.i !== player.index) {
 		tmpPlayer = findUserByIndex(a.i);
 		if (tmpPlayer != null) {
-			shootNextBullet(a, tmpPlayer);
+			shootNextBullet(a, tmpPlayer, target.d, currentTime, getNextBullet(bullets));
 		}
 	}
 }
