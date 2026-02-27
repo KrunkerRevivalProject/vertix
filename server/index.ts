@@ -4,6 +4,9 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { Server, type Socket } from "socket.io";
 import {
+	Projectile,
+	shootNextBullet,
+	getNextBullet,
 	setupMap,
 	wallCol,
 	getCurrentWeapon,
@@ -79,6 +82,9 @@ let mapData = {
 	height: (genData.height - 4) * mapTileScale,
 };
 setupMap(mapData, mapTileScale);
+for (let i = 0; i < 100; i++) {
+	bullets.push(new Projectile());
+}
 
 let scoreRed = 0;
 let scoreBlue = 0;
@@ -117,7 +123,9 @@ io.on("connection", (socket: Socket) => {
 		spawnProtection: 0,
 		nameYOffset: 0,
 		dead: true,
+		onScreen: false,
 		type: "player",
+		delta: 0,
 		targetF: 0,
 		animIndex: 0,
 		team: players.length % 2 == 0 ? "blue" : "red",
@@ -175,6 +183,7 @@ io.on("connection", (socket: Socket) => {
 		if (init) return;
 
 		player.dead = false;
+		player.onScreen = true;
 		player.angle = 0;
 		player.x = 128;
 		player.y = 128;
@@ -276,41 +285,67 @@ io.on("connection", (socket: Socket) => {
 			d: d,
 			si: -1,
 		});
-		//TODO: damage sync
-		const shooter = player;
-		const receiver = players[1];
-		if (receiver) {
-			io.emit("1", {
-				dID: shooter.index,
-				gID: receiver.index,
-				dir: 0,
-				amount: -getCurrentWeapon(shooter).dmg,
-				bi: -1,
-				h: (receiver.health -= getCurrentWeapon(shooter).dmg),
-			});
-			const dead = receiver.health <= 0;
-			if (dead) {
-				io.emit("3", {
+		const bullet = getNextBullet(bullets)
+		shootNextBullet(
+			{
+				i: player.index,
+				x: f,
+				y: e,
+				d: d,
+				si: -1,
+			},
+			player,
+			targetD,
+			currentTime,
+			bullet,
+		);
+		while (bullet.active) { // TODO: check if travel time is correct
+			bullet.update(player.delta, currentTime, clutter, tiles, players);
+		}
+		if (
+			bullet.lastHit !== ","
+		) {
+			bullet.deactivate();
+			let parts = bullet.lastHit.split(",");
+			let idx = Number(parts[1]);
+			const shooter = player;
+			const receiver = players[idx];
+			if (receiver && !receiver.dead) {
+				const damage = getCurrentWeapon(shooter).dmg * getCurrentWeapon(shooter).bulletsPerShot;
+				io.emit("1", {
 					dID: shooter.index,
 					gID: receiver.index,
-					sS: 100,
+					dir: d,
+					amount: -damage,
+					bi: -1,
+					h: (receiver.health -= damage),
 				});
-				shooter.score += 100;
-				io.emit("upd", {
-					i: shooter.index,
-					s: shooter.score,
-					kil: (shooter.kills += 1),
-				});
-				io.emit("upd", { i: receiver.index, dea: (receiver.deaths += 1) });
-				io.emit(
-					"lb",
-					players.flatMap((pl) => [pl.index]),
-				);
-				io.emit(
-					"ts",
-					receiver.team == "red" ? scoreRed : scoreBlue,
-					shooter.team == "red" ? (scoreRed += 1) : (scoreBlue += 1),
-				);
+				const dead = receiver.health <= 0;
+				if (dead) {
+					receiver.dead = true;
+					receiver.onScreen = false;
+					io.emit("3", {
+						dID: shooter.index,
+						gID: receiver.index,
+						sS: 100,
+					});
+					shooter.score += 100;
+					io.emit("upd", {
+						i: shooter.index,
+						s: shooter.score,
+						kil: (shooter.kills += 1),
+					});
+					io.emit("upd", { i: receiver.index, dea: (receiver.deaths += 1) });
+					io.emit(
+						"lb",
+						players.flatMap((pl) => [pl.index]),
+					);
+					io.emit(
+						"ts",
+						receiver.team == "red" ? scoreRed : scoreBlue,
+						shooter.team == "red" ? (scoreRed += 1) : (scoreBlue += 1),
+					);
+				}
 			}
 		}
 	});
@@ -320,7 +355,7 @@ io.on("connection", (socket: Socket) => {
 		//let currentTime = data.ts;
 		let inputNumber = data.isn;
 		let space = data.s;
-		let delta = data.delta;
+		let delta = player.delta = data.delta;
 		var e = Math.sqrt(horizontalDT * horizontalDT + verticalDT * verticalDT);
 		if (e !== 0) {
 			horizontalDT /= e;
