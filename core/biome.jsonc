@@ -6,6 +6,9 @@
 		"rules": {
 			"style": {
 				"useConst": "off"
+			},
+			"suspicious": {
+				// "noVar": "warn"
 			}
 		}
 	}

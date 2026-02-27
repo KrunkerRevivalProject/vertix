@@ -26,12 +26,11 @@ const {
 	linearInterpolate,
 } = utils;
 
-var playerName;
-var playerClassIndex;
+let playerName: string | undefined;
+var playerClassIndex: number | undefined;
 var playerType;
 var healthBarWidth;
-var playerNameInput = document.getElementById("playerNameInput");
-var classInput = document.getElementById("classSelect");
+var playerNameInput: HTMLInputElement = document.getElementById("playerNameInput");
 var socket: Socket | undefined;
 var reason;
 var animLoopHandle;
@@ -226,7 +225,7 @@ function getFile() {
 function selectedCMap(a) {
 	var b = a.value.split("\\");
 	document.getElementById("customMapButton").innerHTML = b[b.length - 1];
-	if (a.files && a.files[0]) {
+	if (a.files?.[0]) {
 		b = new FileReader();
 		b.onload = (a) => {
 			var b = document.createElement("img");
@@ -608,7 +607,7 @@ mainCanvas.addEventListener("mouseup", mouseUp, false);
 var lastAngle = 0;
 var lastDist = 0;
 var targetChanged = true;
-function focusGame(a) {
+function focusGame() {
 	mainCanvas.focus();
 }
 let lastTarget;
@@ -1014,7 +1013,6 @@ function messageFromServer(a) {
 	}
 }
 var context = mainCanvas.getContext("2d");
-var osCanvas = document.createElement("canvas");
 var graph = context;
 var mapCanvas: HTMLCanvasElement = document.getElementById("mapc");
 var mapContext = mapCanvas.getContext("2d");
@@ -1064,9 +1062,9 @@ if (getCookie("showTrippy") == "true") {
 } else if (document.getElementById("showTrippy").checked) {
 	document.getElementById("showTrippy").click();
 }
-var showTrippy = document.getElementById("showTrippy").checked;
-function settingShowTrippy(a) {
-	showTrippy = a.checked;
+var showTrippy = (document.getElementById("showTrippy") as HTMLInputElement).checked;
+function settingShowTrippy(elem: HTMLInputElement) {
+	showTrippy = elem.checked;
 	setCookie("showTrippy", showTrippy ? "true" : "false");
 }
 if (getCookie("showSprays") != "false") {
@@ -1304,6 +1302,7 @@ function receivePing() {
 }
 var pingInterval = null;
 function setupSocket(a: Socket) {
+	// logging, ignoring packets that are spammy
 	a.onAny((event, ...args) => {
 		if (["pong1", "rsd"].includes(event)) return;
 		console.info("%c <= ", "background:#FF6A19;color:#000", event, args);
@@ -2911,7 +2910,7 @@ function updateGameLoop() {
 	}
 	if (disconnected || kicked) {
 		drawOverlay(graph, false, false);
-		var a = kicked
+		const renderedReason = kicked
 			? reason !== ""
 				? renderShadedAnimText(reason, viewMult * 48, "#ffffff", 6, "")
 				: renderShadedAnimText(
@@ -2922,13 +2921,13 @@ function updateGameLoop() {
 						"",
 					)
 			: renderShadedAnimText("Disconnected", viewMult * 48, "#ffffff", 6, "");
-		if (a != undefined) {
+		if (renderedReason !== undefined) {
 			graph.drawImage(
-				a,
-				maxScreenWidth / 2 - a.width / 2,
-				maxScreenHeight / 2 - a.height / 2,
-				a.width,
-				a.height,
+				renderedReason,
+				maxScreenWidth / 2 - renderedReason.width / 2,
+				maxScreenHeight / 2 - renderedReason.height / 2,
+				renderedReason.width,
+				renderedReason.height,
 			);
 		}
 	}
@@ -3908,7 +3907,8 @@ function Projectile() {
 	this.dotInRect = (a, b, d, e, f, h) =>
 		a >= d && a <= d + f && b >= e && b <= e + h;
 	this.adjustOnCollision = function (a, b, d, e) {
-		let h = this.cEndX, g = this.cEndY;
+		let h = this.cEndX,
+			g = this.cEndY;
 		for (let f = 100; f > 0; ) {
 			f--;
 			if (this.dotInRect(h, g, a, b, d, e)) {
@@ -4359,7 +4359,6 @@ function updateCamosList(a, b) {
 window.updateCamosList = updateCamosList;
 var animLength = 3;
 var tmpSprite = null;
-var tmpIndex = 0;
 var classSpriteSheets = [];
 function loadPlayerSprites(a) {
 	classSpriteSheets = [];
@@ -4368,47 +4367,44 @@ function loadPlayerSprites(a) {
 	resize();
 }
 function loadPlayerSpriteArray(a, b) {
-	for (var d = 0; d < b.length; ++d) {
-		var e = [];
-		var f = [];
-		var h = [];
-		var g = [];
-		e.push(getSprite(`${a}characters/${b[d].folderName}/up`));
-		f.push(getSprite(`${a}characters/${b[d].folderName}/down`));
-		h.push(getSprite(`${a}characters/${b[d].folderName}/left`));
-		g.push(getSprite(`${a}characters/${b[d].folderName}/left`));
-		for (var l = 0; l < animLength; ++l) {
-			tmpIndex = l;
-			e.push(getSprite(`${a}characters/${b[d].folderName}/up${tmpIndex + 1}`));
-			tmpSprite = b[d].hasDown
-				? getSprite(`${a}characters/${b[d].folderName}/down${tmpIndex + 1}`)
-				: getSprite(`${a}characters/${b[d].folderName}/up${tmpIndex + 1}`);
-			f.push(tmpSprite);
+	for (let i = 0; i < b.length; ++i) {
+		let upSprites = [];
+		let downSprites = [];
+		let leftSprites = [];
+		let rightSprites = [];
+		upSprites.push(getSprite(`${a}characters/${b[i].folderName}/up`));
+		downSprites.push(getSprite(`${a}characters/${b[i].folderName}/down`));
+		leftSprites.push(getSprite(`${a}characters/${b[i].folderName}/left`));
+		rightSprites.push(getSprite(`${a}characters/${b[i].folderName}/left`));
+		for (let j = 0; j < animLength; ++j) {
+			let tmpIndex = j;
+			upSprites.push(
+				getSprite(`${a}characters/${b[i].folderName}/up${tmpIndex + 1}`),
+			);
+			tmpSprite = b[i].hasDown
+				? getSprite(`${a}characters/${b[i].folderName}/down${tmpIndex + 1}`)
+				: getSprite(`${a}characters/${b[i].folderName}/up${tmpIndex + 1}`);
+			downSprites.push(tmpSprite);
 			if (tmpIndex >= 2) {
 				tmpIndex = 0;
 			}
-			h.push(
-				getSprite(`${a}characters/${b[d].folderName}/left${tmpIndex + 1}`),
+			leftSprites.push(
+				getSprite(`${a}characters/${b[i].folderName}/left${tmpIndex + 1}`),
 			);
-			g.push(
-				getSprite(`${a}characters/${b[d].folderName}/left${tmpIndex + 1}`),
+			rightSprites.push(
+				getSprite(`${a}characters/${b[i].folderName}/left${tmpIndex + 1}`),
 			);
 		}
-		var l = getSprite(`${a}characters/${b[d].folderName}/arm`);
-		var m = getSprite(`${a}characters/${b[d].folderName}/hd`);
-		var k = getSprite(`${a}characters/${b[d].folderName}/hu`);
-		var p = getSprite(`${a}characters/${b[d].folderName}/hl`);
-		var n = getSprite(`${a}characters/${b[d].folderName}/hl`);
 		classSpriteSheets.push({
-			upSprites: e,
-			downSprites: f,
-			leftSprites: h,
-			rightSprites: g,
-			arm: l,
-			hD: m,
-			hU: k,
-			hL: p,
-			hR: n,
+			upSprites,
+			downSprites,
+			leftSprites,
+			rightSprites,
+			arm: getSprite(`${a}characters/${b[i].folderName}/arm`),
+			hD: getSprite(`${a}characters/${b[i].folderName}/hd`),
+			hU: getSprite(`${a}characters/${b[i].folderName}/hu`),
+			hL: getSprite(`${a}characters/${b[i].folderName}/hl`),
+			hR: getSprite(`${a}characters/${b[i].folderName}/hl`),
 		});
 	}
 }
@@ -4476,23 +4472,13 @@ function loadDefaultSprites(a) {
 	healthPackSprite = getSprite(`${a}healthpack`);
 	lootCrateSprite = getSprite(`${a}lootCrate1`);
 	weaponSpriteSheet = [];
-	for (var b = 0; b < weaponNames.length; ++b) {
-		var d;
-		var e;
-		var f;
-		var h;
-		var g;
-		d = getSprite(`${a}weapons/${weaponNames[b]}/up`);
-		e = getSprite(`${a}weapons/${weaponNames[b]}/up`);
-		f = getSprite(`${a}weapons/${weaponNames[b]}/left`);
-		h = getSprite(`${a}weapons/${weaponNames[b]}/left`);
-		g = getSprite(`${a}weapons/${weaponNames[b]}/icon`);
+	for (let i = 0; i < weaponNames.length; ++i) {
 		weaponSpriteSheet.push({
-			upSprite: d,
-			downSprite: e,
-			leftSprite: f,
-			rightSprite: h,
-			icon: g,
+			upSprite: getSprite(`${a}weapons/${weaponNames[i]}/up`),
+			downSprite: getSprite(`${a}weapons/${weaponNames[i]}/up`),
+			leftSprite: getSprite(`${a}weapons/${weaponNames[i]}/left`),
+			rightSprite: getSprite(`${a}weapons/${weaponNames[i]}/left`),
+			icon: getSprite(`${a}weapons/${weaponNames[i]}/icon`),
 		});
 	}
 	bulletSprites.push(getSprite(`${a}weapons/bullet`));
@@ -5359,56 +5345,37 @@ function drawBackground() {
 		0,
 	);
 }
-function getCachedWall(a) {
-	var b =
-		a.left +
-		"" +
-		a.right +
-		"" +
-		a.top +
-		"" +
-		a.bottom +
-		"" +
-		a.topLeft +
-		"" +
-		a.topRight +
-		"" +
-		a.bottomLeft +
-		"" +
-		a.bottomRight +
-		"" +
-		a.edgeTile +
-		"" +
-		a.hasCollision;
-	var d = cachedWalls[b];
-	if (d == undefined && wallSprite != undefined && wallSprite.isLoaded) {
-		var d = document.createElement("canvas");
-		var e = d.getContext("2d");
-		e.imageSmoothingEnabled = false;
-		d.width = a.scale;
-		d.height = a.scale;
-		e.drawImage(wallSprite, 0, 0, a.scale, a.scale);
+function getCachedWall(tile) {
+	let cacheKey = `${tile.left}${tile.right}${tile.top}${tile.bottom}${tile.topLeft}${tile.topRight}${tile.bottomLeft}${tile.bottomRight}${tile.edgeTile}${tile.hasCollision}`;
+
+	if (cachedWalls[cacheKey] === undefined && wallSprite?.isLoaded) {
+		let canvasElem = document.createElement("canvas");
+		let ctx = canvasElem.getContext("2d");
+		ctx.imageSmoothingEnabled = false;
+		canvasElem.width = tile.scale;
+		canvasElem.height = tile.scale;
+		ctx.drawImage(wallSprite, 0, 0, tile.scale, tile.scale);
 		drawSprite(
-			e,
+			ctx,
 			darkFillerSprite,
 			12,
 			12,
-			a.scale - 24,
-			a.scale - 24,
+			tile.scale - 24,
+			tile.scale - 24,
 			0,
 			false,
 			0,
 			0,
 			0,
 		);
-		if (a.left === 1) {
+		if (tile.left === 1) {
 			drawSprite(
-				e,
+				ctx,
 				darkFillerSprite,
 				0,
 				12,
 				12,
-				a.scale - 24,
+				tile.scale - 24,
 				0,
 				false,
 				0,
@@ -5416,14 +5383,14 @@ function getCachedWall(a) {
 				0,
 			);
 		}
-		if (a.right === 1) {
+		if (tile.right === 1) {
 			drawSprite(
-				e,
+				ctx,
 				darkFillerSprite,
-				a.scale - 12,
+				tile.scale - 12,
 				12,
 				12,
-				a.scale - 24,
+				tile.scale - 24,
 				0,
 				false,
 				0,
@@ -5431,28 +5398,13 @@ function getCachedWall(a) {
 				0,
 			);
 		}
-		if (a.top === 1) {
+		if (tile.top === 1) {
 			drawSprite(
-				e,
+				ctx,
 				darkFillerSprite,
 				12,
 				0,
-				a.scale - 24,
-				12,
-				0,
-				false,
-				0,
-				0,
-				0,
-			);
-		}
-		if (a.bottom === 1) {
-			drawSprite(
-				e,
-				darkFillerSprite,
-				12,
-				a.scale - 12,
-				a.scale - 24,
+				tile.scale - 24,
 				12,
 				0,
 				false,
@@ -5461,14 +5413,35 @@ function getCachedWall(a) {
 				0,
 			);
 		}
-		if (!a.hasCollision || (a.topLeft === 1 && a.top === 1 && a.left === 1)) {
-			drawSprite(e, darkFillerSprite, 0, 0, 12, 12, 0, false, 0, 0, 0);
-		}
-		if (!a.hasCollision || (a.topRight === 1 && a.top === 1 && a.right === 1)) {
+		if (tile.bottom === 1) {
 			drawSprite(
-				e,
+				ctx,
 				darkFillerSprite,
-				a.scale - 12,
+				12,
+				tile.scale - 12,
+				tile.scale - 24,
+				12,
+				0,
+				false,
+				0,
+				0,
+				0,
+			);
+		}
+		if (
+			!tile.hasCollision ||
+			(tile.topLeft === 1 && tile.top === 1 && tile.left === 1)
+		) {
+			drawSprite(ctx, darkFillerSprite, 0, 0, 12, 12, 0, false, 0, 0, 0);
+		}
+		if (
+			!tile.hasCollision ||
+			(tile.topRight === 1 && tile.top === 1 && tile.right === 1)
+		) {
+			drawSprite(
+				ctx,
+				darkFillerSprite,
+				tile.scale - 12,
 				0,
 				12,
 				12,
@@ -5480,14 +5453,14 @@ function getCachedWall(a) {
 			);
 		}
 		if (
-			!a.hasCollision ||
-			(a.bottomLeft === 1 && a.bottom === 1 && a.left === 1)
+			!tile.hasCollision ||
+			(tile.bottomLeft === 1 && tile.bottom === 1 && tile.left === 1)
 		) {
 			drawSprite(
-				e,
+				ctx,
 				darkFillerSprite,
 				0,
-				a.scale - 12,
+				tile.scale - 12,
 				12,
 				12,
 				0,
@@ -5498,14 +5471,14 @@ function getCachedWall(a) {
 			);
 		}
 		if (
-			!a.hasCollision ||
-			(a.bottomRight === 1 && a.bottom === 1 && a.right === 1)
+			!tile.hasCollision ||
+			(tile.bottomRight === 1 && tile.bottom === 1 && tile.right === 1)
 		) {
 			drawSprite(
-				e,
+				ctx,
 				darkFillerSprite,
-				a.scale - 12,
-				a.scale - 12,
+				tile.scale - 12,
+				tile.scale - 12,
 				12,
 				12,
 				0,
@@ -5515,62 +5488,49 @@ function getCachedWall(a) {
 				0,
 			);
 		}
-		cachedWalls[b] = d;
+		cachedWalls[cacheKey] = canvasElem;
 	}
-	return d;
+	return cachedWalls[cacheKey];
 }
 var tilesPerFloorTile = 8;
-function getCachedFloor(a) {
-	var tmpIndex =
-		a.spriteIndex +
-		"" +
-		a.left +
-		"" +
-		a.right +
-		"" +
-		a.top +
-		"" +
-		a.bottom +
-		"" +
-		a.topLeft +
-		"" +
-		a.topRight;
+function getCachedFloor(tile) {
+	var tmpIndex = `${tile.spriteIndex}${tile.left}${tile.right}${tile.top}${tile.bottom}${tile.topLeft}${tile.topRight}`;
 	if (
 		cachedFloors[tmpIndex] === undefined &&
 		sideWalkSprite != null &&
 		sideWalkSprite.isLoaded
 	) {
-		let tmpCanvas: HTMLCanvasElement = document.createElement("canvas");
+		let tmpCanvas = document.createElement("canvas");
 		let ctx = tmpCanvas.getContext("2d");
 		ctx.imageSmoothingEnabled = false;
 
-		tmpCanvas.width = a.scale;
-		tmpCanvas.height = a.scale * (a.bottom ? 0.51 : 1);
-		ctx.drawImage(floorSprites[a.spriteIndex], 0, 0, a.scale, a.scale);
-		var f = a.scale / tilesPerFloorTile;
-		if (a.topLeft === 1) {
+		tmpCanvas.width = tile.scale;
+		tmpCanvas.height = tile.scale * (tile.bottom ? 0.51 : 1);
+		ctx.drawImage(floorSprites[tile.spriteIndex], 0, 0, tile.scale, tile.scale);
+		var f = tile.scale / tilesPerFloorTile;
+		if (tile.topLeft === 1) {
 			renderSideWalks(ctx, 1, f, 0, 0, 0, 0, 0);
 		}
-		if (a.topRight === 1) {
-			renderSideWalks(ctx, 1, f, Math.PI, a.scale - f, 0, 0, 0);
+		if (tile.topRight === 1) {
+			renderSideWalks(ctx, 1, f, Math.PI, tile.scale - f, 0, 0, 0);
 		}
-		if (a.left === 1) {
-			if (a.top === 1) {
+		if (tile.left === 1) {
+			if (tile.top === 1) {
 				renderSideWalks(ctx, 2, f, null, 0, 0, 0, f);
 				renderSideWalks(ctx, tilesPerFloorTile - 2, f, 0, 0, f * 2, 0, f);
 			} else {
 				renderSideWalks(ctx, tilesPerFloorTile, f, 0, 0, 0, 0, f);
 			}
 		}
-		if (a.right === 1) {
-			if (a.top === 1) {
-				renderSideWalks(ctx, 2, f, null, a.scale - f, 2, 0, f);
+		if (tile.right === 1) {
+			if (tile.top === 1) {
+				renderSideWalks(ctx, 2, f, null, tile.scale - f, 2, 0, f);
 				renderSideWalks(
 					ctx,
 					tilesPerFloorTile - 2,
 					f,
 					Math.PI,
-					a.scale - f,
+					tile.scale - f,
 					f * 2,
 					0,
 					f,
@@ -5581,18 +5541,18 @@ function getCachedFloor(a) {
 					tilesPerFloorTile,
 					f,
 					Math.PI,
-					a.scale - f,
+					tile.scale - f,
 					0,
 					0,
 					f,
 				);
 			}
 		}
-		if (a.top === 1) {
+		if (tile.top === 1) {
 			renderSideWalks(ctx, tilesPerFloorTile, f, Math.PI / 2, 0, 0, f, 0);
 		}
-		if (a.bottom === 1) {
-			renderSideWalks(ctx, tilesPerFloorTile, f, 0, 0, a.scale - f, f, 0);
+		if (tile.bottom === 1) {
+			renderSideWalks(ctx, tilesPerFloorTile, f, 0, 0, tile.scale - f, f, 0);
 		}
 		cachedFloors[tmpIndex] = tmpCanvas;
 	}
@@ -5897,21 +5857,22 @@ function showNotification(a) {
 }
 var activeNotifications = 0;
 function positionNotifications() {
-	for (var a = (activeNotifications = 0); a < notifications.length; ++a) {
-		if (notifications[a].active) {
+	activeNotifications = 0;
+	for (let i = 0; i < notifications.length; ++i) {
+		if (notifications[i].active) {
 			activeNotifications++;
 		}
 	}
 	if (activeNotifications > 0) {
 		notifications.sort(sortByAlpha);
-		var b = 0;
-		var d =
+		let b = 0;
+		const yBase =
 			maxScreenHeight -
 			notifications.length * notificationsGap * viewMult -
 			100;
-		for (var a = 0; a < notifications.length; ++a) {
-			if (notifications[a].active) {
-				notifications[a].y = d + notificationsGap * viewMult * b;
+		for (let i = 0; i < notifications.length; ++i) {
+			if (notifications[i].active) {
+				notifications[i].y = yBase + notificationsGap * viewMult * b;
 				b++;
 			}
 		}
@@ -5928,10 +5889,10 @@ function sortByAlpha(a, b) {
 }
 function updateNotifications(a) {
 	graph.fillStyle = "#fff";
-	for (var b = 0; b < notifications.length; ++b) {
-		if (notifications[b].active) {
-			notifications[b].update(a);
-			notifications[b].draw();
+	for (let i = 0; i < notifications.length; ++i) {
+		if (notifications[i].active) {
+			notifications[i].update(a);
+			notifications[i].draw();
 		}
 	}
 	graph.globalAlpha = 1;
@@ -6367,7 +6328,7 @@ function stillDustParticle(a, b, d) {
 	tmpParticle.active = true;
 }
 var then = Date.now();
-let elapsed;
+let elapsed: number | undefined;
 function callUpdate() {
 	requestAnimationFrame(callUpdate);
 	currentTime = Date.now();
