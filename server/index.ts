@@ -4,7 +4,6 @@ import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { Server, type Socket } from "socket.io";
 import {
-	Projectile,
 	shootNextBullet,
 	getNextBullet,
 	setupMap,
@@ -12,6 +11,7 @@ import {
 	getCurrentWeapon,
 	roundNumber,
 } from "core/src/utils.ts";
+import { ServerProjectile } from "./utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
 
 const app = new Hono();
@@ -83,7 +83,7 @@ let mapData = {
 };
 setupMap(mapData, mapTileScale);
 for (let i = 0; i < 100; i++) {
-	bullets.push(new Projectile());
+	bullets.push(new ServerProjectile());
 }
 
 let scoreRed = 0;
@@ -217,8 +217,8 @@ io.on("connection", (socket: Socket) => {
 		);
 		io.emit(
 			"ts",
-			player.team == "red" ? scoreRed : scoreBlue,
-			player.team == "red" ? scoreBlue : scoreBlue,
+			player.team === "red" ? scoreRed : scoreBlue,
+			player.team === "red" ? scoreBlue : scoreBlue,
 		);
 	});
 	// socket.on("ftc", (playerIdx) => {
@@ -333,8 +333,8 @@ io.on("connection", (socket: Socket) => {
 							io.emit("lb", players.flatMap((pl) => [pl.index]));
 							io.emit(
 								"ts",
-								receiver.team == "red" ? scoreRed : scoreBlue,
-								shooter.team == "red" ? (scoreRed += 1) : (scoreBlue += 1)
+								receiver.team === "red" ? scoreRed : scoreBlue,
+								shooter.team === "red" ? (scoreRed += 1) : (scoreBlue += 1)
 							);
 						}
 					}
