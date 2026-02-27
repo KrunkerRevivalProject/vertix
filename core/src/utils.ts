@@ -27,7 +27,13 @@ export function Projectile() {
 	this.updateAccuracy = 3;
 	this.bounce = false;
 	this.dustTimer = 0;
-	this.update = function (delta: number, currentTime: number, clutter: any, tiles: any, players: any) {
+	this.update = function (
+		delta: number,
+		currentTime: number,
+		clutter: any,
+		tiles: any,
+		players: any,
+	) {
 		if (this.active) {
 			let lifetime = currentTime - this.startTime;
 			if (this.skipMove) {
@@ -150,7 +156,8 @@ export function Projectile() {
 												//	true,
 												//),
 												//createLiquid(k.x, k.y, this.dir, 4)),
-											this.pierceCount > 0 && this.pierceCount--,
+												this.pierceCount > 0 &&
+												this.pierceCount--,
 											this.pierceCount <= 0 && (this.active = false))),
 								this.active));
 							++i
@@ -571,7 +578,10 @@ export function wallCol(player, gameMap, gameObjects) {
 			) {
 				if (player.oldX <= tmpTile.x) {
 					player.x = tmpTile.x - player.width / 2 - 2;
-				} else if (player.oldX - player.width / 2 >= tmpTile.x + tmpTile.scale) {
+				} else if (
+					player.oldX - player.width / 2 >=
+					tmpTile.x + tmpTile.scale
+				) {
 					player.x = tmpTile.x + tmpTile.scale + player.width / 2 + 2;
 				}
 				if (player.oldY <= tmpTile.y) {
@@ -584,11 +594,15 @@ export function wallCol(player, gameMap, gameObjects) {
 				!tmpTile.hardPoint &&
 				player.x > tmpTile.x &&
 				player.x < tmpTile.x + tmpTile.scale &&
-				player.y - player.jumpY - player.height * 0.85 > tmpTile.y - tmpTile.scale / 2 &&
+				player.y - player.jumpY - player.height * 0.85 >
+					tmpTile.y - tmpTile.scale / 2 &&
 				player.y - player.jumpY - player.height * 0.85 <= tmpTile.y
 			) {
 				player.nameYOffset = Math.round(
-					player.y - player.jumpY - player.height * 0.85 - (tmpTile.y - tmpTile.scale / 2),
+					player.y -
+						player.jumpY -
+						player.height * 0.85 -
+						(tmpTile.y - tmpTile.scale / 2),
 				);
 			}
 		}

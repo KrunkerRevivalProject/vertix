@@ -171,9 +171,7 @@ io.on("connection", (socket: Socket) => {
 	socket.on("gotit", (client, init, currentTime) => {
 		console.log("gotit", client, init, currentTime);
 		player.name = client.name ? client.name : player.name;
-		player.classIndex = client.classIndex
-			? client.classIndex
-			: 0;
+		player.classIndex = client.classIndex ? client.classIndex : 0;
 		const currentClass = characterClasses[player.classIndex];
 		player.weapons = currentClass.weaponIndexes.map((i) => weapons[i]);
 		player.health = currentClass.health;
@@ -285,7 +283,7 @@ io.on("connection", (socket: Socket) => {
 			d: d,
 			si: -1,
 		});
-		const bullet = getNextBullet(bullets)
+		const bullet = getNextBullet(bullets);
 		shootNextBullet(
 			{
 				i: player.index,
@@ -299,19 +297,20 @@ io.on("connection", (socket: Socket) => {
 			currentTime,
 			bullet,
 		);
-		while (bullet.active) { // TODO: check if travel time is correct
+		while (bullet.active) {
+			// TODO: check if travel time is correct
 			bullet.update(player.delta, currentTime, clutter, tiles, players);
 		}
-		if (
-			bullet.lastHit !== ","
-		) {
+		if (bullet.lastHit !== ",") {
 			bullet.deactivate();
 			let parts = bullet.lastHit.split(",");
 			let idx = Number(parts[1]);
 			const shooter = player;
 			const receiver = players[idx];
 			if (receiver && !receiver.dead) {
-				const damage = getCurrentWeapon(shooter).dmg * getCurrentWeapon(shooter).bulletsPerShot;
+				const damage =
+					getCurrentWeapon(shooter).dmg *
+					getCurrentWeapon(shooter).bulletsPerShot;
 				io.emit("1", {
 					dID: shooter.index,
 					gID: receiver.index,
@@ -355,7 +354,7 @@ io.on("connection", (socket: Socket) => {
 		//let currentTime = data.ts;
 		let inputNumber = data.isn;
 		let space = data.s;
-		let delta = player.delta = data.delta;
+		let delta = (player.delta = data.delta);
 		var e = Math.sqrt(horizontalDT * horizontalDT + verticalDT * verticalDT);
 		if (e !== 0) {
 			horizontalDT /= e;

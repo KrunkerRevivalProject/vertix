@@ -31,7 +31,8 @@ let playerName: string | undefined;
 var playerClassIndex: number | undefined;
 var playerType;
 var healthBarWidth;
-var playerNameInput: HTMLInputElement = document.getElementById("playerNameInput");
+var playerNameInput: HTMLInputElement =
+	document.getElementById("playerNameInput");
 var socket: Socket | undefined;
 var reason;
 var animLoopHandle;
@@ -1063,7 +1064,8 @@ if (getCookie("showTrippy") == "true") {
 } else if (document.getElementById("showTrippy").checked) {
 	document.getElementById("showTrippy").click();
 }
-var showTrippy = (document.getElementById("showTrippy") as HTMLInputElement).checked;
+var showTrippy = (document.getElementById("showTrippy") as HTMLInputElement)
+	.checked;
 function settingShowTrippy(elem: HTMLInputElement) {
 	showTrippy = elem.checked;
 	setCookie("showTrippy", showTrippy ? "true" : "false");
@@ -4089,7 +4091,13 @@ function someoneShot(a) {
 	if (a.i !== player.index) {
 		tmpPlayer = findUserByIndex(a.i);
 		if (tmpPlayer != null) {
-			shootNextBullet(a, tmpPlayer, target.d, currentTime, getNextBullet(bullets));
+			shootNextBullet(
+				a,
+				tmpPlayer,
+				target.d,
+				currentTime,
+				getNextBullet(bullets),
+			);
 		}
 	}
 }
