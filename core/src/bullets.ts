@@ -30,41 +30,38 @@ export function Projectile() {
 	this.explodeOnDeath = false;
 	this.updateAccuracy = 3;
 	this.bounce = false;
-	var a = 0;
-	var b = 0;
-	var d = 0;
-	var e = 0;
+	this.dustTimer = 0;
 	this.update = function (delta: number, currentTime, clutter, tiles, players) {
 		if (this.active) {
-			e = currentTime - this.startTime;
+			let lifetime = currentTime - this.startTime;
 			if (this.skipMove) {
-				e = 0;
+				lifetime = 0;
 				this.startTime = currentTime;
 			}
-			for (var g = 0; g < this.updateAccuracy; ++g) {
-				var h = this.speed * delta;
+			for (let g = 0; g < this.updateAccuracy; ++g) {
+				let vel = this.speed * delta;
 				if (this.active) {
-					a = (h * Math.cos(this.dir)) / this.updateAccuracy;
-					b = (h * Math.sin(this.dir)) / this.updateAccuracy;
+					let changeX = (vel * Math.cos(this.dir)) / this.updateAccuracy;
+					let changeY = (vel * Math.sin(this.dir)) / this.updateAccuracy;
 					if (this.active && !this.skipMove && this.speed > 0) {
-						this.x += a;
-						this.y += b;
+						this.x += changeX;
+						this.y += changeY;
 						if (
 							getDistance(this.startX, this.startY, this.x, this.y) >=
 							this.trailMaxLength
 						) {
-							this.startX += a;
-							this.startY += b;
+							this.startX += changeX;
+							this.startY += changeY;
 						}
 					}
 					this.cEndX =
 						this.x +
-						((h + this.height) * Math.cos(this.dir)) / this.updateAccuracy;
+						((vel + this.height) * Math.cos(this.dir)) / this.updateAccuracy;
 					this.cEndY =
 						this.y +
-						((h + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
-					for (h = 0; h < clutter.length; ++h) {
-						k = clutter[h];
+						((vel + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
+					for (vel = 0; vel < clutter.length; ++vel) {
+						k = clutter[vel];
 						if (
 							this.active &&
 							k.type == "clutter" &&
@@ -86,9 +83,9 @@ export function Projectile() {
 					}
 					if (this.active) {
 						var k;
-						for (var h = 0; h < tiles.length; ++h) {
+						for (var h = 0; vel < tiles.length; ++vel) {
 							if (this.active) {
-								k = tiles[h];
+								k = tiles[vel];
 								if (k.wall && k.hasCollision && this.canSeeObject(k, k.scale)) {
 									if (k.bottom) {
 										if (this.lineInRect(k.x, k.y, k.scale, k.scale, true)) {
@@ -123,14 +120,14 @@ export function Projectile() {
 					}
 					if (this.active) {
 						for (
-							h = 0;
-							h < players.length &&
-							((k = players[h]),
+							let i = 0;
+							i < players.length &&
+							((k = players[i]),
 							k.index == this.owner.index ||
-								this.lastHit !== "" ||
+								!(this.lastHit.indexOf(`,${k.index},`) < 0) ||
 								k.team == this.owner.team ||
 								k.type != "player" ||
-								k.onScreen ||
+								!k.onScreen ||
 								k.dead ||
 								(this.lineInRect(
 									k.x - k.width / 2,
@@ -143,7 +140,7 @@ export function Projectile() {
 									(this.explodeOnDeath
 										? (this.active = false)
 										: this.dmg > 0 &&
-											((this.lastHit = `${k.index}`),
+											((this.lastHit += `${k.index},`),
 											this.spriteIndex != 2 &&
 												//(particleCone(
 												//	12,
@@ -157,23 +154,23 @@ export function Projectile() {
 												//	true,
 												//),
 												//createLiquid(k.x, k.y, this.dir, 4)),
-												this.pierceCount > 0 &&
-												this.pierceCount--,
+											this.pierceCount > 0 && this.pierceCount--,
+											console.log("hit"),
 											this.pierceCount <= 0 && (this.active = false))),
 								this.active));
-							++h
+							++i
 						);
 					}
-					if (this.maxLifeTime != null && e >= this.maxLifeTime) {
+					if (this.maxLifeTime != null && lifetime >= this.maxLifeTime) {
 						this.active = false;
 					}
 				}
 			}
-			if (this.spriteIndex == 1) {
-				d -= delta;
-				if (d <= 0) {
+			if (this.spriteIndex === 1) {
+				this.dustTimer -= delta;
+				if (this.dustTimer <= 0) {
 					//stillDustParticle(this.x, this.y, true);
-					d = 20;
+					this.dustTimer = 20;
 				}
 			}
 		} else if (!this.active && this.trailAlpha > 0) {
@@ -186,22 +183,20 @@ export function Projectile() {
 	};
 	this.activate = function () {
 		this.skipMove = true;
-		this.lastHit = "";
+		this.lastHit = ",";
 		this.active = true;
 		//playSound(`shot${this.weaponIndex}`, this.x, this.y);
 	};
-	var f = 0;
-	var h = 0;
 	this.canSeeObject = function (a, b) {
-		f = Math.abs(this.cEndX - a.x);
-		h = Math.abs(this.cEndY - a.y);
+		let f = Math.abs(this.cEndX - a.x);
+		let h = Math.abs(this.cEndY - a.y);
 		return f <= (b + this.height) * 2 && h <= (b + this.height) * 2;
 	};
 	this.deactivate = function () {
 		this.active = false;
 	};
 	this.hitSomething = function (a, b) {
-		if (this.spriteIndex != 2) {
+		if (this.spriteIndex !== 2) {
 			//particleCone(
 			//	10,
 			//	this.cEndX,
@@ -271,7 +266,9 @@ export function Projectile() {
 	this.dotInRect = (a, b, d, e, f, h) =>
 		a >= d && a <= d + f && b >= e && b <= e + h;
 	this.adjustOnCollision = function (a, b, d, e) {
-		for (var f = 100, h = this.cEndX, g = this.cEndY; f > 0; ) {
+		let h = this.cEndX,
+			g = this.cEndY;
+		for (let f = 100; f > 0; ) {
 			f--;
 			if (this.dotInRect(h, g, a, b, d, e)) {
 				f = 0;
@@ -280,7 +277,7 @@ export function Projectile() {
 				g += Math.sin(this.dir + Math.PI) * 2;
 			}
 		}
-		for (f = 100; f > 0; ) {
+		for (let f = 100; f > 0; ) {
 			f--;
 			if (this.dotInRect(h, g, a, b, d, e)) {
 				h += Math.cos(this.dir + Math.PI) * 2;
@@ -296,7 +293,7 @@ export function Projectile() {
 	};
 }
 var bulletIndex = 0;
-function getNextBullet(bullets: any) {
+export function getNextBullet(bullets: any) {
 	bulletIndex++;
 	if (bulletIndex >= bullets.length) {
 		bulletIndex = 0;
@@ -308,9 +305,9 @@ export function shootNextBullet(
 	player: any,
 	targetD: number,
 	currentTime: number,
-	bullets: any,
+	bullet: any,
 ) {
-	let bullet = getNextBullet(bullets);
+	//let bullet = getNextBullet(bullets);
 	let weapon = getCurrentWeapon(player);
 	if (bullet !== undefined) {
 		bullet.serverIndex = init.si;

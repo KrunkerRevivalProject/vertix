@@ -10,7 +10,7 @@ import {
 	roundNumber,
 } from "core/src/utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
-import { Projectile, shootNextBullet } from "core/src/bullets.ts";
+import { Projectile, shootNextBullet, getNextBullet } from "core/src/bullets.ts";
 
 const app = new Hono();
 app.use(serveStatic({ root: path.join(import.meta.dirname, "..", "public") }));
@@ -125,7 +125,7 @@ io.on("connection", (socket: Socket) => {
 		animIndex: 0,
 		team: players.length % 2 == 0 ? "blue" : "red",
 		delta: 0,
-		team: players.length % 2 == 0 ? "blue" : "red",
+		onScreen: false,
 	};
 	players.push(player);
 
@@ -179,6 +179,7 @@ io.on("connection", (socket: Socket) => {
 		player.speed = currentClass.speed;
 		if (init) return;
 
+		player.onScreen = true;
 		player.dead = false;
 		player.angle = 0;
 		player.x = 128;
@@ -281,6 +282,7 @@ io.on("connection", (socket: Socket) => {
 			d: d,
 			si: -1,
 		});
+		const bullet = getNextBullet(bullets)
 		shootNextBullet(
 			{
 				i: player.index,
@@ -292,53 +294,54 @@ io.on("connection", (socket: Socket) => {
 			player,
 			targetD,
 			currentTime,
-			bullets,
+			bullet,
 		);
-		for (let i = 0; i < 100; i++) {
-			bullets[i].update(player.delta, currentTime, clutter, tiles, players);
-			if (
-				bullets[i].lastHit !== "" &&
-				bullets[i].active &&
-				bullets[i].owner.index == player.index
-			) {
-				bullets[i].deactivate();
-				let idx = bullets[i].lastHit;
-				const shooter = player;
-				const receiver = players[idx];
-				if (receiver && !receiver.dead) {
-					io.emit("1", {
+
+		while (bullet.active) {
+			bullet.update(player.delta, currentTime, clutter, tiles, players); //figure out travel time
+		}
+		if (
+			bullet.lastHit !== ","
+		) {
+			bullet.deactivate();
+			let parts = bullet.lastHit.split(",");
+			let idx = Number(parts[1]);
+			const shooter = player;
+			const receiver = players[idx];
+			if (receiver && !receiver.dead) {
+				const damage = getCurrentWeapon(shooter).dmg * getCurrentWeapon(shooter).bulletsPerShot;
+				io.emit("1", {
+					dID: shooter.index,
+					gID: receiver.index,
+					dir: d,
+					amount: -damage,
+					bi: -1,
+					h: (receiver.health -= damage),
+				});
+				const dead = receiver.health <= 0;
+				if (dead) {
+					receiver.dead = true;
+					io.emit("3", {
 						dID: shooter.index,
 						gID: receiver.index,
-						dir: 0,
-						amount: -getCurrentWeapon(shooter).dmg,
-						bi: -1,
-						h: (receiver.health -= getCurrentWeapon(shooter).dmg),
+						sS: 100,
 					});
-					const dead = receiver.health <= 0;
-					if (dead) {
-						receiver.dead = true;
-						io.emit("3", {
-							dID: shooter.index,
-							gID: receiver.index,
-							sS: 100,
-						});
-						shooter.score += 100;
-						io.emit("upd", {
-							i: shooter.index,
-							s: shooter.score,
-							kil: (shooter.kills += 1),
-						});
-						io.emit("upd", { i: receiver.index, dea: (receiver.deaths += 1) });
-						io.emit(
-							"lb",
-							players.flatMap((pl) => [pl.index]),
-						);
-						io.emit(
-							"ts",
-							receiver.team == "red" ? scoreRed : scoreBlue,
-							shooter.team == "red" ? (scoreRed += 1) : (scoreBlue += 1),
-						);
-					}
+					shooter.score += 100;
+					io.emit("upd", {
+						i: shooter.index,
+						s: shooter.score,
+						kil: (shooter.kills += 1),
+					});
+					io.emit("upd", { i: receiver.index, dea: (receiver.deaths += 1) });
+					io.emit(
+						"lb",
+						players.flatMap((pl) => [pl.index]),
+					);
+					io.emit(
+						"ts",
+						receiver.team == "red" ? scoreRed : scoreBlue,
+						shooter.team == "red" ? (scoreRed += 1) : (scoreBlue += 1),
+					);
 				}
 			}
 		}
@@ -349,8 +352,7 @@ io.on("connection", (socket: Socket) => {
 		//let currentTime = data.ts;
 		let inputNumber = data.isn;
 		let space = data.s;
-		let delta = data.delta;
-		player.delta = delta;
+		let delta = player.delta = data.delta;
 		var e = Math.sqrt(horizontalDT * horizontalDT + verticalDT * verticalDT);
 		if (e !== 0) {
 			horizontalDT /= e;
@@ -374,7 +376,7 @@ io.on("connection", (socket: Socket) => {
 		);
 		//console.log("4", horizontalDT, verticalDT, currentTime, inputNumber, space, delta);
 	});
-	socket.on("create", (lobby) => {});
+	socket.on("create", (lobby) => { });
 });
 
 io.listen(1119);
