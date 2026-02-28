@@ -3,13 +3,11 @@
 		"target": "ES2022",
 		"lib": ["DOM", "ES2022"],
 		"module": "ESNext",
-		"checkJs": false, // scary
 		"noEmit": true,
 		"isolatedModules": true,
 		"resolveJsonModule": true,
 		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true
 		// "strict": true
-		// "types": ["@rspack/core/module"]
 	}
 }

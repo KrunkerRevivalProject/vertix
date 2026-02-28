@@ -1,14 +1,9 @@
 {
 	"name": "core",
 	"version": "1.0.0",
-	"description": "",
-	"main": "index.js",
 	"scripts": {
 		"dev": "rolldown -c rolldown.config.js --watch"
 	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
 	"devDependencies": {
 		"@types/jquery": "^3.5.33",
 		"@zip.js/zip.js": "^2.7.62",
