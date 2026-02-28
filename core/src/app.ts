@@ -2974,8 +2974,8 @@ function drawOverlay(a, b, d) {
 }
 var drawMiniMapFPS = 4;
 var drawMiniMapCounter = 0;
-function doGame(a) {
-	updateScreenShake(a);
+function doGame(delta: number) {
+	updateScreenShake(delta);
 	if (target != null) {
 		startX =
 			player.x -
@@ -2996,16 +2996,16 @@ function doGame(a) {
 	drawMap(0);
 	drawMap(1);
 	drawSprays();
-	updateParticles(a, 0);
-	drawGameObjects(a);
-	updateBullets(a);
-	updateParticles(a, 1);
+	updateParticles(delta, 0);
+	drawGameObjects(delta);
+	updateBullets(delta);
+	updateParticles(delta, 1);
 	drawMap(2);
 	drawPlayerNames();
 	drawEdgeShader();
-	drawGameLights(a);
-	updateAnimTexts(a);
-	updateNotifications(a);
+	drawGameLights(delta);
+	updateAnimTexts(delta);
+	updateNotifications(delta);
 	drawUI();
 	drawMiniMapCounter--;
 	if (drawMiniMapCounter <= 0 && gameStart) {
@@ -3108,21 +3108,21 @@ for (let i = 0; i < 30; ++i) {
 }
 
 var tmpGlow = null;
-function createFlash(a, b, d) {
+function createFlash(x: number, y: number, scale: number) {
 	glowIndex++;
 	if (glowIndex >= flashGlows.length) {
 		glowIndex = 0;
 	}
 	tmpGlow = flashGlows[glowIndex];
-	tmpGlow.x = a;
-	tmpGlow.y = b;
+	tmpGlow.x = x;
+	tmpGlow.y = y;
 	tmpGlow.scale = 0;
-	tmpGlow.initScale = d * 220;
+	tmpGlow.initScale = scale * 220;
 	tmpGlow.duration = 0;
 	tmpGlow.maxDuration = 180;
 	tmpGlow.active = true;
 }
-function drawGameLights(a) {
+function drawGameLights(delta: number) {
 	if (lightSprite != null) {
 		graph.globalCompositeOperation = "lighter";
 		graph.globalAlpha = 0.2;
@@ -3158,7 +3158,7 @@ function drawGameLights(a) {
 			graph.globalAlpha = 0.2;
 			for (let i = 0; i < flashGlows.length; ++i) {
 				let tmpObject = flashGlows[i];
-				tmpObject.update(a);
+				tmpObject.update(delta);
 				tmpObject.draw();
 			}
 		}
@@ -4125,11 +4125,11 @@ function someoneShot(a) {
 	}
 }
 var trailGrad = null;
-function updateBullets(a) {
+function updateBullets(delta: number) {
 	graph.globalAlpha = 1;
 	for (let i = 0; i < bullets.length; i++) {
 		let bullet = bullets[i];
-		bullet.update(a);
+		bullet.update(delta);
 		if (bullet.active) {
 			let b = bullet.x - startX;
 			let d = bullet.y - startY;
@@ -4673,9 +4673,8 @@ function loadModPack(a, b) {
 		setModInfoText("Mod could not be loaded");
 	}
 }
-let tmpSpriteCollection;
 function getPlayerSprite(a, b, d) {
-	tmpSpriteCollection = classSpriteSheets[a];
+	let tmpSpriteCollection = classSpriteSheets[a];
 	if (tmpSpriteCollection == undefined) {
 		return null;
 	}
@@ -4700,9 +4699,8 @@ function getPlayerSprite(a, b, d) {
 	return tmpSprite;
 }
 var cachedHats = [];
-var tmpAcc = null;
 function getHatSprite(a, b) {
-	tmpAcc = a.account;
+	let tmpAcc = a.account;
 	if (tmpAcc != undefined) {
 		if (tmpAcc.hat != null) {
 			tmpSprite = cachedHats[tmpAcc.hat.id];
@@ -4772,7 +4770,7 @@ function getHatSprite(a, b) {
 				}
 			}
 		} else {
-			tmpSpriteCollection = classSpriteSheets[a.classIndex];
+			let tmpSpriteCollection = classSpriteSheets[a.classIndex];
 			if (tmpSpriteCollection == undefined) {
 				return null;
 			}
@@ -4798,7 +4796,7 @@ function getHatSprite(a, b) {
 }
 var cachedShirts = [];
 function getShirtSprite(a, b) {
-	tmpAcc = a.account;
+	let tmpAcc = a.account;
 	if (tmpAcc != undefined && tmpAcc.shirt != null && a.classIndex != 8) {
 		tmpSprite = cachedShirts[tmpAcc.shirt.id];
 		if (tmpSprite == undefined) {
@@ -4930,7 +4928,7 @@ function getWeaponSprite(a, b, d) {
 var playerCanvas = document.createElement("canvas");
 var playerContext = playerCanvas.getContext("2d");
 var initPlayerCanv = false;
-function drawGameObjects(a) {
+function drawGameObjects(delta: number) {
 	if (!initPlayerCanv) {
 		playerCanvas.width = Math.round(300);
 		playerCanvas.height = Math.round(500);
@@ -5155,7 +5153,7 @@ function drawGameObjects(a) {
 						playerCanvas.height,
 					);
 					playerContext.globalCompositeOperation = "source-over";
-					tmpObject.hitFlash -= a * 0.01;
+					tmpObject.hitFlash -= delta * 0.01;
 					if (tmpObject.hitFlash < 0) {
 						tmpObject.hitFlash = 0;
 					}
@@ -5555,17 +5553,16 @@ function renderSideWalks(a, b, d, e, f, h, g, l) {
 		h += l;
 	}
 }
-var tmpTlSprite = null;
-function drawMap(a) {
+function drawMap(layer: number) {
 	if (gameMap != null) {
 		for (let i = 0; i < gameMap.tiles.length; ++i) {
 			let tile = gameMap.tiles[i];
-			if (a === 0) {
+			if (layer === 0) {
 				if (
 					!tile.wall &&
 					canSee(tile.x - startX, tile.y - startY, mapTileScale, mapTileScale)
 				) {
-					tmpTlSprite = getCachedFloor(tile);
+					let tmpTlSprite = getCachedFloor(tile);
 					if (tmpTlSprite !== undefined) {
 						drawSprite(
 							graph,
@@ -5582,7 +5579,7 @@ function drawMap(a) {
 						);
 					}
 				}
-			} else if (a === 1) {
+			} else if (layer === 1) {
 				if (
 					tile.wall &&
 					!tile.bottom &&
@@ -5608,7 +5605,7 @@ function drawMap(a) {
 					);
 				}
 			} else if (
-				a === 2 &&
+				layer === 2 &&
 				tile.wall &&
 				canSee(
 					tile.x - startX,
@@ -5617,7 +5614,7 @@ function drawMap(a) {
 					mapTileScale,
 				)
 			) {
-				tmpTlSprite = getCachedWall(tile);
+				let tmpTlSprite = getCachedWall(tile);
 				if (tmpTlSprite !== undefined) {
 					drawSprite(
 						graph,
@@ -5635,18 +5632,21 @@ function drawMap(a) {
 				}
 			}
 		}
-		if (a === 0) {
-			for (let d = 0; d < gameMap.pickups.length; ++d) {
-				let b = gameMap.pickups[d];
-				if (b.active && canSee(b.x - startX, b.y - startY, 0, 0)) {
-					if (b.type === "healthpack") {
+		if (layer === 0) {
+			for (let i = 0; i < gameMap.pickups.length; ++i) {
+				let tmpPickup = gameMap.pickups[i];
+				if (
+					tmpPickup.active &&
+					canSee(tmpPickup.x - startX, tmpPickup.y - startY, 0, 0)
+				) {
+					if (tmpPickup.type === "healthpack") {
 						drawSprite(
 							graph,
 							healthPackSprite,
-							b.x - b.scale / 2 - startX,
-							b.y - b.scale / 2 - startY,
-							b.scale,
-							b.scale,
+							tmpPickup.x - tmpPickup.scale / 2 - startX,
+							tmpPickup.y - tmpPickup.scale / 2 - startY,
+							tmpPickup.scale,
+							tmpPickup.scale,
 							0,
 							true,
 							0,
@@ -5657,10 +5657,10 @@ function drawMap(a) {
 						drawSprite(
 							graph,
 							lootCrateSprite,
-							b.x - b.scale / 2 - startX,
-							b.y - b.scale / 2 - startY,
-							b.scale,
-							b.scale,
+							tmpPickup.x - tmpPickup.scale / 2 - startX,
+							tmpPickup.y - tmpPickup.scale / 2 - startY,
+							tmpPickup.scale,
+							tmpPickup.scale,
 							0,
 							true,
 							0,
@@ -5715,12 +5715,12 @@ function getCachedShadow(a, b, d, e) {
 		ctx.drawImage(a, 0, -d, b, d);
 		b = ctx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height);
 		d = b.data;
-		e = 0;
-		for (var g = d.length; e < g; e += 4) {
-			d[e] = 0;
-			d[e + 1] = 0;
-			d[e + 2] = 0;
-			d[e + 3] = d[e + 3];
+
+		for (let i = 0; i < d.length; i += 4) {
+			d[i] = 0;
+			d[i + 1] = 0;
+			d[i + 2] = 0;
+			d[i + 3] = d[i + 3];
 		}
 		ctx.putImageData(b, 0, 0);
 		cachedShadows[a.index] = tmpCanvas;
@@ -5870,11 +5870,11 @@ function sortByAlpha(a, b) {
 		return 0;
 	}
 }
-function updateNotifications(a) {
+function updateNotifications(delta: number) {
 	graph.fillStyle = "#fff";
 	for (let i = 0; i < notifications.length; ++i) {
 		if (notifications[i].active) {
-			notifications[i].update(a);
+			notifications[i].update(delta);
 			notifications[i].draw();
 		}
 	}
@@ -5885,14 +5885,13 @@ for (let i = 0; i < 20; i++) {
 	animTexts.push(new AnimText());
 }
 var shadowOffset = 6;
-var tmpDrawText = null;
 
-function updateAnimTexts(a) {
+function updateAnimTexts(delta: number) {
 	graph.lineJoin = "round";
 	graph.textAlign = "center";
 	graph.textBaseline = "middle";
 	for (let i = 0; i < animTexts.length; i++) {
-		animTexts[i].update(a);
+		animTexts[i].update(delta);
 		if (animTexts[i].active) {
 			animTexts[i].draw();
 		}
@@ -6053,7 +6052,7 @@ var particleIndex = 0;
 for (let i = 0; i < 700; ++i) {
 	cachedParticles.push(new Particle());
 }
-function updateParticles(a, b) {
+function updateParticles(delta: number, layer: number) {
 	for (let i = 0; i < cachedParticles.length; ++i) {
 		if (
 			(showParticles || cachedParticles[i].forceShow) &&
@@ -6065,8 +6064,8 @@ function updateParticles(a, b) {
 				cachedParticles[i].scale,
 			)
 		) {
-			if (b === cachedParticles[i].layer) {
-				cachedParticles[i].update(a);
+			if (layer === cachedParticles[i].layer) {
+				cachedParticles[i].update(delta);
 				cachedParticles[i].draw();
 			}
 		} else {
@@ -6231,12 +6230,11 @@ function createLiquid(a, b, d, e) {
 var maxShakeDist = 2000;
 var maxExplosionDuration = 400;
 var maxShake = 9;
-var tmpShake = 0;
-var tmpDir = 0;
+
 function createExplosion(a, b, d) {
 	let tmpDist = getDistance(a, b, player.x, player.y);
 	if (tmpDist <= maxShakeDist) {
-		tmpDir = getAngle(a, player.x, b, player.y);
+		let tmpDir = getAngle(a, player.x, b, player.y);
 		screenShake(d * maxShake * (1 - tmpDist / maxShakeDist), tmpDir);
 	}
 	playSound("explosion", a, b);
@@ -6265,7 +6263,7 @@ function createSmokePuff(
 		tmpParticle.duration = 0;
 		tmpParticle.layer = 1;
 		tmpParticle.rotation = 0;
-		if (i == 0 && hole) {
+		if (i === 0 && hole) {
 			tmpParticle.x = x;
 			tmpParticle.y = y;
 			tmpParticle.initScale = randomFloat(50, 60) * scale;
