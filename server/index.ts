@@ -339,11 +339,14 @@ io.on("connection", (socket: Socket) => {
 					kil: (sourcePlayer.kills += 1),
 				});
 				io.emit("upd", { i: destPlayer.index, dea: (destPlayer.deaths += 1) });
-				io.emit("lb", players.flatMap((pl) => [pl.index]));
+				io.emit(
+					"lb",
+					players.flatMap((pl) => [pl.index]),
+				);
 				io.emit(
 					"ts",
 					destPlayer.team === "red" ? scoreRed : scoreBlue,
-					sourcePlayer.team === "red" ? (scoreRed += 1) : (scoreBlue += 1)
+					sourcePlayer.team === "red" ? (scoreRed += 1) : (scoreBlue += 1),
 				);
 			};
 			updateBullet();
@@ -379,7 +382,7 @@ io.on("connection", (socket: Socket) => {
 		);
 		//console.log("4", horizontalDT, verticalDT, currentTime, inputNumber, space, delta);
 	});
-	socket.on("create", (lobby) => { });
+	socket.on("create", (lobby) => {});
 });
 
 io.listen(1119);
