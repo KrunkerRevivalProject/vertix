@@ -738,12 +738,12 @@ function inputChange(a, b) {
 	keyToChange = b;
 }
 function getKeyName(a) {
-	let b = keyCodeMap[a];
+	var b;
+	b = keyCodeMap[a];
 	if (b == undefined || !b.trim()) {
 		b = String.fromCharCode(a);
 	}
-	b = b.charAt(0).toUpperCase() + b.slice(1);
-	return b;
+	return (b = b.charAt(0).toUpperCase() + b.slice(1));
 }
 function saveKeysToCookie() {
 	setCookie("customControls", JSON.stringify(keysList));
@@ -951,38 +951,38 @@ var chatLineCounter = 0;
 ChatManager.prototype.addChatLine = function (a, b, d, e) {
 	if (!mobile) {
 		b = checkProfanityString(b);
-		let listElem = document.createElement("li");
-		let source = "me";
-		if (d || e === "system" || e === "notif") {
-			if (e === "system") {
-				source = "system";
-			} else if (e === "notif") {
-				source = "notif";
+		var f = document.createElement("li");
+		var h = "me";
+		if (d || e == "system" || e == "notif") {
+			if (e == "system") {
+				h = "system";
+			} else if (e == "notif") {
+				h = "notif";
 			}
 		} else {
-			source = player.team === e ? "blue" : "red";
+			h = player.team == e ? "blue" : "red";
 		}
 		chatLineCounter++;
-		listElem.className = source;
+		f.className = h;
 		e = false;
-		if (source === "system" || source === "notif") {
-			listElem.innerHTML = `<span>${b}</span>`;
+		if (h == "system" || h == "notif") {
+			f.innerHTML = `<span>${b}</span>`;
 		} else {
 			e = true;
-			listElem.innerHTML =
+			f.innerHTML =
 				"<span>" +
 				(d ? "YOU" : a) +
 				': </span><label id="chatLine' +
 				chatLineCounter +
 				'"></label>';
 		}
-		this.appendMessage(listElem);
+		this.appendMessage(f);
 		if (e) {
 			document.getElementById(`chatLine${chatLineCounter}`).textContent = b;
 		}
 	}
 };
-ChatManager.prototype.appendMessage = (msgElem: HTMLElement) => {
+ChatManager.prototype.appendMessage = (a) => {
 	if (mobile) return;
 
 	const chatbox = document.getElementById("chatbox");
@@ -990,7 +990,7 @@ ChatManager.prototype.appendMessage = (msgElem: HTMLElement) => {
 	for (; chatbox.clientHeight > 260; ) {
 		chatList.removeChild(chatList.childNodes[0]);
 	}
-	chatList.appendChild(msgElem);
+	chatList.appendChild(a);
 };
 var chat = new ChatManager();
 var tmpChatUser = null;
@@ -1333,9 +1333,9 @@ function setupSocket(a: Socket) {
 		kickPlayer("Disconnected. Your connection timed out.");
 		console.log(a);
 	});
-	a.on("error", (errorMsg) => {
+	a.on("error", (a) => {
 		console.log("PLEASE NOTIFY THE DEVELOPER OF THE FOLLOWING ERROR");
-		console.log(`ERROR: ${errorMsg}`);
+		console.log(`ERROR: ${a}`);
 	});
 	a.on("welcome", (b, d) => {
 		player.id = b.id;
@@ -1652,15 +1652,15 @@ function setupSocket(a: Socket) {
 			updateUiStats(b);
 		}
 	});
-	a.on("3", (event) => {
-		let killSource = findUserByIndex(event.dID);
-		let killDest = findUserByIndex(event.gID);
-		killDest.dead = true;
-		if (event.kB && killDest !== player.index) {
-			if (event.dID === player.index) {
+	a.on("3", (a) => {
+		var b = findUserByIndex(a.gID);
+		var e = findUserByIndex(a.dID);
+		b.dead = true;
+		if (a.kB && a.gID != player.index) {
+			if (a.dID == player.index) {
 				startBigAnimText(
 					"BOSS SLAIN",
-					`${event.sS} POINTS`,
+					`${a.sS} POINTS`,
 					2000,
 					true,
 					"#ffffff",
@@ -1669,39 +1669,39 @@ function setupSocket(a: Socket) {
 					1.25,
 				);
 			} else {
-				showNotification(`${killSource.name} slayed the boss`);
+				showNotification(`${e.name} slayed the boss`);
 			}
-		} else if (killSource === player.index && killDest !== player.index) {
-			playSound("kill1", killSource.x, killSource.y);
-			let killMsg = "";
-			if (killDest.team !== killSource.team) {
-				event.sS = `+${event.sS}`;
-				killMsg =
-					event.kd <= 1 || event.kd == undefined
+		} else if (a.dID == player.index && a.gID != player.index) {
+			playSound("kill1", e.x, e.y);
+			var f = "";
+			if (b.team != e.team) {
+				a.sS = `+${a.sS}`;
+				f =
+					a.kd <= 1 || a.kd == undefined
 						? "Enemy Killed"
-						: event.kd == 2
+						: a.kd == 2
 							? "Double Kill"
-							: event.kd == 3
+							: a.kd == 3
 								? "Triple Kill"
-								: event.kd == 4
+								: a.kd == 4
 									? "Multi Kill"
-									: event.kd == 5
+									: a.kd == 5
 										? "Ultra Kill"
-										: event.kd == 6
+										: a.kd == 6
 											? "No Way!"
-											: event.kd == 7
+											: a.kd == 7
 												? "Stop!"
 												: "Godlike!";
 			} else {
-				killMsg = "Team Kill";
-				event.sS = "no";
+				f = "Team Kill";
+				a.sS = "no";
 			}
-			if (event.ast) {
-				killMsg = "Kill Assist";
+			if (a.ast) {
+				f = "Kill Assist";
 			}
 			startBigAnimText(
-				killMsg,
-				`${event.sS} POINTS`,
+				f,
+				`${a.sS} POINTS`,
 				2000,
 				true,
 				"#ffffff",
@@ -1710,11 +1710,14 @@ function setupSocket(a: Socket) {
 				1.25,
 			);
 		}
-		if (killDest === player.index) {
+		if (a.gID == player.index) {
 			hideStatTable();
 			gameStart = false;
 			hideUI(false);
 			player.dead = true;
+			try {
+				googletag.pubads().refresh();
+			} catch (h) {}
 			window.setTimeout(() => {
 				if (!gameOver) {
 					document.getElementById("startMenuWrapper").style.display = "block";
@@ -1788,6 +1791,9 @@ function setupSocket(a: Socket) {
 		} catch (h) {
 			console.log(h);
 		}
+		try {
+			googletag.pubads().refresh();
+		} catch (h) {}
 	});
 	a.on("8", (a) => {
 		document.getElementById("nextGameTimer").innerHTML =
@@ -1848,7 +1854,7 @@ function showStatTable(a, b, d, e, f, h) {
 			}
 			if (b != null) {
 				document.getElementById("voteModeContainer").innerHTML = "";
-				for (let g = 0; g < b.length; ++g) {
+				for (var g = 0; g < b.length; ++g) {
 					d = document.createElement("button");
 					d.className = "modeVoteButton";
 					d.setAttribute("id", `votesText${g}`);
@@ -1876,7 +1882,7 @@ function showStatTable(a, b, d, e, f, h) {
 		}
 	}
 	try {
-		document.getElementById("gameStatBoard").textContent = "";
+		document.getElementById("gameStatBoard").innerHTML = "";
 		addRowToStatTable(
 			[
 				{
@@ -1922,7 +1928,7 @@ function showStatTable(a, b, d, e, f, h) {
 			],
 			true,
 		);
-		for (let g = 0; g < a.length; ++g) {
+		for (g = 0; g < a.length; ++g) {
 			if (a[g].team !== "") {
 				addRowToStatTable(
 					[
@@ -2165,14 +2171,13 @@ function removeUser(a) {
 		}
 	}
 }
-function updateUiStats(player) {
-	document.getElementById("scoreValue").innerHTML = player.score;
-	if (player.weapons.length > 0) {
-		document.getElementById("ammoValue").innerHTML =
-			getCurrentWeapon(player).ammo;
+function updateUiStats(a) {
+	document.getElementById("scoreValue").innerHTML = a.score;
+	if (a.weapons.length > 0) {
+		document.getElementById("ammoValue").innerHTML = getCurrentWeapon(a).ammo;
 	}
-	document.getElementById("healthValue").innerHTML = player.health;
-	if (player.health <= 10) {
+	document.getElementById("healthValue").innerHTML = a.health;
+	if (a.health <= 10) {
 		document.getElementById("healthValue").style.color = "#e06363";
 	} else {
 		document.getElementById("healthValue").style.color = "#fff";
@@ -2254,18 +2259,20 @@ function canPlaceFlag(a, b) {
 		return a != undefined && !a.hardPoint;
 	}
 }
+var tmpNowTime = 0;
 function receiveServerData(a) {
-	let tmpNowTime = Date.now();
+	tmpNowTime = Date.now();
 	timeSinceLastUpdate = tmpNowTime - timeOfLastUpdate;
 	timeOfLastUpdate = tmpNowTime;
+	var b;
 	if (!gameOver) {
-		for (let i = 0; i < gameObjects.length; ++i) {
-			if (gameObjects[i].type === "player") {
-				gameObjects[i].onScreen = false;
+		for (var d = 0; d < gameObjects.length; ++d) {
+			if (gameObjects[d].type == "player") {
+				gameObjects[d].onScreen = false;
 			}
 		}
 		for (let d = 0; d < a.length; ) {
-			let b = a[0 + d];
+			b = a[0 + d];
 			const tmpUser = findUserByIndex(a[1 + d]);
 			if (a[1 + d] === player.index && tmpUser != null) {
 				if (b > 2) {
@@ -2319,14 +2326,14 @@ function receiveServerData(a) {
 			if (gameObjects[d].dead || gameOver || thisInput.length > 80) {
 				thisInput.length = 0;
 			}
-			let f = 0;
+			var f = 0;
 			if (!gameObjects[d].dead) {
 				while (f < thisInput.length) {
 					if (thisInput[f].isn <= gameObjects[d].isn) {
 						thisInput.splice(f, 1);
 					} else {
 						a = thisInput[f].hdt;
-						let b = thisInput[f].vdt;
+						b = thisInput[f].vdt;
 						const e = Math.sqrt(
 							thisInput[f].hdt * thisInput[f].hdt +
 								thisInput[f].vdt * thisInput[f].vdt,
@@ -2568,26 +2575,26 @@ function changeSpray(a, b) {
 	}
 }
 window.changeSpray = changeSpray;
-function findUserByIndex(idx: number) {
-	for (let k = 0; k < gameObjects.length; ++k) {
-		if (gameObjects[k].index === idx) {
-			return gameObjects[k];
+function findUserByIndex(a) {
+	for (var b = 0; b < gameObjects.length; ++b) {
+		if (gameObjects[b].index === a) {
+			return gameObjects[b];
 		}
 	}
 	return null;
 }
+var tmpUsers = [];
 function getUsersList() {
-	let tmpUsers = []
-	for (let i = 0; i < gameObjects.length; ++i) {
-		if (gameObjects[i].type === "player") {
-			tmpUsers.push(gameObjects[i]);
+	for (var a = (tmpUsers.length = 0); a < gameObjects.length; ++a) {
+		if (gameObjects[a].type == "player") {
+			tmpUsers.push(gameObjects[a]);
 		}
 	}
 	tmpUsers.sort(sortUsersByScore);
 	return tmpUsers;
 }
 function sortUsersByScore(a, b) {
-	if (b.score === a.score) {
+	if (b.score == a.score) {
 		if (a.id < b.id) {
 			return -1;
 		} else if (a.id > b.id) {
@@ -2612,12 +2619,13 @@ function sortUsersByPosition(a, b) {
 		return 0;
 	}
 }
+var tmpPlayer = null;
 function updateLeaderboard(a) {
 	try {
 		var b = '<span class="title">LEADERBOARD</span>';
 		var d = 1;
 		for (var e = 0; e < a.length; ++e) {
-			let tmpPlayer = findUserByIndex(a[0 + e]);
+			tmpPlayer = findUserByIndex(a[0 + e]);
 			if (tmpPlayer != null) {
 				b += "<br />";
 				if (tmpPlayer.index == player.index) {
@@ -2657,7 +2665,7 @@ function updateTeamScores(a, b) {
 			if (gameMode.teams) {
 				e.innerHTML = "A";
 				h.style.display = "";
-				if (player.team === "red") {
+				if (player.team == "red") {
 					d.setAttribute("style", `display:block;width:${b}%`);
 					d.style.width = `${b}%`;
 					f.setAttribute("style", `display:block;width:${a}%`);
@@ -2725,6 +2733,7 @@ function hideUI(a) {
 //   }
 //   tabbed = 1;
 // });
+var sendData = null;
 var fpsUpdateUICounter = 0;
 function updateGameLoop() {
 	delta = currentTime - oldTime;
@@ -2738,39 +2747,39 @@ function updateGameLoop() {
 	horizontalDT = verticalDT = 0;
 	count++;
 	var doJump = 0;
-	if (keys.u === 1) {
+	if (keys.u == 1) {
 		verticalDT = -1;
 		temp = 0;
 	}
-	if (keys.d === 1) {
+	if (keys.d == 1) {
 		verticalDT = 1;
 		temp = 0;
 	}
-	if (keys.r === 1) {
+	if (keys.r == 1) {
 		horizontalDT = 1;
 		temp = 0;
 	}
-	if (keys.l === 1) {
+	if (keys.l == 1) {
 		horizontalDT = -1;
 		temp = 0;
 	} else {
 		keyd = 0;
 	}
-	if (keys.s === 1) {
+	if (keys.s == 1) {
 		doJump = 0;
 		temp = 0;
 	}
 	var b = horizontalDT;
 	var d = verticalDT;
 	var e = Math.sqrt(horizontalDT * horizontalDT + verticalDT * verticalDT);
-	if (e !== 0) {
+	if (e != 0) {
 		b /= e;
 		d /= e;
 	}
 	if (clientPrediction) {
 		for (let e = 0; e < gameObjects.length; e++) {
-			if (gameObjects[e].type === "player") {
-				if (gameObjects[e].index === player.index) {
+			if (gameObjects[e].type == "player") {
+				if (gameObjects[e].index == player.index) {
 					gameObjects[e].oldX = gameObjects[e].x;
 					gameObjects[e].oldY = gameObjects[e].y;
 					if (!gameObjects[e].dead && !gameOver) {
@@ -2782,11 +2791,11 @@ function updateGameLoop() {
 					gameObjects[e].y = Math.round(gameObjects[e].y);
 					gameObjects[e].angle =
 						((target.f + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) + 90;
-					if (getCurrentWeapon(gameObjects[e]) !== undefined) {
-						let f = Math.round((gameObjects[e].angle % 360) / 90) * 90;
-						if (f === 0 || f === 360) {
+					if (getCurrentWeapon(gameObjects[e]) != undefined) {
+						var f = Math.round((gameObjects[e].angle % 360) / 90) * 90;
+						if (f == 0 || f == 360) {
 							getCurrentWeapon(gameObjects[e]).front = true;
-						} else if (f === 180) {
+						} else if (f == 180) {
 							getCurrentWeapon(gameObjects[e]).front = false;
 						} else {
 							getCurrentWeapon(gameObjects[e]).front = true;
@@ -2800,7 +2809,7 @@ function updateGameLoop() {
 						doJump = 1;
 					}
 				}
-				if (gameObjects[e].jumpY !== 0) {
+				if (gameObjects[e].jumpY != 0) {
 					gameObjects[e].jumpDelta -= gameObjects[e].gravityStrength * delta;
 					gameObjects[e].jumpY += gameObjects[e].jumpDelta * delta;
 					if (gameObjects[e].jumpY > 0) {
@@ -2812,8 +2821,8 @@ function updateGameLoop() {
 					}
 					gameObjects[e].jumpY = Math.round(gameObjects[e].jumpY);
 				}
-				if (gameObjects[e].index === player.index && !gameOver) {
-					let sendData = {
+				if (gameObjects[e].index == player.index && !gameOver) {
+					sendData = {
 						hdt: b,
 						vdt: d,
 						ts: currentTime,
@@ -2844,7 +2853,7 @@ function updateGameLoop() {
 				if (gameOver) {
 					gameObjects[e].animIndex = 0;
 				} else {
-					let f = Math.abs(b) + Math.abs(d);
+					f = Math.abs(b) + Math.abs(d);
 					if (gameObjects[e].index != player.index) {
 						f =
 							Math.abs(gameObjects[e].xSpeed) + Math.abs(gameObjects[e].ySpeed);
@@ -3173,36 +3182,17 @@ function getCachedMiniMap() {
 	fillCounter++;
 	if (
 		cachedMiniMap == null &&
-		gameMap !== undefined &&
+		gameMap != undefined &&
 		gameMap.tiles.length > 0
 	) {
-		let baseCanvasElem = document.createElement("canvas");
-		let baseCtx = baseCanvasElem.getContext("2d");
-		baseCanvasElem.width = mapScale;
-		baseCanvasElem.height = mapScale;
-		baseCtx.fillStyle = "#fff";
-		for (let i = 0; i < gameMap.tiles.length; ++i) {
-			if (gameMap.tiles[i].wall) {
-				baseCtx.fillRect(
-					(gameMap.tiles[i].x / gameWidth) * mapScale,
-					(gameMap.tiles[i].y / gameHeight) * mapScale,
-					((mapTileScale * 1.08) / gameWidth) * mapScale,
-					((mapTileScale * 1.08) / gameWidth) * mapScale,
-				);
-			}
-		}
-		let finalCanvasElem = document.createElement("canvas");
-		let finalCtx = finalCanvasElem.getContext("2d");
-		finalCanvasElem.width = mapScale;
-		finalCanvasElem.height = mapScale;
-		finalCtx.globalAlpha = 0.1;
-		finalCtx.drawImage(baseCanvasElem, 0, 0);
-		finalCtx.globalAlpha = 1;
-		for (let d = 0; d < gameMap.tiles.length; ++d) {
-			if (gameMap.tiles[d].hardPoint) {
-				finalCtx.fillStyle =
-					gameMap.tiles[d].objTeam === player.team ? "#5151d9" : "#d95151";
-				finalCtx.fillRect(
+		var a = document.createElement("canvas");
+		var b = a.getContext("2d");
+		a.width = mapScale;
+		a.height = mapScale;
+		b.fillStyle = "#fff";
+		for (var d = 0; d < gameMap.tiles.length; ++d) {
+			if (gameMap.tiles[d].wall) {
+				b.fillRect(
 					(gameMap.tiles[d].x / gameWidth) * mapScale,
 					(gameMap.tiles[d].y / gameHeight) * mapScale,
 					((mapTileScale * 1.08) / gameWidth) * mapScale,
@@ -3210,7 +3200,26 @@ function getCachedMiniMap() {
 				);
 			}
 		}
-		cachedMiniMap = finalCanvasElem;
+		var b = document.createElement("canvas");
+		var e = b.getContext("2d");
+		b.width = mapScale;
+		b.height = mapScale;
+		e.globalAlpha = 0.1;
+		e.drawImage(a, 0, 0);
+		e.globalAlpha = 1;
+		for (let d = 0; d < gameMap.tiles.length; ++d) {
+			if (gameMap.tiles[d].hardPoint) {
+				e.fillStyle =
+					gameMap.tiles[d].objTeam == player.team ? "#5151d9" : "#d95151";
+				e.fillRect(
+					(gameMap.tiles[d].x / gameWidth) * mapScale,
+					(gameMap.tiles[d].y / gameHeight) * mapScale,
+					((mapTileScale * 1.08) / gameWidth) * mapScale,
+					((mapTileScale * 1.08) / gameWidth) * mapScale,
+				);
+			}
+		}
+		cachedMiniMap = b;
 	}
 	return cachedMiniMap;
 }
@@ -3223,14 +3232,14 @@ function drawMiniMap() {
 	mapContext.globalAlpha = 1;
 	for (a = 0; a < gameObjects.length; ++a) {
 		if (
-			gameObjects[a].type === "player" &&
+			gameObjects[a].type == "player" &&
 			gameObjects[a].onScreen &&
-			(gameObjects[a].index === player.index ||
-				gameObjects[a].team === player.team ||
+			(gameObjects[a].index == player.index ||
+				gameObjects[a].team == player.team ||
 				gameObjects[a].isBoss)
 		) {
 			mapContext.fillStyle =
-				gameObjects[a].index === player.index
+				gameObjects[a].index == player.index
 					? "#fff"
 					: gameObjects[a].isBoss
 						? "#db4fcd"
@@ -3253,9 +3262,9 @@ function drawMiniMap() {
 		a = 0;
 		for (; a < gameMap.pickups.length; ++a) {
 			if (gameMap.pickups[a].active) {
-				if (gameMap.pickups[a].type === "lootcrate") {
+				if (gameMap.pickups[a].type == "lootcrate") {
 					mapContext.fillStyle = "#ffd100";
-				} else if (gameMap.pickups[a].type === "healthpack") {
+				} else if (gameMap.pickups[a].type == "healthpack") {
 					mapContext.fillStyle = "#5ed951";
 				}
 				mapContext.beginPath();
@@ -3310,14 +3319,15 @@ function updateScreenShake(a) {
 	}
 }
 var userSprays = [];
+var tmpSpray = (tmpPlayer = null);
 var cachedSprays = [];
 function createSpray(a, b, d) {
-	let tmpPlayer = findUserByIndex(a);
+	tmpPlayer = findUserByIndex(a);
 	if (tmpPlayer != null) {
-		let tmpSpray = null;
-		for (let i = 0; i < userSprays.length; ++i) {
-			if (userSprays[i].owner == a) {
-				tmpSpray = userSprays[i];
+		tmpSpray = null;
+		for (var e = 0; e < userSprays.length; ++e) {
+			if (userSprays[e].owner == a) {
+				tmpSpray = userSprays[e];
 				break;
 			}
 		}
@@ -3354,7 +3364,7 @@ function deactivateSprays() {
 }
 function cacheSpray(a) {
 	const tmpIndex = a.src;
-	let tmpSpray = cachedSprays[tmpIndex];
+	tmpSpray = cachedSprays[tmpIndex];
 	if (tmpSpray == undefined && a.width !== 0) {
 		var b = document.createElement("canvas");
 		var d = b.getContext("2d");
@@ -3376,7 +3386,7 @@ function drawSprays() {
 	if (showSprays) {
 		for (let i = 0; i < userSprays.length; ++i) {
 			if (userSprays[i].active) {
-				let tmpSpray = cachedSprays[`${userSprays[i].src}`];
+				tmpSpray = cachedSprays[`${userSprays[i].src}`];
 				if (tmpSpray != undefined) {
 					graph.drawImage(
 						tmpSpray,
@@ -3565,12 +3575,12 @@ function startSoundTrack(a) {
 	}
 }
 var maxHearDist = 1500;
-function playSound(soundId: string, x: number, y: number) {
+function playSound(a, b, d) {
 	if (!kicked && doSounds) {
 		try {
-			let tmpDist = getDistance(player.x, player.y, x, y);
+			let tmpDist = getDistance(player.x, player.y, b, d);
 			if (tmpDist <= maxHearDist) {
-				tmpSound = tmpList[soundId];
+				tmpSound = tmpList[a];
 				if (tmpSound !== undefined) {
 					tmpSound = tmpSound.sound;
 					tmpSound.volume(Math.round((1 - tmpDist / maxHearDist) * 10) / 10);
@@ -3616,37 +3626,25 @@ function getSprite(a) {
 	spriteIndex++;
 	return b;
 }
-function flipSprite(sprite: HTMLImageElement, b) {
+function flipSprite(a, b) {
 	try {
-		let canvasElem = document.createElement("canvas");
-		let ctx = canvasElem.getContext("2d");
-		canvasElem.width = sprite.width;
-		canvasElem.height = sprite.height;
-		ctx.imageSmoothingEnabled = false;
+		var d = document.createElement("canvas");
+		var e = d.getContext("2d");
+		d.width = a.width;
+		d.height = a.height;
+		e.imageSmoothingEnabled = false;
 		if (b) {
-			ctx.scale(-1, 1);
-			ctx.drawImage(
-				sprite,
-				-canvasElem.width,
-				0,
-				canvasElem.width,
-				canvasElem.height,
-			);
+			e.scale(-1, 1);
+			e.drawImage(a, -d.width, 0, d.width, d.height);
 		} else {
-			ctx.scale(1, -1);
-			ctx.drawImage(
-				sprite,
-				0,
-				-canvasElem.height,
-				canvasElem.width,
-				canvasElem.height,
-			);
+			e.scale(1, -1);
+			e.drawImage(a, 0, -d.height, d.width, d.height);
 		}
-		canvasElem.index = sprite.index;
-		canvasElem.flipped = true;
-		canvasElem.isLoaded = true;
-		return canvasElem;
-	} catch (e) {}
+		d.index = a.index;
+		d.flipped = true;
+		d.isLoaded = true;
+		return d;
+	} catch (f) {}
 	return false;
 }
 function Projectile() {
@@ -3707,27 +3705,20 @@ function Projectile() {
 					this.cEndY =
 						this.y +
 						((vel + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
-					for (let i = 0; i < gameObjects.length; ++i) {
-						let tmpObj = gameObjects[i];
+					for (vel = 0; vel < gameObjects.length; ++vel) {
+						k = gameObjects[vel];
 						if (
 							this.active &&
-							tmpObj.type === "clutter" &&
-							tmpObj.active &&
-							tmpObj.hc &&
-							this.canSeeObject(tmpObj, tmpObj.h) &&
-							tmpObj.h * tmpObj.tp >= this.yOffset &&
-							this.lineInRect(
-								tmpObj.x,
-								tmpObj.y - tmpObj.h,
-								tmpObj.w,
-								tmpObj.h - this.yOffset,
-								true,
-							)
+							k.type == "clutter" &&
+							k.active &&
+							k.hc &&
+							this.canSeeObject(k, k.h) &&
+							k.h * k.tp >= this.yOffset &&
+							this.lineInRect(k.x, k.y - k.h, k.w, k.h - this.yOffset, true)
 						) {
 							if (this.bounce) {
 								this.bounceDir(
-									this.cEndY <= tmpObj.y - tmpObj.h ||
-										this.cEndY >= tmpObj.y - this.yOffset,
+									this.cEndY <= k.y - k.h || this.cEndY >= k.y - this.yOffset,
 								);
 							} else {
 								this.active = false;
@@ -3736,9 +3727,10 @@ function Projectile() {
 						}
 					}
 					if (this.active) {
-						for (let h = 0; h < gameMap.tiles.length; ++h) {
+						var k;
+						for (var h = 0; vel < gameMap.tiles.length; ++vel) {
 							if (this.active) {
-								let k = gameMap.tiles[h];
+								k = gameMap.tiles[vel];
 								if (k.wall && k.hasCollision && this.canSeeObject(k, k.scale)) {
 									if (k.bottom) {
 										if (this.lineInRect(k.x, k.y, k.scale, k.scale, true)) {
@@ -3772,11 +3764,10 @@ function Projectile() {
 						}
 					}
 					if (this.active && this.owner.index == player.index) {
-						let k;
 						for (
-							let h = 0;
-							h < gameObjects.length &&
-							((k = gameObjects[h]),
+							vel = 0;
+							vel < gameObjects.length &&
+							((k = gameObjects[vel]),
 							k.index == this.owner.index ||
 								!(this.lastHit.indexOf(`,${k.index},`) < 0) ||
 								k.team == this.owner.team ||
@@ -3811,7 +3802,7 @@ function Projectile() {
 											this.pierceCount > 0 && this.pierceCount--,
 											this.pierceCount <= 0 && (this.active = false))),
 								this.active));
-							++h
+							++vel
 						);
 					}
 					if (this.maxLifeTime != null && lifetime >= this.maxLifeTime) {
@@ -3963,6 +3954,7 @@ function playerEquipWeapon(a, b) {
 	a.currentWeapon = b;
 }
 var actionBar = document.getElementById("actionBar");
+var tmpDiv = null;
 function updateWeaponUI(a, force) {
 	if (weaponSpriteSheet[0] == undefined || a.weapons == undefined) {
 		return false;
@@ -3976,7 +3968,7 @@ function updateWeaponUI(a, force) {
 			actionContainer.id = `actionContainer${i}`;
 			actionContainer.className =
 				i === a.currentWeapon ? "actionContainerActive" : "actionContainer";
-			let tmpDiv = weaponSpriteSheet[a.weapons[i].weaponIndex].icon;
+			tmpDiv = weaponSpriteSheet[a.weapons[i].weaponIndex].icon;
 			if (tmpDiv != undefined) {
 				tmpDiv.className = "actionItem";
 				let actionCooldown = document.createElement("div");
@@ -3989,7 +3981,7 @@ function updateWeaponUI(a, force) {
 		}
 	} else {
 		for (let d = 0; d < a.weapons.length; ++d) {
-			let tmpDiv = document.getElementById(`actionContainer${d}`);
+			tmpDiv = document.getElementById(`actionContainer${d}`);
 			tmpDiv.className =
 				d === a.currentWeapon ? "actionContainerActive" : "actionContainer";
 		}
@@ -3997,7 +3989,7 @@ function updateWeaponUI(a, force) {
 	updateUiStats(a);
 }
 function setCooldownAnimation(weaponIdx, time, d) {
-	let tmpDiv = document.getElementById(`actionCooldown${weaponIdx}`);
+	tmpDiv = document.getElementById(`actionCooldown${weaponIdx}`);
 	if (d) {
 		tmpDiv.style.height = "100%";
 		$(`#actionCooldown${weaponIdx}`).animate(
@@ -4097,7 +4089,7 @@ function findServerBullet(bulletIndex) {
 }
 function someoneShot(a) {
 	if (a.i !== player.index) {
-		let tmpPlayer = findUserByIndex(a.i);
+		tmpPlayer = findUserByIndex(a.i);
 		if (tmpPlayer != null) {
 			shootNextBullet(
 				a,
@@ -4509,20 +4501,21 @@ function loadModPack(a, b) {
 			}
 			function e(a) {
 				this.typeName = a;
+				var b = this;
 				this.process = (a) => {
 					try {
-						if (this.typeName.indexOf("modinfo") > -1) {
+						if (b.typeName.indexOf("modinfo") > -1) {
 							setModInfoText(a);
-						} else if (this.typeName.indexOf("cssmod") > -1) {
+						} else if (b.typeName.indexOf("cssmod") > -1) {
 							var d = document.createElement("style");
 							d.type = "text/css";
 							d.innerHTML = a;
 							document.getElementsByTagName("head")[0].appendChild(d);
-						} else if (this.typeName.indexOf("gameinfo") > -1) {
+						} else if (b.typeName.indexOf("gameinfo") > -1) {
 							var e = a.replace(/(\r\n|\n|\r)/gm, "");
 							var f = JSON.parse(e);
 							updateMenuInfo(f.name);
-						} else if (this.typeName.indexOf("charinfo") > -1) {
+						} else if (b.typeName.indexOf("charinfo") > -1) {
 							var h = a.replace(/(\r\n|\n|\r)/gm, "").split("|");
 							let tmp = [];
 							for (a = 0; a < h.length; ++a) {
@@ -5993,11 +5986,11 @@ function startMovingAnimText(a, b, d, e, f) {
 	);
 }
 function deactiveAnimTexts(a) {
-	for (let i = 0; i < animTexts.length; ++i) {
-		if (animTexts[i].active) {
-			if (animTexts[i].removable) {
-				animTexts[i].active = false;
-			} else if (animTexts[i].textType === a) {
+	for (var b = 0; b < animTexts.length; ++b) {
+		if (animTexts[b].active) {
+			if (animTexts[b].removable) {
+				animTexts[b].active = false;
+			} else if (animTexts[b].textType == a) {
 				return false;
 			}
 		}
@@ -6005,8 +5998,8 @@ function deactiveAnimTexts(a) {
 	return true;
 }
 function deactiveAllAnimTexts() {
-	for (let i = 0; i < animTexts.length; ++i) {
-		animTexts[i].active = false;
+	for (var a = 0; a < animTexts.length; ++a) {
+		animTexts[a].active = false;
 	}
 }
 var cachedTextRenders = [];
@@ -6168,41 +6161,43 @@ function getReadyParticle() {
 	}
 	return cachedParticles[particleIndex];
 }
+var tmpParticle = null;
 function particleCone(a, b, d, e, f, h, g, l, m) {
-	if (!showParticles) return;
-	for (let i = 0; i < a; ++i) {
-		let tmpParticle = getReadyParticle();
-		tmpParticle.forceShow = false;
-		tmpParticle.checkCollisions = false;
-		tmpParticle.x = b;
-		tmpParticle.y = d;
-		tmpParticle.rotation = 0;
-		tmpParticle.alpha = 1;
-		tmpParticle.speed = 0;
-		tmpParticle.fadeSpeed = 0;
-		tmpParticle.initSpeed = 0;
-		tmpParticle.initScale = randomFloat(3, 9);
-		tmpParticle.spriteIndex = 0;
-		tmpParticle.maxDuration = -1;
-		tmpParticle.duration = 0;
-		if (i === 0 && l === 2 && m) {
-			tmpParticle.spriteIndex = 3;
-			tmpParticle.layer = 0;
-		} else {
-			tmpParticle.dir = e + randomFloat(-f, f);
-			tmpParticle.initScale = g * randomFloat(1.5, 1.8);
-			tmpParticle.initSpeed = h * randomFloat(0.3, 1.3);
-			tmpParticle.maxDuration = randomFloat(0.8, 1.1) * 360;
-			tmpParticle.spriteIndex = l;
-			tmpParticle.layer = randomInt(0, 1);
+	if (showParticles) {
+		for (let i = 0; i < a; ++i) {
+			tmpParticle = getReadyParticle();
+			tmpParticle.forceShow = false;
+			tmpParticle.checkCollisions = false;
+			tmpParticle.x = b;
+			tmpParticle.y = d;
+			tmpParticle.rotation = 0;
+			tmpParticle.alpha = 1;
+			tmpParticle.speed = 0;
+			tmpParticle.fadeSpeed = 0;
+			tmpParticle.initSpeed = 0;
+			tmpParticle.initScale = randomFloat(3, 9);
+			tmpParticle.spriteIndex = 0;
+			tmpParticle.maxDuration = -1;
+			tmpParticle.duration = 0;
+			if (i === 0 && l === 2 && m) {
+				tmpParticle.spriteIndex = 3;
+				tmpParticle.layer = 0;
+			} else {
+				tmpParticle.dir = e + randomFloat(-f, f);
+				tmpParticle.initScale = g * randomFloat(1.5, 1.8);
+				tmpParticle.initSpeed = h * randomFloat(0.3, 1.3);
+				tmpParticle.maxDuration = randomFloat(0.8, 1.1) * 360;
+				tmpParticle.spriteIndex = l;
+				tmpParticle.layer = randomInt(0, 1);
+			}
+			tmpParticle.scale = tmpParticle.initScale;
+			tmpParticle.active = true;
 		}
-		tmpParticle.scale = tmpParticle.initScale;
-		tmpParticle.active = true;
 	}
 }
 var liquidSpread = 35;
 function createLiquid(a, b, d, e) {
-	let tmpParticle = getReadyParticle();
+	tmpParticle = getReadyParticle();
 	tmpParticle.x = a + randomFloat(-liquidSpread, liquidSpread);
 	tmpParticle.y = b + randomFloat(-liquidSpread, liquidSpread);
 	tmpParticle.initSpeed = 0;
@@ -6233,16 +6228,10 @@ function createExplosion(a, b, d) {
 	playSound("explosion", a, b);
 	createSmokePuff(a, b, d, true, 1);
 }
-function createSmokePuff(
-	x: number,
-	y: number,
-	scale: number,
-	hole: boolean,
-	speed: number,
-) {
-	createFlash(x, y, scale);
+function createSmokePuff(a, b, d, e, f) {
+	createFlash(a, b, d);
 	for (let i = 0; i < 30; ++i) {
-		let tmpParticle = getReadyParticle();
+		tmpParticle = getReadyParticle();
 		tmpParticle.dir =
 			Math.round(randomFloat(-Math.PI, Math.PI) / (Math.PI / 3)) *
 			(Math.PI / 3);
@@ -6256,10 +6245,10 @@ function createSmokePuff(
 		tmpParticle.duration = 0;
 		tmpParticle.layer = 1;
 		tmpParticle.rotation = 0;
-		if (i === 0 && hole) {
-			tmpParticle.x = x;
-			tmpParticle.y = y;
-			tmpParticle.initScale = randomFloat(50, 60) * scale;
+		if (i == 0 && e) {
+			tmpParticle.x = a;
+			tmpParticle.y = b;
+			tmpParticle.initScale = randomFloat(50, 60) * d;
 			tmpParticle.rotation = randomInt(0, 5);
 			tmpParticle.speed = 0;
 			tmpParticle.fadeSpeed = 0.0002;
@@ -6267,30 +6256,29 @@ function createSmokePuff(
 			tmpParticle.spriteIndex = 6;
 			tmpParticle.layer = 0;
 		} else if (i <= 10) {
-			let tmpDist = i * scale;
-			tmpParticle.x = x + tmpDist * Math.cos(tmpParticle.dir);
-			tmpParticle.y = y + tmpDist * Math.sin(tmpParticle.dir);
-			tmpParticle.initScale = randomFloat(30, 33) * scale;
-			tmpParticle.initSpeed = (3 / tmpParticle.initScale) * scale * speed;
+			let tmpDist = i * d;
+			tmpParticle.x = a + tmpDist * Math.cos(tmpParticle.dir);
+			tmpParticle.y = b + tmpDist * Math.sin(tmpParticle.dir);
+			tmpParticle.initScale = randomFloat(30, 33) * d;
+			tmpParticle.initSpeed = (3 / tmpParticle.initScale) * d * f;
 			tmpParticle.maxDuration = maxExplosionDuration * 0.8;
 		} else {
-			let tmpDist = randomFloat(0, 10) * scale;
-			tmpParticle.x = x + tmpDist * Math.cos(tmpParticle.dir);
-			tmpParticle.y = y + tmpDist * Math.sin(tmpParticle.dir);
+			let tmpDist = randomFloat(0, 10) * d;
+			tmpParticle.x = a + tmpDist * Math.cos(tmpParticle.dir);
+			tmpParticle.y = b + tmpDist * Math.sin(tmpParticle.dir);
 			let rand = randomFloat(0.7, 1.4);
-			tmpParticle.initScale = scale * 11 * rand;
-			tmpParticle.initSpeed =
-				(((12 / tmpParticle.initScale) * scale) / rand) * speed;
+			tmpParticle.initScale = d * 11 * rand;
+			tmpParticle.initSpeed = (((12 / tmpParticle.initScale) * d) / rand) * f;
 			tmpParticle.maxDuration = maxExplosionDuration * rand;
 		}
 		tmpParticle.scale = tmpParticle.initScale;
 		tmpParticle.active = true;
 	}
 }
-function stillDustParticle(x, y, d) {
-	let tmpParticle = getReadyParticle();
-	tmpParticle.x = x + randomInt(-10, 10);
-	tmpParticle.y = y;
+function stillDustParticle(a, b, d) {
+	tmpParticle = getReadyParticle();
+	tmpParticle.x = a + randomInt(-10, 10);
+	tmpParticle.y = b;
 	tmpParticle.initScale = randomFloat(18, 25);
 	tmpParticle.initSpeed = 0.05;
 	tmpParticle.maxDuration = 600;
