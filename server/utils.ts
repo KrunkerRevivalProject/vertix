@@ -145,11 +145,11 @@ export class ServerProjectile {
                                     this.pierceCount <= 1,
                                 ) &&
                                     tmpPlayer.spawnProtection <= 0 &&
-                                    (this.explodeOnDeath
+                                    (this.lastHit += `${tmpPlayer.index},`,
+                                        this.explodeOnDeath
                                         ? (this.active = false)
                                         : this.dmg > 0 &&
-                                            ((this.lastHit += `${tmpPlayer.index},`),
-                                            this.spriteIndex != 2 &&
+                                            (this.spriteIndex != 2 &&
                                                 //(particleCone(
                                                 //	12,
                                                 //	k.x,

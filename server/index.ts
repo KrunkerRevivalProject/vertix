@@ -299,49 +299,52 @@ io.on("connection", (socket: Socket) => {
 				bullet,
 			);
 			const updateBullet = () => {
-				if (bullet.active && bullet.lastHit !== ",") {
-					bullet.deactivate();
+				let sourcePlayer = player;
+				let destPlayer;
+				if (bullet.lastHit !== ",") {
 					let parts = bullet.lastHit.split(",");
 					let idx = Number(parts[1]);
-					const shooter = player;
-					const receiver = players[idx];
-					if (receiver && !receiver.dead) {
-						io.emit("1", {
-							dID: shooter.index,
-							gID: receiver.index,
-							dir: d,
-							amount: -getCurrentWeapon(shooter).dmg,
-							bi: -1,
-							h: (receiver.health -= getCurrentWeapon(shooter).dmg),
-						});
-						const dead = receiver.health <= 0;
-						if (dead) {
-							receiver.dead = true;
-							receiver.onScreen = false;
-							io.emit("3", {
-								dID: shooter.index,
-								gID: receiver.index,
-								sS: 100,
-							});
-							shooter.score += 100;
-							io.emit("upd", {
-								i: shooter.index,
-								s: shooter.score,
-								kil: (shooter.kills += 1),
-							});
-							io.emit("upd", { i: receiver.index, dea: (receiver.deaths += 1) });
-							io.emit("lb", players.flatMap((pl) => [pl.index]));
-							io.emit(
-								"ts",
-								receiver.team === "red" ? scoreRed : scoreBlue,
-								shooter.team === "red" ? (scoreRed += 1) : (scoreBlue += 1)
-							);
-						}
-					}
+					destPlayer = players[idx];
 				} else {
 					bullet.update(player.delta, currentTime, clutter, tiles, players);
 					setTimeout(updateBullet, player.delta);
+					return;
 				}
+				if (!bullet.active && bullet.explodeOnDeath) {
+					io.emit("ex", destPlayer.x, destPlayer.y, 3);
+				}
+				bullet.deactivate();
+				if (destPlayer.dead) return;
+				io.emit("1", {
+					dID: sourcePlayer.index,
+					gID: destPlayer.index,
+					dir: d,
+					amount: -getCurrentWeapon(sourcePlayer).dmg,
+					bi: -1,
+					h: (destPlayer.health -= getCurrentWeapon(sourcePlayer).dmg),
+				});
+				const dead = destPlayer.health <= 0;
+				if (!dead) return;
+				destPlayer.dead = true;
+				destPlayer.onScreen = false;
+				io.emit("3", {
+					dID: sourcePlayer.index,
+					gID: destPlayer.index,
+					sS: 100,
+				});
+				sourcePlayer.score += 100;
+				io.emit("upd", {
+					i: sourcePlayer.index,
+					s: sourcePlayer.score,
+					kil: (sourcePlayer.kills += 1),
+				});
+				io.emit("upd", { i: destPlayer.index, dea: (destPlayer.deaths += 1) });
+				io.emit("lb", players.flatMap((pl) => [pl.index]));
+				io.emit(
+					"ts",
+					destPlayer.team === "red" ? scoreRed : scoreBlue,
+					sourcePlayer.team === "red" ? (scoreRed += 1) : (scoreBlue += 1)
+				);
 			};
 			updateBullet();
 		}
