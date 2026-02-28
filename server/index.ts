@@ -103,6 +103,7 @@ io.on("connection", (socket: Socket) => {
 		currentWeapon: 0,
 		weapons: [weapons[0], weapons[5]],
 		health: 0,
+		maxHealth: 0,
 		height: 100,
 		width: 50,
 		speed: 0.5,
@@ -174,7 +175,7 @@ io.on("connection", (socket: Socket) => {
 		player.classIndex = client.classIndex ? client.classIndex : 0;
 		const currentClass = characterClasses[player.classIndex];
 		player.weapons = currentClass.weaponIndexes.map((i) => weapons[i]);
-		player.health = currentClass.health;
+		player.health = (player.maxHealth = currentClass.maxHealth);
 		player.height = currentClass.height;
 		player.width = currentClass.width;
 		player.speed = currentClass.speed;
@@ -308,7 +309,7 @@ io.on("connection", (socket: Socket) => {
 				} else if (!bullet.active && bullet.explodeOnDeath) {
 					io.emit("ex", bullet.x, bullet.y, 3);
 					//TODO: calculate players in radius of the explosion and deal damage
-					return
+					return;
 				} else {
 					bullet.update(player.delta, currentTime, clutter, tiles, players);
 					setTimeout(updateBullet, player.delta);

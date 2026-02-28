@@ -1,7 +1,7 @@
 export let characterClasses = [
 	{
 		classN: "Triggerman",
-		health: 100,
+		maxHealth: 100,
 		height: 100,
 		width: 50,
 		speed: 0.5,
@@ -13,7 +13,7 @@ export let characterClasses = [
 	},
 	{
 		classN: "Detective",
-		health: 100,
+		maxHealth: 100,
 		height: 100,
 		width: 50,
 		speed: 0.5,
@@ -25,7 +25,7 @@ export let characterClasses = [
 	},
 	{
 		classN: "Hunter",
-		health: 50,
+		maxHealth: 50,
 		height: 100,
 		width: 50,
 		speed: 0.5,
@@ -37,7 +37,7 @@ export let characterClasses = [
 	},
 	{
 		classN: "Run 'N Gun",
-		health: 100,
+		maxHealth: 100,
 		height: 100,
 		width: 50,
 		speed: 0.6,
@@ -49,7 +49,7 @@ export let characterClasses = [
 	},
 	{
 		classN: "Vince",
-		health: 100,
+		maxHealth: 100,
 		height: 100,
 		width: 50,
 		speed: 0.5,
@@ -61,7 +61,7 @@ export let characterClasses = [
 	},
 	{
 		classN: "Rocketeer",
-		health: 120,
+		maxHealth: 120,
 		height: 100,
 		width: 50,
 		speed: 0.4,
@@ -74,7 +74,7 @@ export let characterClasses = [
 	},
 	{
 		classN: "Spray N' Pray",
-		health: 250,
+		maxHealth: 250,
 		height: 100,
 		width: 50,
 		speed: 0.3,
@@ -86,7 +86,7 @@ export let characterClasses = [
 	},
 	{
 		classN: "Arsonist",
-		health: 100,
+		maxHealth: 100,
 		height: 100,
 		width: 50,
 		speed: 0.5,
@@ -98,7 +98,7 @@ export let characterClasses = [
 	},
 	{
 		classN: "Duck",
-		health: 600,
+		maxHealth: 600,
 		height: 100,
 		width: 50,
 		speed: 0.5,
@@ -110,7 +110,7 @@ export let characterClasses = [
 	},
 	{
 		classN: "Nademan",
-		health: 110,
+		maxHealth: 110,
 		height: 100,
 		width: 50,
 		speed: 0.5,
