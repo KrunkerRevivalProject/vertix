@@ -299,7 +299,7 @@ io.on("connection", (socket: Socket) => {
 				bullet,
 			);
 			const updateBullet = () => {
-				if (bullet.active && bullet.owner.index === player.index && bullet.lastHit !== ",") {
+				if (bullet.active && bullet.lastHit !== ",") {
 					bullet.deactivate();
 					let parts = bullet.lastHit.split(",");
 					let idx = Number(parts[1]);

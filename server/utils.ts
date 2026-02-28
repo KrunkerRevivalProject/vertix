@@ -1,36 +1,39 @@
-//@ts-nocheck horror.
 import { getDistance } from "core/src/utils.ts";
 
-export function ServerProjectile() {
-    this.speed =
-        this.width =
-        this.height =
-        this.jumpY =
-        this.yOffset =
-        this.dir =
-        this.cEndY =
-        this.cEndX =
-        this.startY =
-        this.y =
-        this.startX =
-        this.x =
-            0;
-    this.active = false;
-    this.weaponIndex = this.spriteIndex = this.pierceCount = 0;
-    this.glowHeight = this.glowWidth = null;
-    this.speed = this.trailWidth = this.trailMaxLength = this.trailAlpha = 0;
-    this.owner = null;
-    this.dmg = 0;
-    this.lastHit = "";
-    this.serverIndex = null;
-    this.skipMove = true;
-    this.startTime = 0;
-    this.maxLifeTime = null;
-    this.explodeOnDeath = false;
-    this.updateAccuracy = 3;
-    this.bounce = false;
-    this.dustTimer = 0;
-    this.update = function (
+export class ServerProjectile { 
+    width = 0;
+    height = 0;
+    jumpY = 0;
+    yOffset = 0;
+    dir = 0;
+    cEndX = 0;
+    cEndY = 0;
+    startX = 0;
+    startY = 0;
+    y = 0;
+    x = 0;
+    active = false;
+    weaponIndex = 0;
+    spriteIndex = 0;
+    pierceCount = 0;
+    glowHeight = 0;
+    glowWidth = 0;
+    speed = 0;
+    trailWidth = 0; 
+    trailMaxLength = 0; 
+    trailAlpha = 0;
+    owner: any = null;
+    dmg = 0;
+    lastHit = "";
+    serverIndex = 0;
+    skipMove = true;
+    startTime = 0;
+    maxLifeTime = 0;
+    explodeOnDeath = false;
+    updateAccuracy = 3;
+    bounce = false;
+    dustTimer = 0;
+    update(
         delta: number,
         currentTime: number,
         clutter: any,
@@ -65,20 +68,20 @@ export function ServerProjectile() {
                     this.cEndY =
                         this.y +
                         ((vel + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
-                    for (vel = 0; vel < clutter.length; ++vel) {
-                        k = clutter[vel];
+                    for (let i = 0; i < clutter.length; ++i) {
+                        let tmpClutter = clutter[i];
                         if (
                             this.active &&
-                            k.type == "clutter" &&
-                            k.active &&
-                            k.hc &&
-                            this.canSeeObject(k, k.h) &&
-                            k.h * k.tp >= this.yOffset &&
-                            this.lineInRect(k.x, k.y - k.h, k.w, k.h - this.yOffset, true)
+                            tmpClutter.type == "clutter" &&
+                            tmpClutter.active &&
+                            tmpClutter.hc &&
+                            this.canSeeObject(tmpClutter, tmpClutter.h) &&
+                            tmpClutter.h * tmpClutter.tp >= this.yOffset &&
+                            this.lineInRect(tmpClutter.x, tmpClutter.y - tmpClutter.h, tmpClutter.w, tmpClutter.h - this.yOffset, true)
                         ) {
                             if (this.bounce) {
                                 this.bounceDir(
-                                    this.cEndY <= k.y - k.h || this.cEndY >= k.y - this.yOffset,
+                                    this.cEndY <= tmpClutter.y - tmpClutter.h || this.cEndY >= tmpClutter.y - this.yOffset,
                                 );
                             } else {
                                 this.active = false;
@@ -87,21 +90,20 @@ export function ServerProjectile() {
                         }
                     }
                     if (this.active) {
-                        var k;
-                        for (var h = 0; vel < tiles.length; ++vel) {
+                        for (let i = 0; i < tiles.length; ++i) {
                             if (this.active) {
-                                k = tiles[vel];
-                                if (k.wall && k.hasCollision && this.canSeeObject(k, k.scale)) {
-                                    if (k.bottom) {
-                                        if (this.lineInRect(k.x, k.y, k.scale, k.scale, true)) {
+                                let tmpTile = tiles[i];
+                                if (tmpTile.wall && tmpTile.hasCollision && this.canSeeObject(tmpTile, tmpTile.scale)) {
+                                    if (tmpTile.bottom) {
+                                        if (this.lineInRect(tmpTile.x, tmpTile.y, tmpTile.scale, tmpTile.scale, true)) {
                                             this.active = false;
                                         }
                                     } else if (
                                         this.lineInRect(
-                                            k.x,
-                                            k.y,
-                                            k.scale,
-                                            k.scale - this.owner.height - this.jumpY,
+                                            tmpTile.x,
+                                            tmpTile.y,
+                                            tmpTile.scale,
+                                            tmpTile.scale - this.owner.height - this.jumpY,
                                             true,
                                         )
                                     ) {
@@ -110,11 +112,11 @@ export function ServerProjectile() {
                                     if (!this.active) {
                                         if (this.bounce) {
                                             this.bounceDir(
-                                                !(this.cEndX <= k.x) && !(this.cEndX >= k.x + k.scale),
+                                                !(this.cEndX <= tmpTile.x) && !(this.cEndX >= tmpTile.x + tmpTile.scale),
                                             );
                                         } else {
                                             this.hitSomething(
-                                                !(this.cEndX <= k.x) && !(this.cEndX >= k.x + k.scale),
+                                                !(this.cEndX <= tmpTile.x) && !(this.cEndX >= tmpTile.x + tmpTile.scale),
                                                 2,
                                             );
                                         }
@@ -124,28 +126,29 @@ export function ServerProjectile() {
                         }
                     }
                     if (this.active) {
+                        let tmpPlayer;
                         for (
                             let i = 0;
                             i < players.length &&
-                            ((k = players[i]),
-                            k.index == this.owner.index ||
-                                !(this.lastHit.indexOf(`,${k.index},`) < 0) ||
-                                k.team == this.owner.team ||
-                                k.type != "player" ||
-                                !k.onScreen ||
-                                k.dead ||
+                            ((tmpPlayer = players[i]),
+                            tmpPlayer.index == this.owner.index ||
+                                !(this.lastHit.indexOf(`,${tmpPlayer.index},`) < 0) ||
+                                tmpPlayer.team == this.owner.team ||
+                                tmpPlayer.type != "player" ||
+                                !tmpPlayer.onScreen ||
+                                tmpPlayer.dead ||
                                 (this.lineInRect(
-                                    k.x - k.width / 2,
-                                    k.y - k.height - k.jumpY,
-                                    k.width,
-                                    k.height,
+                                    tmpPlayer.x - tmpPlayer.width / 2,
+                                    tmpPlayer.y - tmpPlayer.height - tmpPlayer.jumpY,
+                                    tmpPlayer.width,
+                                    tmpPlayer.height,
                                     this.pierceCount <= 1,
                                 ) &&
-                                    k.spawnProtection <= 0 &&
+                                    tmpPlayer.spawnProtection <= 0 &&
                                     (this.explodeOnDeath
                                         ? (this.active = false)
                                         : this.dmg > 0 &&
-                                            ((this.lastHit += `${k.index},`),
+                                            ((this.lastHit += `${tmpPlayer.index},`),
                                             this.spriteIndex != 2 &&
                                                 //(particleCone(
                                                 //	12,
@@ -186,21 +189,21 @@ export function ServerProjectile() {
         }
         this.skipMove = false;
     };
-    this.activate = function () {
+    activate() {
         this.skipMove = true;
         this.lastHit = ",";
         this.active = true;
         //playSound(`shot${this.weaponIndex}`, this.x, this.y);
     };
-    this.canSeeObject = function (a, b) {
+    canSeeObject(a: any, b: number) {
         let f = Math.abs(this.cEndX - a.x);
         let h = Math.abs(this.cEndY - a.y);
         return f <= (b + this.height) * 2 && h <= (b + this.height) * 2;
     };
-    this.deactivate = function () {
+    deactivate() {
         this.active = false;
     };
-    this.hitSomething = function (a, b) {
+    hitSomething(a: boolean, b: number) {
         if (this.spriteIndex !== 2) {
             //particleCone(
             //	10,
@@ -215,14 +218,14 @@ export function ServerProjectile() {
             //);
         }
     };
-    this.bounceDir = function (a) {
+    bounceDir(a: boolean) {
         this.dir = a ? Math.PI * 2 - this.dir : Math.PI - this.dir;
         this.active = true;
         this.speed *= 0.65;
         this.x = this.cEndX;
         this.y = this.cEndY;
     };
-    this.lineInRect = function (a, b, d, e, f) {
+    lineInRect(a: number, b: number, d: number, e: number, f: boolean) {
         var g = this.x;
         var h = this.y;
         var k = g;
@@ -268,9 +271,10 @@ export function ServerProjectile() {
         }
         return true;
     };
-    this.dotInRect = (a, b, d, e, f, h) =>
-        a >= d && a <= d + f && b >= e && b <= e + h;
-    this.adjustOnCollision = function (a, b, d, e) {
+    dotInRect(a: number, b: number, d: number, e: number, f: number, h: number) {
+        return a >= d && a <= d + f && b >= e && b <= e + h;
+    }
+    adjustOnCollision(a: number, b: number, d: number, e: number) {
         let h = this.cEndX,
             g = this.cEndY;
         for (let f = 100; f > 0; ) {
