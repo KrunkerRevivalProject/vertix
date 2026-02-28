@@ -24,7 +24,7 @@ export class ServerProjectile {
 	trailAlpha = 0;
 	owner: any = null;
 	dmg = 0;
-	lastHit = "";
+	lastHit: number[] = [];
 	serverIndex = 0;
 	skipMove = true;
 	startTime = 0;
@@ -153,7 +153,7 @@ export class ServerProjectile {
 							i < players.length &&
 							((tmpPlayer = players[i]),
 							tmpPlayer.index == this.owner.index ||
-								!(this.lastHit.indexOf(`,${tmpPlayer.index},`) < 0) ||
+								this.lastHit.includes(tmpPlayer.index) ||
 								tmpPlayer.team == this.owner.team ||
 								tmpPlayer.type != "player" ||
 								!tmpPlayer.onScreen ||
@@ -166,11 +166,11 @@ export class ServerProjectile {
 									this.pierceCount <= 1,
 								) &&
 									tmpPlayer.spawnProtection <= 0 &&
-									((this.lastHit += `${tmpPlayer.index},`),
-									this.explodeOnDeath
+									(this.explodeOnDeath
 										? (this.active = false)
 										: this.dmg > 0 &&
-											(this.spriteIndex != 2 &&
+											((this.lastHit.push(tmpPlayer.index),
+												this.spriteIndex != 2 &&
 												//(particleCone(
 												//	12,
 												//	k.x,
@@ -186,7 +186,7 @@ export class ServerProjectile {
 												this.pierceCount > 0 &&
 												this.pierceCount--,
 											this.pierceCount <= 0 && (this.active = false))),
-								this.active));
+								this.active)));
 							++i
 						);
 					}
@@ -212,7 +212,7 @@ export class ServerProjectile {
 	}
 	activate() {
 		this.skipMove = true;
-		this.lastHit = ",";
+		this.lastHit = [];
 		this.active = true;
 		//playSound(`shot${this.weaponIndex}`, this.x, this.y);
 	}
