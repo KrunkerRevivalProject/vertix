@@ -1,5 +1,6 @@
 //@ts-nocheck
 import * as zip from "@zip.js/zip.js";
+import { Howl } from "howler";
 import $ from "jquery";
 import { io, type Socket } from "socket.io-client";
 import {
