@@ -169,8 +169,8 @@ export class ServerProjectile {
 									(this.explodeOnDeath
 										? (this.active = false)
 										: this.dmg > 0 &&
-											((this.lastHit.push(tmpPlayer.index),
-												this.spriteIndex != 2 &&
+											(this.lastHit.push(tmpPlayer.index),
+											this.spriteIndex != 2 &&
 												//(particleCone(
 												//	12,
 												//	k.x,
@@ -185,8 +185,8 @@ export class ServerProjectile {
 												//createLiquid(k.x, k.y, this.dir, 4)),
 												this.pierceCount > 0 &&
 												this.pierceCount--,
-											this.pierceCount <= 0 && (this.active = false))),
-								this.active)));
+											this.pierceCount <= 0 && (this.active = false)),
+									this.active)));
 							++i
 						);
 					}

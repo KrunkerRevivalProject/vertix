@@ -1947,7 +1947,10 @@ function showStatTable(userList: object[], b, d, e, f, h) {
 						id: null,
 					},
 					{
-						text: userList[g].lastItem != null ? userList[g].lastItem.name : "No Reward",
+						text:
+							userList[g].lastItem != null
+								? userList[g].lastItem.name
+								: "No Reward",
 						className: "rewardText",
 						color:
 							userList[g].lastItem != null

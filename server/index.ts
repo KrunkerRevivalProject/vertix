@@ -175,7 +175,7 @@ io.on("connection", (socket: Socket) => {
 		player.classIndex = client.classIndex ? client.classIndex : 0;
 		const currentClass = characterClasses[player.classIndex];
 		player.weapons = currentClass.weaponIndexes.map((i) => weapons[i]);
-		player.health = (player.maxHealth = currentClass.maxHealth);
+		player.health = player.maxHealth = currentClass.maxHealth;
 		player.height = currentClass.height;
 		player.width = currentClass.width;
 		player.speed = currentClass.speed;
@@ -341,7 +341,10 @@ io.on("connection", (socket: Socket) => {
 						s: sourcePlayer.score,
 						kil: (sourcePlayer.kills += 1),
 					});
-					io.emit("upd", { i: destPlayers[i].index, dea: (destPlayers[i].deaths += 1) });
+					io.emit("upd", {
+						i: destPlayers[i].index,
+						dea: (destPlayers[i].deaths += 1),
+					});
 					io.emit(
 						"lb",
 						players.flatMap((pl) => [pl.index]),
