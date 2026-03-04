@@ -1,4 +1,6 @@
 //@ts-nocheck
+
+import type { ZipReader } from "@zip.js/zip.js";
 import * as zip from "@zip.js/zip.js";
 import { Howl } from "howler";
 import $ from "jquery";
@@ -32,7 +34,7 @@ var playerNameInput: HTMLInputElement =
 var socket: Socket | undefined;
 var reason: string | undefined;
 var mobile = false;
-var room;
+var room: any;
 var currentFPS = 0;
 var fillCounter = 0;
 var currentLikeButton = "";
@@ -590,7 +592,7 @@ var keys = {
 var reenviar = true;
 var directionLock = false;
 var directions = [];
-var zipFileCloser;
+var zipFileCloser: any;
 var mainCanvas: HTMLCanvasElement = document.getElementById("cvs");
 mainCanvas.width = screenWidth;
 mainCanvas.height = screenHeight;
@@ -1430,11 +1432,11 @@ function setupSocket(a: Socket) {
 			clanDBMessage.innerHTML = a;
 		}
 	});
-	a.on("dbClanInvR", (a, d) => {
+	a.on("dbClanInvR", (a, _) => {
 		clanInvMessage.style.display = "block";
 		clanInvMessage.innerHTML = a;
 	});
-	a.on("dbKickInvR", (a, d) => {
+	a.on("dbKickInvR", (a, _) => {
 		clanInvMessage.style.display = "block";
 		clanInvMessage.innerHTML = a;
 	});
@@ -3276,7 +3278,7 @@ function screenShake(a, b) {
 		screenSkDir = b;
 	}
 }
-function updateScreenShake(a) {
+function updateScreenShake(_) {
 	if (screenShackeScale > 0) {
 		screenSkX = screenShackeScale * Math.cos(screenSkDir);
 		screenSkY = screenShackeScale * Math.sin(screenSkDir);
@@ -3286,8 +3288,8 @@ function updateScreenShake(a) {
 		}
 	}
 }
-var userSprays = [];
-var cachedSprays = [];
+var userSprays: HTMLImageElement[] = [];
+var cachedSprays: CanvasImageSource[] = [];
 function createSpray(a, b, d) {
 	let tmpPlayer = findUserByIndex(a);
 	if (tmpPlayer != null) {
@@ -3329,23 +3331,23 @@ function deactivateSprays() {
 		userSprays[i].active = false;
 	}
 }
-function cacheSpray(a) {
-	const tmpIndex = a.src;
+function cacheSpray(img: HTMLImageElement) {
+	const tmpIndex = img.src;
 	let tmpSpray = cachedSprays[tmpIndex];
-	if (tmpSpray == undefined && a.width !== 0) {
-		var b = document.createElement("canvas");
-		var d = b.getContext("2d");
-		b.width = a.resolution;
-		b.height = a.resolution;
-		d.drawImage(a, 0, 0, a.resolution, a.resolution);
-		var d = document.createElement("canvas");
-		var e = d.getContext("2d");
-		d.width = a.scale;
-		d.height = a.scale;
-		e.imageSmoothingEnabled = false;
-		e.globalAlpha = a.alpha;
-		e.drawImage(b, 0, 0, a.scale, a.scale);
-		tmpSpray = d;
+	if (tmpSpray === undefined && img.width !== 0) {
+		let initialCanvas = document.createElement("canvas");
+		let initialCtx = initialCanvas.getContext("2d");
+		initialCanvas.width = img.resolution;
+		initialCanvas.height = img.resolution;
+		initialCtx.drawImage(img, 0, 0, img.resolution, img.resolution);
+		let finalCanvas = document.createElement("canvas");
+		let finalCtx = finalCanvas.getContext("2d");
+		finalCanvas.width = img.scale;
+		finalCanvas.height = img.scale;
+		finalCtx.imageSmoothingEnabled = false;
+		finalCtx.globalAlpha = img.alpha;
+		finalCtx.drawImage(initialCanvas, 0, 0, img.scale, img.scale);
+		tmpSpray = finalCanvas;
 		cachedSprays[tmpIndex] = tmpSpray;
 	}
 }
@@ -4021,23 +4023,23 @@ function shootBullet(source) {
 			) {
 				getCurrentWeapon(source).spreadIndex = 0;
 			}
-			var d =
+			let spread =
 				getCurrentWeapon(source).spread[getCurrentWeapon(source).spreadIndex];
-			var d = utils.roundNumber(target.f + Math.PI + d, 2);
-			var e =
+			spread = utils.roundNumber(target.f + Math.PI + spread, 2);
+			let dist =
 				getCurrentWeapon(source).holdDist + getCurrentWeapon(source).bDist;
-			var f = Math.round(source.x + e * Math.cos(d));
-			var e = Math.round(
+			let x = Math.round(source.x + dist * Math.cos(spread));
+			dist = Math.round(
 				source.y -
 					getCurrentWeapon(source).yOffset -
 					source.jumpY +
-					e * Math.sin(d),
+					dist * Math.sin(spread),
 			);
 			shootNextBullet(
 				{
-					x: f,
-					y: e,
-					d: d,
+					x: x,
+					y: dist,
+					d: spread,
 					si: -1,
 				},
 				source,
@@ -4498,184 +4500,180 @@ function setModInfoText(a) {
 }
 var fileFormat = "";
 window.loadModPack = loadModPack;
-function loadModPack(a, b) {
+function loadModPack(url: string, b) {
 	try {
-		if (!loadingTexturePack) {
-			function d() {
-				this.numFiles;
-				this.progress;
-				this.reader;
-				this.init = (a, b) => {
-					this.numFiles = b;
-					this.progress = 0;
-					this.reader = a;
-				};
-				this.close = () => {
-					if (this.reader) {
-						this.progress++;
-						if (this.numFiles === this.progress) {
-							spriteIndex = 0;
-							loadPlayerSprites("sprites/");
-							loadDefaultSprites("sprites/");
-							loadSounds("sounds/");
-							this.reader.close();
-							this.reader = undefined;
-							loadingTexturePack = false;
-						}
-					} else {
-						console.log("reader not valid");
-					}
-				};
-			}
-			function e(a) {
-				this.typeName = a;
-				this.process = (a) => {
-					try {
-						if (this.typeName.indexOf("modinfo") > -1) {
-							setModInfoText(a);
-						} else if (this.typeName.indexOf("cssmod") > -1) {
-							let d = document.createElement("style");
-							d.type = "text/css";
-							d.innerHTML = a;
-							document.getElementsByTagName("head")[0].appendChild(d);
-						} else if (this.typeName.indexOf("gameinfo") > -1) {
-							let e = a.replace(/(\r\n|\n|\r)/gm, "");
-							let f = JSON.parse(e);
-							updateMenuInfo(f.name);
-						} else if (this.typeName.indexOf("charinfo") > -1) {
-							let h = a.replace(/(\r\n|\n|\r)/gm, "").split("|");
-							let tmp = [];
-							for (a = 0; a < h.length; ++a) {
-								tmp.push(JSON.parse(h[a]));
-							}
-							setCharacterClasses(tmp);
-							createClassList();
-							pickedCharacter(currentClassID);
-						}
-					} catch (err) {
-						console.error(`Script Read Error: ${err}`);
-					}
-					zipFileCloser.close();
-				};
-			}
-			function f(a, b) {
-				this.filename = a;
-				this.soundAsDataURL = this.tmpLocation = "";
-				this.format = b;
-				this.process = (a) => {
-					this.soundAsDataURL = URL.createObjectURL(a);
-					if (this.soundAsDataURL) {
-						try {
-							this.tmpLocation = this.filename;
-							localStorage.setItem(
-								`${this.tmpLocation}data`,
-								this.soundAsDataURL,
-							);
-							localStorage.setItem(`${this.tmpLocation}format`, this.format);
-						} catch (err) {
-							console.error(`Storage failed: ${err}`);
-						}
-						zipFileCloser.close();
-					} else {
-						console.error(`failed to generate url: ${this.filename}`);
-					}
-				};
-			}
-			function h(a) {
-				this.filename = a;
-				this.imgAsDataURL = this.tmpLocation = "";
-				this.process = (a) => {
-					this.imgAsDataURL = URL.createObjectURL(a);
-					if (this.imgAsDataURL) {
-						try {
-							this.tmpLocation = this.filename;
-							localStorage.setItem(this.tmpLocation, this.imgAsDataURL);
-						} catch (err) {
-							console.error(`Storage failed: ${err}`);
-						}
-						zipFileCloser.close();
-					} else {
-						console.error(`failed to generate url: ${this.filename}`);
-					}
-				};
-			}
-			var g = "";
-			if (b) {
-				doSounds = false;
-				g = "/res.zip";
-			} else {
-				if (a == "") {
-					setModInfoText("Please enter a mod Key/URL");
-					return false;
-				}
-				loadingTexturePack = doSounds = true;
-				if (isURL(a)) {
-					g = a;
-					if (!g.match(/^https?:\/\//i)) {
-						g = `http://${g}`;
+		if (loadingTexturePack) return;
+		function d() {
+			this.numFiles;
+			this.progress;
+			this.reader;
+			this.init = (reader: ZipReader, numFiles: number) => {
+				this.numFiles = numFiles;
+				this.progress = 0;
+				this.reader = reader;
+			};
+			this.close = () => {
+				if (this.reader) {
+					this.progress++;
+					if (this.numFiles === this.progress) {
+						spriteIndex = 0;
+						loadPlayerSprites("sprites/");
+						loadDefaultSprites("sprites/");
+						loadSounds("sounds/");
+						this.reader.close();
+						this.reader = undefined;
+						loadingTexturePack = false;
 					}
 				} else {
-					g = `https://dl.dropboxusercontent.com/s/${a}/vertixmod.zip`;
+					console.log("reader not valid");
 				}
-			}
-			if (!b) {
-				setModInfoText("Loading...");
-			}
-			zipFileCloser ||= new d();
-			var l = "";
-			const reader = new zip.ZipReader(new zip.HttpReader(g));
-			reader.getEntries().then((entries) => {
-				let b = entries;
-				if (b.length) {
-					zipFileCloser.init(reader, b.length);
-					for (var d = 0; d < b.length; d++) {
-						var g = b[d];
-						if (g.directory) {
-							zipFileCloser.close();
-						} else {
-							g.filename = g.filename.replace("vertixmod/", "");
-							fileFormat =
-								g.filename.split(".")[g.filename.split(".").length - 1];
-							l = g.filename.split("/")[0];
-							if (l == "scripts") {
-								let processor = new e(g.filename);
-								g.getData(new zip.TextWriter())
-									.then((a) => {
-										processor.process(a);
-									})
-									.catch((err) => {
-										console.error(`Script Read Error: ${err}`);
-									});
-							} else if (l == "sprites") {
-								let processor = new h(g.filename);
-								g.getData(new zip.BlobWriter("image/png"))
-									.then((a) => {
-										processor.process(a);
-									})
-									.catch((err) => {
-										console.error(`Image Load Error: ${err}`);
-									});
-							} else if (l == "sounds") {
-								let processor = new f(
-									g.filename.replace(`.${fileFormat}`, ""),
-									fileFormat,
-								);
-								g.getData(new zip.BlobWriter(`audio/${fileFormat}`))
-									.then((a) => {
-										processor.process(a);
-									})
-									.catch((err) => {
-										console.error(`Sound Load Error: ${err}`);
-									});
-							} else {
-								loadingTexturePack = false;
-								setModInfoText("Mod could not be loaded");
-							}
+			};
+		}
+		function e(a) {
+			this.typeName = a;
+			this.process = (a) => {
+				try {
+					if (this.typeName.indexOf("modinfo") > -1) {
+						setModInfoText(a);
+					} else if (this.typeName.indexOf("cssmod") > -1) {
+						let d = document.createElement("style");
+						d.type = "text/css";
+						d.innerHTML = a;
+						document.getElementsByTagName("head")[0].appendChild(d);
+					} else if (this.typeName.indexOf("gameinfo") > -1) {
+						let e = a.replace(/(\r\n|\n|\r)/gm, "");
+						let f = JSON.parse(e);
+						updateMenuInfo(f.name);
+					} else if (this.typeName.indexOf("charinfo") > -1) {
+						let h = a.replace(/(\r\n|\n|\r)/gm, "").split("|");
+						let tmp = [];
+						for (a = 0; a < h.length; ++a) {
+							tmp.push(JSON.parse(h[a]));
 						}
+						setCharacterClasses(tmp);
+						createClassList();
+						pickedCharacter(currentClassID);
+					}
+				} catch (err) {
+					console.error(`Script Read Error: ${err}`);
+				}
+				zipFileCloser.close();
+			};
+		}
+		function f(a, b) {
+			this.filename = a;
+			this.soundAsDataURL = this.tmpLocation = "";
+			this.format = b;
+			this.process = (a) => {
+				this.soundAsDataURL = URL.createObjectURL(a);
+				if (this.soundAsDataURL) {
+					try {
+						this.tmpLocation = this.filename;
+						localStorage.setItem(
+							`${this.tmpLocation}data`,
+							this.soundAsDataURL,
+						);
+						localStorage.setItem(`${this.tmpLocation}format`, this.format);
+					} catch (err) {
+						console.error(`Storage failed: ${err}`);
+					}
+					zipFileCloser.close();
+				} else {
+					console.error(`failed to generate url: ${this.filename}`);
+				}
+			};
+		}
+		function h(a) {
+			this.filename = a;
+			this.imgAsDataURL = this.tmpLocation = "";
+			this.process = (a) => {
+				this.imgAsDataURL = URL.createObjectURL(a);
+				if (this.imgAsDataURL) {
+					try {
+						this.tmpLocation = this.filename;
+						localStorage.setItem(this.tmpLocation, this.imgAsDataURL);
+					} catch (err) {
+						console.error(`Storage failed: ${err}`);
+					}
+					zipFileCloser.close();
+				} else {
+					console.error(`failed to generate url: ${this.filename}`);
+				}
+			};
+		}
+		let modPath = "";
+		if (b) {
+			doSounds = false;
+			modPath = "/res.zip";
+		} else {
+			if (url === "") {
+				setModInfoText("Please enter a mod Key/URL");
+				return false;
+			}
+			loadingTexturePack = doSounds = true;
+			if (isURL(url)) {
+				modPath = url;
+				if (!modPath.match(/^https?:\/\//i)) {
+					modPath = `http://${modPath}`;
+				}
+			} else {
+				modPath = `https://dl.dropboxusercontent.com/s/${url}/vertixmod.zip`;
+			}
+		}
+		if (!b) {
+			setModInfoText("Loading...");
+		}
+		zipFileCloser ||= new d();
+		const reader = new zip.ZipReader(new zip.HttpReader(modPath));
+		reader.getEntries().then((entries) => {
+			let b = entries;
+			if (!b.length) return;
+			zipFileCloser.init(reader, b.length);
+			for (let i = 0; i < b.length; i++) {
+				let tmpFile = b[i];
+				if (tmpFile.directory) {
+					zipFileCloser.close();
+				} else {
+					tmpFile.filename = tmpFile.filename.replace("vertixmod/", "");
+					fileFormat = tmpFile.filename.split(".")[tmpFile.filename.split(".").length - 1];
+					let basePath = tmpFile.filename.split("/")[0];
+					if (basePath === "scripts") {
+						let processor = new e(tmpFile.filename);
+						tmpFile.getData(new zip.TextWriter())
+							.then((a) => {
+								processor.process(a);
+							})
+							.catch((err) => {
+								console.error(`Script Read Error: ${err}`);
+							});
+					} else if (basePath === "sprites") {
+						let processor = new h(tmpFile.filename);
+						tmpFile.getData(new zip.BlobWriter("image/png"))
+							.then((a) => {
+								processor.process(a);
+							})
+							.catch((err) => {
+								console.error(`Image Load Error: ${err}`);
+							});
+					} else if (basePath === "sounds") {
+						let processor = new f(
+							tmpFile.filename.replace(`.${fileFormat}`, ""),
+							fileFormat,
+						);
+						tmpFile.getData(new zip.BlobWriter(`audio/${fileFormat}`))
+							.then((a) => {
+								processor.process(a);
+							})
+							.catch((err) => {
+								console.error(`Sound Load Error: ${err}`);
+							});
+					} else {
+						loadingTexturePack = false;
+						setModInfoText("Mod could not be loaded");
 					}
 				}
-			});
-		}
+			}
+		});
 	} catch (err) {
 		console.error(err);
 		loadingTexturePack = false;
