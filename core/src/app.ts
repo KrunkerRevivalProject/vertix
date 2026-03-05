@@ -3633,36 +3633,46 @@ function flipSprite(sprite: HTMLImageElement, b) {
 	}
 	return false;
 }
-function Projectile() {
-	this.speed =
-		this.width =
-		this.height =
-		this.jumpY =
-		this.yOffset =
-		this.dir =
-		this.cEndY =
-		this.cEndX =
-		this.startY =
-		this.y =
-		this.startX =
-		this.x =
-			0;
-	this.active = false;
-	this.weaponIndex = this.spriteIndex = this.pierceCount = 0;
-	this.glowHeight = this.glowWidth = null;
-	this.speed = this.trailWidth = this.trailMaxLength = this.trailAlpha = 0;
-	this.owner = null;
-	this.dmg = 0;
-	this.lastHit = [];
-	this.serverIndex = null;
-	this.skipMove = true;
-	this.startTime = 0;
-	this.maxLifeTime = null;
-	this.explodeOnDeath = false;
-	this.updateAccuracy = 3;
-	this.bounce = false;
-	this.dustTimer = 0;
-	this.update = function (delta) {
+class Projectile {
+	width = 0;
+	height = 0;
+	jumpY = 0;
+	yOffset = 0;
+	dir = 0;
+	cEndX = 0;
+	cEndY = 0;
+	startX = 0;
+	startY = 0;
+	y = 0;
+	x = 0;
+	active = false;
+	weaponIndex = 0;
+	spriteIndex = 0;
+	pierceCount = 0;
+	glowHeight = 0;
+	glowWidth = 0;
+	speed = 0;
+	trailWidth = 0;
+	trailMaxLength = 0;
+	trailAlpha = 0;
+	owner: any = null;
+	dmg = 0;
+	lastHit: number[] = [];
+	serverIndex = 0;
+	skipMove = true;
+	startTime = 0;
+	maxLifeTime = 0;
+	explodeOnDeath = false;
+	updateAccuracy = 3;
+	bounce = false;
+	dustTimer = 0;
+	update(
+		delta: number,
+		currentTime: number,
+		clutter: any,
+		tiles: any,
+		players: any,
+	) {
 		if (this.active) {
 			let lifetime = currentTime - this.startTime;
 			if (this.skipMove) {
@@ -3671,151 +3681,155 @@ function Projectile() {
 			}
 			for (let g = 0; g < this.updateAccuracy; ++g) {
 				let vel = this.speed * delta;
-				if (!this.active) continue;
-				let changeX = (vel * Math.cos(this.dir)) / this.updateAccuracy;
-				let changeY = (vel * Math.sin(this.dir)) / this.updateAccuracy;
-				if (this.active && !this.skipMove && this.speed > 0) {
-					this.x += changeX;
-					this.y += changeY;
-					if (
-						getDistance(this.startX, this.startY, this.x, this.y) >=
-						this.trailMaxLength
-					) {
-						this.startX += changeX;
-						this.startY += changeY;
-					}
-				}
-				this.cEndX =
-					this.x +
-					((vel + this.height) * Math.cos(this.dir)) / this.updateAccuracy;
-				this.cEndY =
-					this.y +
-					((vel + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
-				for (let i = 0; i < gameObjects.length; ++i) {
-					let tmpObj = gameObjects[i];
-					if (
-						this.active &&
-						tmpObj.type === "clutter" &&
-						tmpObj.active &&
-						tmpObj.hc &&
-						this.canSeeObject(tmpObj, tmpObj.h) &&
-						tmpObj.h * tmpObj.tp >= this.yOffset &&
-						this.lineInRect(
-							tmpObj.x,
-							tmpObj.y - tmpObj.h,
-							tmpObj.w,
-							tmpObj.h - this.yOffset,
-							true,
-						)
-					) {
-						if (this.bounce) {
-							this.bounceDir(
-								this.cEndY <= tmpObj.y - tmpObj.h ||
-									this.cEndY >= tmpObj.y - this.yOffset,
-							);
-						} else {
-							this.active = false;
-							this.hitSomething(false, 2);
+				if (this.active) {
+					let changeX = (vel * Math.cos(this.dir)) / this.updateAccuracy;
+					let changeY = (vel * Math.sin(this.dir)) / this.updateAccuracy;
+					if (this.active && !this.skipMove && this.speed > 0) {
+						this.x += changeX;
+						this.y += changeY;
+						if (
+							getDistance(this.startX, this.startY, this.x, this.y) >=
+							this.trailMaxLength
+						) {
+							this.startX += changeX;
+							this.startY += changeY;
 						}
 					}
-				}
-				if (this.active) {
-					for (let h = 0; h < gameMap.tiles.length; ++h) {
-						if (this.active) {
-							let tile = gameMap.tiles[h];
-							if (
-								tile.wall &&
-								tile.hasCollision &&
-								this.canSeeObject(tile, tile.scale)
-							) {
-								if (tile.bottom) {
-									if (
+					this.cEndX =
+						this.x +
+						((vel + this.height) * Math.cos(this.dir)) / this.updateAccuracy;
+					this.cEndY =
+						this.y +
+						((vel + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
+					for (let i = 0; i < clutter.length; ++i) {
+						let tmpClutter = clutter[i];
+						if (
+							this.active &&
+							tmpClutter.type === "clutter" &&
+							tmpClutter.active &&
+							tmpClutter.hc &&
+							this.canSeeObject(tmpClutter, tmpClutter.h) &&
+							tmpClutter.h * tmpClutter.tp >= this.yOffset &&
+							this.lineInRect(
+								tmpClutter.x,
+								tmpClutter.y - tmpClutter.h,
+								tmpClutter.w,
+								tmpClutter.h - this.yOffset,
+								true,
+							)
+						) {
+							if (this.bounce) {
+								this.bounceDir(
+									this.cEndY <= tmpClutter.y - tmpClutter.h ||
+										this.cEndY >= tmpClutter.y - this.yOffset,
+								);
+							} else {
+								this.active = false;
+								this.hitSomething(false, 2);
+							}
+						}
+					}
+					if (this.active) {
+						for (let i = 0; i < tiles.length; ++i) {
+							if (this.active) {
+								let tmpTile = tiles[i];
+								if (
+									tmpTile.wall &&
+									tmpTile.hasCollision &&
+									this.canSeeObject(tmpTile, tmpTile.scale)
+								) {
+									if (tmpTile.bottom) {
+										if (
+											this.lineInRect(
+												tmpTile.x,
+												tmpTile.y,
+												tmpTile.scale,
+												tmpTile.scale,
+												true,
+											)
+										) {
+											this.active = false;
+										}
+									} else if (
 										this.lineInRect(
-											tile.x,
-											tile.y,
-											tile.scale,
-											tile.scale,
+											tmpTile.x,
+											tmpTile.y,
+											tmpTile.scale,
+											tmpTile.scale - this.owner.height - this.jumpY,
 											true,
 										)
 									) {
 										this.active = false;
 									}
-								} else if (
-									this.lineInRect(
-										tile.x,
-										tile.y,
-										tile.scale,
-										tile.scale - this.owner.height - this.jumpY,
-										true,
-									)
-								) {
-									this.active = false;
-								}
-								if (!this.active) {
-									if (this.bounce) {
-										this.bounceDir(
-											!(this.cEndX <= tile.x) &&
-												!(this.cEndX >= tile.x + tile.scale),
-										);
-									} else {
-										this.hitSomething(
-											!(this.cEndX <= tile.x) &&
-												!(this.cEndX >= tile.x + tile.scale),
-											2,
-										);
+									if (!this.active) {
+										if (this.bounce) {
+											this.bounceDir(
+												!(this.cEndX <= tmpTile.x) &&
+													!(this.cEndX >= tmpTile.x + tmpTile.scale),
+											);
+										} else {
+											this.hitSomething(
+												!(this.cEndX <= tmpTile.x) &&
+													!(this.cEndX >= tmpTile.x + tmpTile.scale),
+												2,
+											);
+										}
 									}
 								}
 							}
 						}
 					}
-				}
-				if (this.active && this.owner.index === player.index) {
-					for (let i = 0; i < gameObjects.length; i++) {
-						let tmpObject = gameObjects[i];
-						if (
-							tmpObject.index === this.owner.index ||
-							this.lastHit.includes(tmpObject.index) ||
-							tmpObject.team === this.owner.team ||
-							tmpObject.type !== "player" ||
-							!tmpObject.onScreen ||
-							tmpObject.dead ||
-							(this.lineInRect(
-								tmpObject.x - tmpObject.width / 2,
-								tmpObject.y - tmpObject.height - tmpObject.jumpY,
-								tmpObject.width,
-								tmpObject.height,
-								this.pierceCount <= 1,
-							) &&
-								tmpObject.spawnProtection <= 0)
-						) {
-							continue;
-						}
-						if (this.explodeOnDeath) {
-							this.active = false;
-						} else if (this.dmg > 0) {
-							this.lastHit.push(tmpObject.index);
-							if (this.spriteIndex !== 2) {
-								particleCone(
-									12,
-									tmpObject.x,
-									tmpObject.y - tmpObject.height / 2 - tmpObject.jumpY,
-									this.dir + Math.PI,
-									Math.PI / randomInt(5, 7),
-									0.5,
-									16,
-									0,
-									true,
-								);
-								createLiquid(tmpObject.x, tmpObject.y, this.dir, 4);
+					if (this.active && this.owner.index == player.index) {
+						for (let i = 0; i < players.length; i++) {
+							let tmpPlayer = players[i];
+							if (
+								tmpPlayer.index === this.owner.index ||
+								this.lastHit.includes(tmpPlayer.index) ||
+								tmpPlayer.team === this.owner.team ||
+								tmpPlayer.type !== "player" ||
+								!tmpPlayer.onScreen ||
+								tmpPlayer.dead
+							) {
+								continue;
 							}
-							if (this.pierceCount > 0) this.pierceCount--;
-							if (this.pierceCount <= 0) this.active = false;
+							if (
+								this.lineInRect(
+									tmpPlayer.x - tmpPlayer.width / 2,
+									tmpPlayer.y - tmpPlayer.height - tmpPlayer.jumpY,
+									tmpPlayer.width,
+									tmpPlayer.height,
+									this.pierceCount <= 1,
+								) && tmpPlayer.spawnProtection <= 0
+							) {
+								if (this.explodeOnDeath) {
+									this.active = false;
+									this.lastHit.push(tmpPlayer.index);
+								} else if (this.dmg > 0) {
+									this.lastHit.push(tmpPlayer.index);
+									if (this.spriteIndex !== 2) {
+										particleCone(
+											12,
+											tmpPlayer.x,
+											tmpPlayer.y - tmpPlayer.height / 2 - tmpPlayer.jumpY,
+											this.dir + Math.PI,
+											Math.PI / randomInt(5, 7),
+											0.5,
+											16,
+											0,
+											true,
+										);
+										createLiquid(tmpPlayer.x, tmpPlayer.y, this.dir, 4);
+									}
+									if (this.pierceCount > 0) this.pierceCount--;
+									if (this.pierceCount <= 0) this.active = false;
+								}
+							}
+							if (!this.active) break;
 						}
-						if (!this.active) break;
 					}
-				}
-				if (this.maxLifeTime != null && lifetime >= this.maxLifeTime) {
-					this.active = false;
+					if (this.maxLifeTime != null && lifetime >= this.maxLifeTime) {
+						this.active = false;
+					}
 				}
 			}
 			if (this.spriteIndex === 1) {
@@ -3832,22 +3846,22 @@ function Projectile() {
 			}
 		}
 		this.skipMove = false;
-	};
-	this.activate = () => {
+	}
+	activate() {
 		this.skipMove = true;
 		this.lastHit = [];
 		this.active = true;
 		playSound(`shot${this.weaponIndex}`, this.x, this.y);
-	};
-	this.canSeeObject = function (a, b) {
+	}
+	canSeeObject(a: any, b: number) {
 		let f = Math.abs(this.cEndX - a.x);
 		let h = Math.abs(this.cEndY - a.y);
 		return f <= (b + this.height) * 2 && h <= (b + this.height) * 2;
-	};
-	this.deactivate = () => {
+	}
+	deactivate() {
 		this.active = false;
-	};
-	this.hitSomething = (a, b) => {
+	}
+	hitSomething(a: boolean, b: number) {
 		if (this.spriteIndex !== 2) {
 			particleCone(
 				10,
@@ -3861,15 +3875,15 @@ function Projectile() {
 				a,
 			);
 		}
-	};
-	this.bounceDir = (a) => {
+	}
+	bounceDir(a: boolean) {
 		this.dir = a ? Math.PI * 2 - this.dir : Math.PI - this.dir;
 		this.active = true;
 		this.speed *= 0.65;
 		this.x = this.cEndX;
 		this.y = this.cEndY;
-	};
-	this.lineInRect = (a, b, d, e, f) => {
+	}
+	lineInRect(a: number, b: number, d: number, e: number, f: boolean) {
 		var g = this.x;
 		var h = this.y;
 		var k = g;
@@ -3914,10 +3928,11 @@ function Projectile() {
 			this.adjustOnCollision(a, b, d, e);
 		}
 		return true;
-	};
-	this.dotInRect = (a, b, d, e, f, h) =>
-		a >= d && a <= d + f && b >= e && b <= e + h;
-	this.adjustOnCollision = (a, b, d, e) => {
+	}
+	dotInRect(a: number, b: number, d: number, e: number, f: number, h: number) {
+		return a >= d && a <= d + f && b >= e && b <= e + h;
+	}
+	adjustOnCollision(a: number, b: number, d: number, e: number) {
 		let h = this.cEndX,
 			g = this.cEndY;
 		for (let f = 100; f > 0; ) {
@@ -3942,7 +3957,7 @@ function Projectile() {
 		this.cEndY = g;
 		this.x = this.cEndX;
 		this.y = this.cEndY;
-	};
+	}
 }
 function playerSwapWeapon(a, b) {
 	if (a != null && !a.dead) {
@@ -4117,7 +4132,7 @@ function updateBullets(delta: number) {
 	graph.globalAlpha = 1;
 	for (let i = 0; i < bullets.length; i++) {
 		let bullet = bullets[i];
-		bullet.update(delta);
+		bullet.update(delta, currentTime, gameObjects, gameMap.tiles, gameObjects);
 		if (bullet.active) {
 			let b = bullet.x - startX;
 			let d = bullet.y - startY;
