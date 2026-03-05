@@ -3799,7 +3799,8 @@ class Projectile {
 									tmpPlayer.width,
 									tmpPlayer.height,
 									this.pierceCount <= 1,
-								) && tmpPlayer.spawnProtection <= 0
+								) &&
+								tmpPlayer.spawnProtection <= 0
 							) {
 								if (this.explodeOnDeath) {
 									this.active = false;

@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { cors } from 'hono/cors'
+import { cors } from "hono/cors";
 import { Server, type Socket } from "socket.io";
 import {
 	shootNextBullet,
@@ -14,9 +14,11 @@ import { ServerProjectile } from "./utils.ts";
 import { characterClasses, weapons } from "core/src/loadouts.ts";
 
 const app = new Hono();
-app.use(cors({
-	origin: ["http://localhost:5173"]
-}))
+app.use(
+	cors({
+		origin: ["http://localhost:5173"],
+	}),
+);
 app.get("/getIP", (c) => {
 	return c.json({ ip: "localhost", region: "...", port: "1119" });
 });
@@ -311,16 +313,18 @@ io.on("connection", (socket: Socket) => {
 					for (let p = 0; p < players.length; p++) {
 						let tmpPlayer = players[p];
 						//TODO: align hitboxes properly and calculate dmg drop off
-						if (bullet.rectInRect(
-							bullet.x,
-							bullet.y,
-							bullet.blastRadius,
-							bullet.blastRadius,
-							tmpPlayer.x - tmpPlayer.width / 4,
-							tmpPlayer.y - tmpPlayer.height / 4 - tmpPlayer.jumpY,
-							tmpPlayer.width,
-							tmpPlayer.height,
-						)) {
+						if (
+							bullet.rectInRect(
+								bullet.x,
+								bullet.y,
+								bullet.blastRadius,
+								bullet.blastRadius,
+								tmpPlayer.x - tmpPlayer.width / 4,
+								tmpPlayer.y - tmpPlayer.height / 4 - tmpPlayer.jumpY,
+								tmpPlayer.width,
+								tmpPlayer.height,
+							)
+						) {
 							destPlayers.push(tmpPlayer);
 						}
 					}

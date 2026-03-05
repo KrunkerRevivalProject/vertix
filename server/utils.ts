@@ -167,7 +167,8 @@ export class ServerProjectile {
 									tmpPlayer.width,
 									tmpPlayer.height,
 									this.pierceCount <= 1,
-								) && tmpPlayer.spawnProtection <= 0
+								) &&
+								tmpPlayer.spawnProtection <= 0
 							) {
 								if (this.explodeOnDeath) {
 									this.active = false;
@@ -250,7 +251,13 @@ export class ServerProjectile {
 		this.x = this.cEndX;
 		this.y = this.cEndY;
 	}
-	lineInRect(rectX: number, rectY: number, rectW: number, rectH: number, adjust: boolean) {
+	lineInRect(
+		rectX: number,
+		rectY: number,
+		rectW: number,
+		rectH: number,
+		adjust: boolean,
+	) {
 		var g = this.x;
 		var h = this.y;
 		var k = g;
@@ -296,13 +303,44 @@ export class ServerProjectile {
 		}
 		return true;
 	}
-	dotInRect(dotX: number, dotY: number, rectX: number, rectY: number, rectW: number, rectH: number) {
-		return dotX >= rectX && dotX <= rectX + rectW && dotY >= rectY && dotY <= rectY + rectH;
+	dotInRect(
+		dotX: number,
+		dotY: number,
+		rectX: number,
+		rectY: number,
+		rectW: number,
+		rectH: number,
+	) {
+		return (
+			dotX >= rectX &&
+			dotX <= rectX + rectW &&
+			dotY >= rectY &&
+			dotY <= rectY + rectH
+		);
 	}
-	rectInRect(rectX: number, rectY: number, rectW: number, rectH: number, rectX2: number, rectY2: number, rectW2: number, rectH2: number) {
-		return (rectX < rectX2 + rectW2 && rectX + rectW > rectX2 && rectY < rectY2 + rectH2 && rectY + rectH > rectY2);
+	rectInRect(
+		rectX: number,
+		rectY: number,
+		rectW: number,
+		rectH: number,
+		rectX2: number,
+		rectY2: number,
+		rectW2: number,
+		rectH2: number,
+	) {
+		return (
+			rectX < rectX2 + rectW2 &&
+			rectX + rectW > rectX2 &&
+			rectY < rectY2 + rectH2 &&
+			rectY + rectH > rectY2
+		);
 	}
-	adjustOnCollision(rectX: number, rectY: number, rectW: number, rectH: number) {
+	adjustOnCollision(
+		rectX: number,
+		rectY: number,
+		rectW: number,
+		rectH: number,
+	) {
 		let endX = this.cEndX;
 		let endY = this.cEndY;
 		for (let i = 100; i > 0; ) {
