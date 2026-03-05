@@ -72,7 +72,7 @@ export class ServerProjectile {
 						let tmpClutter = clutter[i];
 						if (
 							this.active &&
-							tmpClutter.type == "clutter" &&
+							tmpClutter.type === "clutter" &&
 							tmpClutter.active &&
 							tmpClutter.hc &&
 							this.canSeeObject(tmpClutter, tmpClutter.h) &&
@@ -147,14 +147,13 @@ export class ServerProjectile {
 						}
 					}
 					if (this.active) {
-						let tmpPlayer;
 						for (let i = 0; i < players.length; i++) {
-							tmpPlayer = players[i];
+							let tmpPlayer = players[i];
 							if (
-								tmpPlayer.index == this.owner.index ||
+								tmpPlayer.index === this.owner.index ||
 								this.lastHit.includes(tmpPlayer.index) ||
-								tmpPlayer.team == this.owner.team ||
-								tmpPlayer.type != "player" ||
+								tmpPlayer.team === this.owner.team ||
+								tmpPlayer.type !== "player" ||
 								!tmpPlayer.onScreen ||
 								tmpPlayer.dead
 							) {
@@ -174,7 +173,7 @@ export class ServerProjectile {
 									this.lastHit.push(tmpPlayer.index);
 								} else if (this.dmg > 0) {
 									this.lastHit.push(tmpPlayer.index);
-									if (this.spriteIndex != 2) {
+									if (this.spriteIndex !== 2) {
 										//(particleCone(
 										//	12,
 										//	k.x,

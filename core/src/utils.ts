@@ -25,7 +25,7 @@ export function shootNextBullet(
 		bullet.updateAccuracy = weapon.cAcc;
 		bullet.width = weapon.bWidth;
 		bullet.height = weapon.bHeight;
-		var randScale = weapon.bRandScale;
+		let randScale = weapon.bRandScale;
 		if (randScale != null) {
 			randScale = randomFloat(randScale[0], randScale[1]);
 			bullet.width *= randScale;

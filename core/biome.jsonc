@@ -9,7 +9,8 @@
 			},
 			"suspicious": {
 				// "noVar": "warn",
-				"noDoubleEquals": "info"
+				"noDoubleEquals": "info",
+				"noExplicitAny": "info"
 			},
 			"correctness": {
 				"noUnusedVariables": "info",

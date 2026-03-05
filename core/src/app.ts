@@ -3664,150 +3664,151 @@ function Projectile() {
 			}
 			for (let g = 0; g < this.updateAccuracy; ++g) {
 				let vel = this.speed * delta;
+				if (!this.active) continue;
+				let changeX = (vel * Math.cos(this.dir)) / this.updateAccuracy;
+				let changeY = (vel * Math.sin(this.dir)) / this.updateAccuracy;
+				if (this.active && !this.skipMove && this.speed > 0) {
+					this.x += changeX;
+					this.y += changeY;
+					if (
+						getDistance(this.startX, this.startY, this.x, this.y) >=
+						this.trailMaxLength
+					) {
+						this.startX += changeX;
+						this.startY += changeY;
+					}
+				}
+				this.cEndX =
+					this.x +
+					((vel + this.height) * Math.cos(this.dir)) / this.updateAccuracy;
+				this.cEndY =
+					this.y +
+					((vel + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
+				for (let i = 0; i < gameObjects.length; ++i) {
+					let tmpObj = gameObjects[i];
+					if (
+						this.active &&
+						tmpObj.type === "clutter" &&
+						tmpObj.active &&
+						tmpObj.hc &&
+						this.canSeeObject(tmpObj, tmpObj.h) &&
+						tmpObj.h * tmpObj.tp >= this.yOffset &&
+						this.lineInRect(
+							tmpObj.x,
+							tmpObj.y - tmpObj.h,
+							tmpObj.w,
+							tmpObj.h - this.yOffset,
+							true,
+						)
+					) {
+						if (this.bounce) {
+							this.bounceDir(
+								this.cEndY <= tmpObj.y - tmpObj.h ||
+									this.cEndY >= tmpObj.y - this.yOffset,
+							);
+						} else {
+							this.active = false;
+							this.hitSomething(false, 2);
+						}
+					}
+				}
 				if (this.active) {
-					let changeX = (vel * Math.cos(this.dir)) / this.updateAccuracy;
-					let changeY = (vel * Math.sin(this.dir)) / this.updateAccuracy;
-					if (this.active && !this.skipMove && this.speed > 0) {
-						this.x += changeX;
-						this.y += changeY;
-						if (
-							getDistance(this.startX, this.startY, this.x, this.y) >=
-							this.trailMaxLength
-						) {
-							this.startX += changeX;
-							this.startY += changeY;
-						}
-					}
-					this.cEndX =
-						this.x +
-						((vel + this.height) * Math.cos(this.dir)) / this.updateAccuracy;
-					this.cEndY =
-						this.y +
-						((vel + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
-					for (let i = 0; i < gameObjects.length; ++i) {
-						let tmpObj = gameObjects[i];
-						if (
-							this.active &&
-							tmpObj.type === "clutter" &&
-							tmpObj.active &&
-							tmpObj.hc &&
-							this.canSeeObject(tmpObj, tmpObj.h) &&
-							tmpObj.h * tmpObj.tp >= this.yOffset &&
-							this.lineInRect(
-								tmpObj.x,
-								tmpObj.y - tmpObj.h,
-								tmpObj.w,
-								tmpObj.h - this.yOffset,
-								true,
-							)
-						) {
-							if (this.bounce) {
-								this.bounceDir(
-									this.cEndY <= tmpObj.y - tmpObj.h ||
-										this.cEndY >= tmpObj.y - this.yOffset,
-								);
-							} else {
-								this.active = false;
-								this.hitSomething(false, 2);
-							}
-						}
-					}
-					if (this.active) {
-						for (let h = 0; h < gameMap.tiles.length; ++h) {
-							if (this.active) {
-								let tile = gameMap.tiles[h];
-								if (
-									tile.wall &&
-									tile.hasCollision &&
-									this.canSeeObject(tile, tile.scale)
-								) {
-									if (tile.bottom) {
-										if (
-											this.lineInRect(
-												tile.x,
-												tile.y,
-												tile.scale,
-												tile.scale,
-												true,
-											)
-										) {
-											this.active = false;
-										}
-									} else if (
+					for (let h = 0; h < gameMap.tiles.length; ++h) {
+						if (this.active) {
+							let tile = gameMap.tiles[h];
+							if (
+								tile.wall &&
+								tile.hasCollision &&
+								this.canSeeObject(tile, tile.scale)
+							) {
+								if (tile.bottom) {
+									if (
 										this.lineInRect(
 											tile.x,
 											tile.y,
 											tile.scale,
-											tile.scale - this.owner.height - this.jumpY,
+											tile.scale,
 											true,
 										)
 									) {
 										this.active = false;
 									}
-									if (!this.active) {
-										if (this.bounce) {
-											this.bounceDir(
-												!(this.cEndX <= tile.x) &&
-													!(this.cEndX >= tile.x + tile.scale),
-											);
-										} else {
-											this.hitSomething(
-												!(this.cEndX <= tile.x) &&
-													!(this.cEndX >= tile.x + tile.scale),
-												2,
-											);
-										}
+								} else if (
+									this.lineInRect(
+										tile.x,
+										tile.y,
+										tile.scale,
+										tile.scale - this.owner.height - this.jumpY,
+										true,
+									)
+								) {
+									this.active = false;
+								}
+								if (!this.active) {
+									if (this.bounce) {
+										this.bounceDir(
+											!(this.cEndX <= tile.x) &&
+												!(this.cEndX >= tile.x + tile.scale),
+										);
+									} else {
+										this.hitSomething(
+											!(this.cEndX <= tile.x) &&
+												!(this.cEndX >= tile.x + tile.scale),
+											2,
+										);
 									}
 								}
 							}
 						}
 					}
-					if (this.active && this.owner.index == player.index) {
-						let k;
-						for (
-							let i = 0;
-							i < gameObjects.length &&
-							((k = gameObjects[i]),
-							k.index == this.owner.index ||
-								!(this.lastHit.indexOf(`,${k.index},`) < 0) ||
-								k.team == this.owner.team ||
-								k.type != "player" ||
-								!k.onScreen ||
-								k.dead ||
-								(this.lineInRect(
-									k.x - k.width / 2,
-									k.y - k.height - k.jumpY,
-									k.width,
-									k.height,
-									this.pierceCount <= 1,
-								) &&
-									k.spawnProtection <= 0 &&
-									(this.explodeOnDeath
-										? (this.active = false)
-										: this.dmg > 0 &&
-											((this.lastHit += `${k.index},`),
-											this.spriteIndex != 2 &&
-												(particleCone(
-													12,
-													k.x,
-													k.y - k.height / 2 - k.jumpY,
-													this.dir + Math.PI,
-													Math.PI / randomInt(5, 7),
-													0.5,
-													16,
-													0,
-													true,
-												),
-												createLiquid(k.x, k.y, this.dir, 4)),
-											this.pierceCount > 0 && this.pierceCount--,
-											this.pierceCount <= 0 && (this.active = false))),
-								this.active));
-							++i
-						);
+				}
+				if (this.active && this.owner.index === player.index) {
+					for (let i = 0; i < gameObjects.length; i++) {
+						let tmpObject = gameObjects[i];
+						if (
+							tmpObject.index === this.owner.index ||
+							this.lastHit.includes(tmpObject.index) ||
+							tmpObject.team === this.owner.team ||
+							tmpObject.type !== "player" ||
+							!tmpObject.onScreen ||
+							tmpObject.dead ||
+							(this.lineInRect(
+								tmpObject.x - tmpObject.width / 2,
+								tmpObject.y - tmpObject.height - tmpObject.jumpY,
+								tmpObject.width,
+								tmpObject.height,
+								this.pierceCount <= 1,
+							) &&
+								tmpObject.spawnProtection <= 0)
+						) {
+							continue;
+						}
+						if (this.explodeOnDeath) {
+							this.active = false;
+						} else if (this.dmg > 0) {
+							this.lastHit.push(tmpObject.index);
+							if (this.spriteIndex !== 2) {
+								particleCone(
+									12,
+									k.x,
+									k.y - k.height / 2 - k.jumpY,
+									this.dir + Math.PI,
+									Math.PI / randomInt(5, 7),
+									0.5,
+									16,
+									0,
+									true,
+								);
+								createLiquid(k.x, k.y, this.dir, 4);
+							}
+							if (this.pierceCount > 0) this.pierceCount--;
+							if (this.pierceCount <= 0) this.active = false;
+						}
+						if (!this.active) break;
 					}
-					if (this.maxLifeTime != null && lifetime >= this.maxLifeTime) {
-						this.active = false;
-					}
+				}
+				if (this.maxLifeTime != null && lifetime >= this.maxLifeTime) {
+					this.active = false;
 				}
 			}
 			if (this.spriteIndex === 1) {
@@ -4635,11 +4636,13 @@ function loadModPack(url: string, b) {
 					zipFileCloser.close();
 				} else {
 					tmpFile.filename = tmpFile.filename.replace("vertixmod/", "");
-					fileFormat = tmpFile.filename.split(".")[tmpFile.filename.split(".").length - 1];
+					fileFormat =
+						tmpFile.filename.split(".")[tmpFile.filename.split(".").length - 1];
 					let basePath = tmpFile.filename.split("/")[0];
 					if (basePath === "scripts") {
 						let processor = new e(tmpFile.filename);
-						tmpFile.getData(new zip.TextWriter())
+						tmpFile
+							.getData(new zip.TextWriter())
 							.then((a) => {
 								processor.process(a);
 							})
@@ -4648,7 +4651,8 @@ function loadModPack(url: string, b) {
 							});
 					} else if (basePath === "sprites") {
 						let processor = new h(tmpFile.filename);
-						tmpFile.getData(new zip.BlobWriter("image/png"))
+						tmpFile
+							.getData(new zip.BlobWriter("image/png"))
 							.then((a) => {
 								processor.process(a);
 							})
@@ -4660,7 +4664,8 @@ function loadModPack(url: string, b) {
 							tmpFile.filename.replace(`.${fileFormat}`, ""),
 							fileFormat,
 						);
-						tmpFile.getData(new zip.BlobWriter(`audio/${fileFormat}`))
+						tmpFile
+							.getData(new zip.BlobWriter(`audio/${fileFormat}`))
 							.then((a) => {
 								processor.process(a);
 							})
