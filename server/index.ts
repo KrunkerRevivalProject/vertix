@@ -308,8 +308,13 @@ io.on("connection", (socket: Socket) => {
 					}
 				} else if (!bullet.active && bullet.explodeOnDeath) {
 					io.emit("ex", bullet.x, bullet.y, 3);
-					//TODO: calculate players in radius of the explosion and deal damage
-					return;
+					if (bullet.lastHit.length > 0) {
+						for (let i = 0; i < bullet.lastHit.length; i++) {
+							destPlayers.push(players[bullet.lastHit[i]]);
+						}
+					} else {
+						return;
+					}
 				} else {
 					bullet.update(player.delta, currentTime, clutter, tiles, players);
 					setTimeout(updateBullet, player.delta);

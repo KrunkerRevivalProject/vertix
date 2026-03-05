@@ -171,6 +171,7 @@ export class ServerProjectile {
 							) {
 								if (this.explodeOnDeath) {
 									this.active = false;
+									this.lastHit.push(tmpPlayer.index);
 								} else if (this.dmg > 0) {
 									this.lastHit.push(tmpPlayer.index);
 									if (this.spriteIndex != 2) {
