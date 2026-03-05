@@ -148,47 +148,51 @@ export class ServerProjectile {
 					}
 					if (this.active) {
 						let tmpPlayer;
-						for (
-							let i = 0;
-							i < players.length &&
-							((tmpPlayer = players[i]),
-							tmpPlayer.index == this.owner.index ||
+						for (let i = 0; i < players.length; i++) {
+							tmpPlayer = players[i];
+							if (
+								tmpPlayer.index == this.owner.index ||
 								this.lastHit.includes(tmpPlayer.index) ||
 								tmpPlayer.team == this.owner.team ||
 								tmpPlayer.type != "player" ||
 								!tmpPlayer.onScreen ||
-								tmpPlayer.dead ||
-								(this.lineInRect(
+								tmpPlayer.dead
+							) {
+								continue;
+							}
+							if (
+								this.lineInRect(
 									tmpPlayer.x - tmpPlayer.width / 2,
 									tmpPlayer.y - tmpPlayer.height - tmpPlayer.jumpY,
 									tmpPlayer.width,
 									tmpPlayer.height,
 									this.pierceCount <= 1,
-								) &&
-									tmpPlayer.spawnProtection <= 0 &&
-									(this.explodeOnDeath
-										? (this.active = false)
-										: this.dmg > 0 &&
-											(this.lastHit.push(tmpPlayer.index),
-											this.spriteIndex != 2 &&
-												//(particleCone(
-												//	12,
-												//	k.x,
-												//	k.y - k.height / 2 - k.jumpY,
-												//	this.dir + Math.PI,
-												//	Math.PI / randomInt(5, 7),
-												//	0.5,
-												//	16,
-												//	0,
-												//	true,
-												//),
-												//createLiquid(k.x, k.y, this.dir, 4)),
-												this.pierceCount > 0 &&
-												this.pierceCount--,
-											this.pierceCount <= 0 && (this.active = false)),
-									this.active)));
-							++i
-						);
+								) && tmpPlayer.spawnProtection <= 0
+							) {
+								if (this.explodeOnDeath) {
+									this.active = false;
+								} else if (this.dmg > 0) {
+									this.lastHit.push(tmpPlayer.index);
+									if (this.spriteIndex != 2) {
+										//(particleCone(
+										//	12,
+										//	k.x,
+										//	k.y - k.height / 2 - k.jumpY,
+										//	this.dir + Math.PI,
+										//	Math.PI / randomInt(5, 7),
+										//	0.5,
+										//	16,
+										//	0,
+										//	true,
+										//),
+										//createLiquid(k.x, k.y, this.dir, 4)),
+									}
+									if (this.pierceCount > 0) this.pierceCount--;
+									if (this.pierceCount <= 0) this.active = false;
+								}
+							}
+							if (!this.active) break;
+						}
 					}
 					if (this.maxLifeTime != null && lifetime >= this.maxLifeTime) {
 						this.active = false;
