@@ -16,6 +16,7 @@ export class ServerProjectile {
 	weaponIndex = 0;
 	spriteIndex = 0;
 	pierceCount = 0;
+	blastRadius = 0;
 	glowHeight = 0;
 	glowWidth = 0;
 	speed = 0;
@@ -170,7 +171,6 @@ export class ServerProjectile {
 							) {
 								if (this.explodeOnDeath) {
 									this.active = false;
-									this.lastHit.push(tmpPlayer.index);
 								} else if (this.dmg > 0) {
 									this.lastHit.push(tmpPlayer.index);
 									if (this.spriteIndex !== 2) {
@@ -298,6 +298,9 @@ export class ServerProjectile {
 	}
 	dotInRect(dotX: number, dotY: number, rectX: number, rectY: number, rectW: number, rectH: number) {
 		return dotX >= rectX && dotX <= rectX + rectW && dotY >= rectY && dotY <= rectY + rectH;
+	}
+	rectInRect(rectX: number, rectY: number, rectW: number, rectH: number, rectX2: number, rectY2: number, rectW2: number, rectH2: number) {
+		return (rectX < rectX2 + rectW2 && rectX + rectW > rectX2 && rectY < rectY2 + rectH2 && rectY + rectH > rectY2);
 	}
 	adjustOnCollision(rectX: number, rectY: number, rectW: number, rectH: number) {
 		let endX = this.cEndX;

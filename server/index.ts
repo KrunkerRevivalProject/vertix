@@ -308,13 +308,23 @@ io.on("connection", (socket: Socket) => {
 					}
 				} else if (!bullet.active && bullet.explodeOnDeath) {
 					io.emit("ex", bullet.x, bullet.y, 3);
-					if (bullet.lastHit.length > 0) {
-						for (let i = 0; i < bullet.lastHit.length; i++) {
-							destPlayers.push(players[bullet.lastHit[i]]);
+					for (let p = 0; p < players.length; p++) {
+						let tmpPlayer = players[p];
+						//TODO: align hitboxes properly and calculate dmg drop off
+						if (bullet.rectInRect(
+							bullet.x,
+							bullet.y,
+							bullet.blastRadius,
+							bullet.blastRadius,
+							tmpPlayer.x - tmpPlayer.width / 4,
+							tmpPlayer.y - tmpPlayer.height / 4 - tmpPlayer.jumpY,
+							tmpPlayer.width,
+							tmpPlayer.height,
+						)) {
+							destPlayers.push(tmpPlayer);
 						}
-					} else {
-						return;
 					}
+					if (destPlayers.length < 0) return;
 				} else {
 					bullet.update(player.delta, currentTime, clutter, tiles, players);
 					setTimeout(updateBullet, player.delta);
@@ -327,9 +337,9 @@ io.on("connection", (socket: Socket) => {
 						dID: sourcePlayer.index,
 						gID: destPlayers[i].index,
 						dir: d,
-						amount: -getCurrentWeapon(sourcePlayer).dmg,
+						amount: -bullet.dmg,
 						bi: -1,
-						h: (destPlayers[i].health -= getCurrentWeapon(sourcePlayer).dmg),
+						h: (destPlayers[i].health -= bullet.dmg),
 					});
 					const dead = destPlayers[i].health <= 0;
 					if (!dead) return;

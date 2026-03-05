@@ -51,6 +51,7 @@ export function shootNextBullet(
 		bullet.glowHeight = weapon.glowHeight;
 		bullet.explodeOnDeath = weapon.explodeOnDeath;
 		bullet.pierceCount = weapon.pierce;
+		bullet.blastRadius = weapon.blastRadius;
 		bullet.activate();
 	}
 	bullet = null;
