@@ -232,7 +232,7 @@ div {
 	margin-right: 10px;
 	width: 62px;
 	height: 62px;
-	background: url("/web/20211107033150im_/http://vertix.io/images/hats/display.png");
+	background: url("/images/hats/display.png");
 	background-size: 62px 62px;
 	background-repeat: no-repeat;
 }
@@ -243,7 +243,7 @@ div {
 	margin-right: 10px;
 	width: 62px;
 	height: 62px;
-	background: url("/web/20211107033150im_/http://vertix.io/images/shirts/display.png");
+	background: url("/images/shirts/display.png");
 	background-size: 62px 62px;
 	background-repeat: no-repeat;
 }
@@ -760,7 +760,6 @@ div {
 	-moz-border-radius: 1px;
 	-webkit-border-radius: 1px;
 	margin-bottom: 10px;
-	border: 0;
 	font-size: 15px;
 	color: rgba(255, 255, 255, 1);
 }
@@ -919,7 +918,6 @@ div {
 	margin-bottom: 10px;
 	font-size: 12px;
 	color: rgba(255, 255, 255, 1);
-	position: relative;
 }
 
 #registerButton {

@@ -2382,6 +2382,7 @@ function resetHatList() {
 		"<div class='hatSelectItem' id='hatItem-1' onclick='changeHat(-1);'>Default</div>";
 	changeHat(-1);
 }
+window.showHatselector = showHatselector;
 function showHatselector() {
 	charSelectorCont.style.display = "none";
 	lobbySelectorCont.style.display = "none";
@@ -2393,6 +2394,7 @@ function showHatselector() {
 	spraySelector.style.display = "none";
 	hatSelector.style.display = "block";
 }
+window.changeHat = changeHat;
 function changeHat(a) {
 	if (socket) {
 		socket.emit("cHat", a);
@@ -2448,6 +2450,7 @@ function resetShirtList() {
 		"<div class='hatSelectItem' id='shirtItem-1' onclick='changeShirt(-1);'>Default</div>";
 	changeShirt(-1);
 }
+window.showShirtselector = showShirtselector;
 function showShirtselector() {
 	charSelectorCont.style.display = "none";
 	lobbySelectorCont.style.display = "none";
@@ -2459,6 +2462,7 @@ function showShirtselector() {
 	hatSelector.style.display = "none";
 	shirtSelector.style.display = "block";
 }
+window.changeShirt = changeShirt;
 function changeShirt(a) {
 	if (socket) {
 		socket.emit("cShirt", a);
@@ -2528,10 +2532,13 @@ function changeSpray(a, b) {
 		currentSpray.style.color = document.getElementById(
 			`sprayItem${a}`,
 		).style.color;
-		document.getElementById(`sprayHoverImage${a}`).innerHTML =
-			"<image class='sprayDisplayImage' src='.././images/sprays/" +
-			b +
-			".png'></image>";
+		let hoverElem = document.getElementById(`sprayHoverImage${a}`);
+		if (hoverElem) {
+			hoverElem.innerHTML =
+				"<image class='sprayDisplayImage' src='.././images/sprays/" +
+				b +
+				".png'></image>";
+		}
 		charSelectorCont.style.display = "block";
 		lobbySelectorCont.style.display = "block";
 		classSelector.style.display = "none";
