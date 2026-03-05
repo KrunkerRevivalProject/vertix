@@ -9,6 +9,5 @@
 		"moduleResolution": "bundler",
 		"allowImportingTsExtensions": true
 		// "strict": true
-	},
-	"include": ["src"]
+	}
 }

@@ -1,3 +1,4 @@
-import { defineConfig } from "vite";
-
-export default defineConfig({});
+/** @type {import('vite').UserConfig} */
+export default {
+	// ...
+};
