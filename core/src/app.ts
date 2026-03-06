@@ -1180,13 +1180,13 @@ function settingSelectChat(elem: HTMLElement) {
 		? "auto"
 		: "none";
 }
-var targetFPS = 30;
+var targetFPS = 60;
 if (localStorage.getItem("targetFPS")) {
 	targetFPS = localStorage.getItem("targetFPS");
 	try {
 		targetFPS = Number.parseInt(targetFPS);
 	} catch (_) {
-		targetFPS = 30;
+		targetFPS = 60;
 	}
 	const fpsSelect: HTMLSelectElement = document.getElementById("fpsSelect");
 	fpsSelect.value = targetFPS;
@@ -1197,7 +1197,7 @@ function pickedFps(elem: HTMLSelectElement) {
 	try {
 		targetFPS = Number.parseInt(targetFPS);
 	} catch (_) {
-		targetFPS = 30;
+		targetFPS = 60;
 	}
 	localStorage.setItem("targetFPS", targetFPS);
 }
