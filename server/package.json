@@ -5,10 +5,10 @@
 		"dev": "node --watch --watch-preserve-output index.ts"
 	},
 	"dependencies": {
-		"@hono/node-server": "^1.19.9",
+		"@hono/node-server": "^1.19.11",
 		"core": "workspace:*",
-		"hono": "^4.12.2",
-		"socket.io": "^4.8.1"
+		"hono": "^4.12.5",
+		"socket.io": "^4.8.3"
 	},
 	"type": "module"
 }
