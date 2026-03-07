@@ -4820,7 +4820,7 @@ function loadModPack(url: string, isBaseAssets: boolean) {
 					let basePath = tmpFile.filename.split("/")[0];
 					if (basePath === "scripts") {
 						let processor = new e(tmpFile.filename);
-						tmpFile
+						(tmpFile as any)
 							.getData(new zip.TextWriter())
 							.then((a) => {
 								processor.process(a);
@@ -4830,7 +4830,7 @@ function loadModPack(url: string, isBaseAssets: boolean) {
 							});
 					} else if (basePath === "sprites") {
 						let processor = new h(tmpFile.filename);
-						tmpFile
+						(tmpFile as any)
 							.getData(new zip.BlobWriter("image/png"))
 							.then((a) => {
 								processor.process(a);
@@ -4843,7 +4843,7 @@ function loadModPack(url: string, isBaseAssets: boolean) {
 							tmpFile.filename.replace(`.${fileFormat}`, ""),
 							fileFormat,
 						);
-						tmpFile
+						(tmpFile as any)
 							.getData(new zip.BlobWriter(`audio/${fileFormat}`))
 							.then((a) => {
 								processor.process(a);
