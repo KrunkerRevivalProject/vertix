@@ -4578,16 +4578,16 @@ function loadPlayerSpriteArray(
 		});
 	}
 }
-var flagSprites: HTMLImageElement[] = [];
-var clutterSprites: HTMLImageElement[] = [];
-var cachedWalls: Record<string, HTMLCanvasElement> = {};
-var floorSprites: HTMLImageElement[] = [];
-var cachedFloors: Record<string, HTMLCanvasElement> = {};
+var flagSprites: Sprite[] = [];
+var clutterSprites: Sprite[] = [];
+var cachedWalls: Record<string, Sprite> = {};
+var floorSprites: Sprite[] = [];
+var cachedFloors: Record<string, Sprite> = {};
 var sideWalkSprite = null;
 var lightSprite = null;
-var ambientSprites: HTMLImageElement[] = [];
-var wallSpritesSeg: HTMLImageElement[] = [];
-var particleSprites: HTMLImageElement[] = [];
+var ambientSprites: Sprite[] = [];
+var wallSpritesSeg: Sprite[] = [];
+var particleSprites: Sprite[] = [];
 var weaponSpriteSheet: {
 	upSprite: Sprite;
 	downSprite: Sprite;
@@ -4595,9 +4595,9 @@ var weaponSpriteSheet: {
 	rightSprite: Sprite;
 	icon: HTMLImageElement;
 }[] = [];
-var bulletSprites: HTMLImageElement[] = [];
-var cachedShadows: HTMLCanvasElement[] = [];
-var cachedWeaponSprites: Record<string, HTMLCanvasElement> = {};
+var bulletSprites: Sprite[] = [];
+var cachedShadows: Sprite[] = [];
+var cachedWeaponSprites: Record<string, Sprite> = {};
 var wallSprite = null;
 var darkFillerSprite = null;
 var healthPackSprite = null;
@@ -5925,7 +5925,8 @@ function getCachedShadow(
 			pixelArray[i + 1] = 0;
 			pixelArray[i + 2] = 0;
 			pixelArray[i + 3] = pixelArray[i + 3]; // ??
-		}
+    }
+		ctx.putImageData(imgData, 0, 0);
 		cachedShadows[sprite.index] = tmpCanvas;
 	}
 	return cachedShadows[sprite.index];
