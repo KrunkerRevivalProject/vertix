@@ -1,4 +1,4 @@
-<html>
+<html lang="en">
 	<head>
 		<meta charset="UTF-8">
 		<title>Vertix Online</title>
@@ -68,7 +68,7 @@
 					</div>
 				</div>
 			</div>
-			<canvas tabindex="1" id="cvs" class="noRightClick" oncontextmenu="return false;"></canvas>
+			<canvas id="cvs" class="noRightClick" oncontextmenu="return false;"></canvas>
 		</div>
 
 		<div id="gameStatWrapper">
@@ -102,9 +102,9 @@
 				<p class="menuHeader">MAIN MENU</p>
 				<input type="text" tabindex="0" autofocus placeholder="Player Name" id="playerNameInput" maxlength="15">
 				<br>
-				<button id="startButton">ENTER GAME</button>
-				<button id="leaderButton">LEADERBOARDS</button>
-				<button id="settingsButton">SETTINGS</button>
+				<button type="button" id="startButton">ENTER GAME</button>
+				<button type="button" id="leaderButton">LEADERBOARDS</button>
+				<button type="button" id="settingsButton">SETTINGS</button>
 				<div id="settings">
 					<ul>
 						<h2 style="margin-bottom:5px;">GRAPHICS:</h2>
@@ -186,7 +186,7 @@
 						</label>
 					</ul>
 				</div>
-				<button id="instructionButton">CONTROLS</button>
+				<button type="button" id="instructionButton">CONTROLS</button>
 				<br>
 				<div id="instructions">
 					<div id="welcomeText" style="margin-bottom:10px;">
@@ -286,15 +286,14 @@
 						</div>
 						<br>
 						Check the
-						<a href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/wiki/index"
-							>Wiki</a
-						>
+						<a href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/wiki/index">
+							Wiki
+						</a>
 						for more info.
 					</div>
 				</div>
 				<div style="width: 100%" id="socialContainer">
 					<div style="margin-bottom:10px;">Thanks for playing</div>
-					<a href="" class="twitter-follow-button" data-show-screen-name="false" data-show-count="true"> </a>
 				</div>
 			</div>
 
@@ -397,8 +396,15 @@
 							style="margin-top:10px;margin-bottom:8px;"
 						>
 						<div id="lobbyMessage" style="margin-left:4px;">Ask the host for the address.</div>
-						<button id="joinLobbyButton" class="smallMenuButton" style="margin-left:5px;margin-top:10px;">JOIN</button>
-						<button class="smallMenuButton" onclick="hideLobbySelector();" style="margin-bottom:0px;margin-top:10px;">
+						<button type="button" id="joinLobbyButton" class="smallMenuButton" style="margin-left:5px;margin-top:10px;">
+							JOIN
+						</button>
+						<button
+							type="button"
+							class="smallMenuButton"
+							onclick="hideLobbySelector();"
+							style="margin-bottom:0px;margin-top:10px;"
+						>
 							BACK
 						</button>
 					</div>
@@ -493,9 +499,14 @@
 							<div id="serverCreateMessage" class="lobbyKey" style="margin-bottom:8px;">
 								Press start to start the Server.
 							</div>
-							<button id="createServerButton" class="smallMenuButton">START</button>
+							<button type="button" id="createServerButton" class="smallMenuButton">START</button>
 						</div>
-						<button class="smallMenuButton" onclick="hideLobbyCSelector();" style="margin-bottom:0px;margin-top:10px;">
+						<button
+							type="button"
+							class="smallMenuButton"
+							onclick="hideLobbyCSelector();"
+							style="margin-bottom:0px;margin-top:10px;"
+						>
 							BACK
 						</button>
 					</div>
@@ -553,9 +564,9 @@
 							onkeyup="if(event.keyCode == 13){startLogin();return false;}"
 						>
 						<div id="loginMessage" style="display:none;"></div>
-						<button id="registerButton" class="smallMenuButton">REGISTER</button>
-						<button id="loginButton" class="smallMenuButton">LOGIN</button>
-						<button id="recoverButton" class="smallMenuButton">RECOVER</button>
+						<button type="button" id="registerButton" class="smallMenuButton">REGISTER</button>
+						<button type="button" id="loginButton" class="smallMenuButton">LOGIN</button>
+						<button type="button" id="recoverButton" class="smallMenuButton">RECOVER</button>
 						<div id="recoverForm" style="display:none;">
 							<input class="menuTextInput" placeholder="Enter Key" id="chngPassKey" maxlength="4" style="width:100%;">
 							<input
@@ -566,7 +577,12 @@
 								maxlength="15"
 								style="width:72%;margin-top:10px;"
 							>
-							<button id="chngPassButton" class="smallMenuButton" style="margin-left:5px;margin-top:10px;">
+							<button
+								type="button"
+								id="chngPassButton"
+								class="smallMenuButton"
+								style="margin-left:5px;margin-top:10px;"
+							>
 								Change
 							</button>
 						</div>
@@ -593,9 +609,11 @@
 									maxlength="4"
 									style="width:70%;"
 								>
-								<button id="createClanButton" class="smallMenuButton" style="margin-left:5px;">CREATE</button>
+								<button type="button" id="createClanButton" class="smallMenuButton" style="margin-left:5px;">
+									CREATE
+								</button>
 								<input class="menuTextInput" placeholder="Clan Name" id="clanKeyInput" maxlength="4" style="width:78%;">
-								<button id="joinClanButton" class="smallMenuButton" style="margin-left:5px;">JOIN</button>
+								<button type="button" id="joinClanButton" class="smallMenuButton" style="margin-left:5px;">JOIN</button>
 								<div id="clanDBMessage" class="serverRespMsg">Join or Create a Clan.</div>
 							</div>
 							<div id="clanStats" style="display:none;">
@@ -616,7 +634,9 @@
 										maxlength="50"
 										style="width:95%;"
 									>
-									<button id="setChatClanButton" class="smallMenuButton" style="margin-top:10px;">UPDATE</button>
+									<button type="button" id="setChatClanButton" class="smallMenuButton" style="margin-top:10px;">
+										UPDATE
+									</button>
 									<div id="clanChtMessage" class="serverRespMsg" style="display:inline-block;margin-left:5px;">
 										(eg. Discord URL)
 									</div>
@@ -627,8 +647,15 @@
 										maxlength="15"
 										style="width:95%;"
 									>
-									<button id="inviteClanButton" class="smallMenuButton" style="margin-top:10px;">INVITE</button>
-									<button id="kickClanButton" class="smallMenuButton" style="margin-left:5px;margin-top:10px;">
+									<button type="button" id="inviteClanButton" class="smallMenuButton" style="margin-top:10px;">
+										INVITE
+									</button>
+									<button
+										type="button"
+										id="kickClanButton"
+										class="smallMenuButton"
+										style="margin-left:5px;margin-top:10px;"
+									>
 										KICK
 									</button>
 									<div id="clanInvMessage" class="serverRespMsg">Invite or Kick Members.</div>
@@ -649,14 +676,15 @@
 									id="youtubeChannelInput"
 									style="margin-bottom:10px;width:95%;"
 								>
-								<button id="saveAccountData" class="smallMenuButton">SAVE</button>
+								<button type="button" id="saveAccountData" class="smallMenuButton">SAVE</button>
 								<div id="editProfileMessage" class="serverRespMsg">Edit Profile Info.</div>
 							</div>
 						</div>
-						<button id="logoutButton" class="smallMenuButton" style="margin-top:10px; margin-bottom:0px;">
+						<button type="button" id="logoutButton" class="smallMenuButton" style="margin-top:10px; margin-bottom:0px;">
 							LOGOUT
 						</button>
 						<button
+							type="button"
 							id="leaveClanButton"
 							class="smallMenuButton"
 							style="margin-top:10px; margin-left:5px; margin-bottom:0px; display:none;"
@@ -664,6 +692,7 @@
 							LEAVE CLAN
 						</button>
 						<button
+							type="button"
 							id="profileButton"
 							class="smallMenuButton"
 							style="margin-top:10px; margin-bottom:0px; margin-left:5px; "
@@ -699,15 +728,16 @@
 							id="textureModInput"
 							class="menuTextInput"
 						>
-						<button id="texturePackButton" class="smallMenuButton">LOAD</button>
+						<button type="button" id="texturePackButton" class="smallMenuButton">LOAD</button>
 					</div>
-					<b
-						><a
+					<b>
+						<a
 							target="_blank"
 							href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/comments/4vypx9/texture_mods_please_post_all_texture_mods_here/"
-							>Get more mods here</a
-						></b
-					>
+						>
+							Get more mods here
+						</a>
+					</b>
 					<br>
 					<div id="modInfo"></div>
 				</div>
@@ -722,15 +752,17 @@
 							<a
 								target="_blank"
 								href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/comments/43ol5a/texture_mods_please_post_all_texture_mods_here/"
-								>FIND A MOD</a
 							>
+								FIND A MOD
+							</a>
 						</li>
 						<li>
 							<a
 								target="_blank"
 								href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/comments/444pzc/guide_how_to_make_a_mod/"
-								>MAKE A MOD</a
 							>
+								MAKE A MOD
+							</a>
 						</li>
 					</ul>
 				</div>
@@ -752,8 +784,9 @@
 							<a
 								target="_blank"
 								href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/wiki/index"
-								>WIKI</a
 							>
+								WIKI
+							</a>
 						</li>
 						<li><a target="_blank" href="./terms.txt">TERMS OF USE</a></li>
 						<li><a target="_blank" href="./privacy.txt">PRIVACY POLICY</a></li>
@@ -784,15 +817,17 @@
 							<a
 								target="_blank"
 								href="https://web.archive.org/web/20230531015720/http://www.facebook.com/sharer.php?u=http://vertix.io"
-								>FACEBOOK</a
 							>
+								FACEBOOK
+							</a>
 						</li>
 						<li>
 							<a
 								target="_blank"
 								href="https://web.archive.org/web/20230531015720/http://twitter.com/share?url=http://vertix.io&amp;text=Check out&amp;hashtags=vertix.io"
-								>TWITTER</a
 							>
+								TWITTER
+							</a>
 						</li>
 					</ul>
 				</div>

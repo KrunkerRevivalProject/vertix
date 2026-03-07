@@ -15,6 +15,9 @@
 			"correctness": {
 				"noUnusedVariables": "info",
 				"useParseIntRadix": "off"
+			},
+			"a11y": {
+				"noAutofocus": "off"
 			}
 		}
 	}
