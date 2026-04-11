@@ -786,6 +786,7 @@ var shirtSelector = document.getElementById("shirtSelector");
 var lobbyCSelector = document.getElementById("lobbyCSelector");
 var charSelectorCont = document.getElementById("charSelectorCont");
 var lobbySelectorCont = document.getElementById("lobbySelectorCont");
+let roomSelector = document.getElementById("roomSelector");
 function showLobbySelector() {
 	charSelectorCont.style.display = "none";
 	lobbySelectorCont.style.display = "none";
@@ -1083,6 +1084,7 @@ function setupSocket(sock: Socket) {
 	sock.on("upd", updateUserValue);
 	sock.on("vt", updateVoteStats);
 	sock.on("add", addUser);
+	sock.on("updRooms", createRoomList);
 	sock.on("updHt", updateHatList);
 	sock.on("updShrt", updateShirtList);
 	sock.on("updCmo", updateCamosList);
@@ -2956,6 +2958,23 @@ function updateBullets(delta: number) {
 			graph.restore();
 		}
 	}
+}
+
+let roomList = document.getElementById("roomList");
+function createRoomList(rooms: any[]) {
+	let res: Node[] = [];
+	for (const [i, room] of rooms.entries()) {
+		res.push(
+			<div class="hatSelectItem" id={`room${i}`} onClick={() => joinRoom(i)}>
+				{`${room.n} - ${room.m} - ${room.pl}`}
+			</div>,
+		);
+	}
+	roomList.replaceChildren(...res);
+	roomSelector.style.display = "block";
+}
+function joinRoom(i: number) {
+	console.log(i);
 }
 
 var currentClassID = 0;

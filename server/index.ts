@@ -15,6 +15,18 @@ let rooms: Room[] = [];
 for (let i = 0; i < 3; i++) {
 	let room = new Room(io, `DEV${i}`);
 	room.handleSocket();
+	room.io.on("connection", (socket: any) => {
+		let list = [];
+		for (const r of rooms) {
+			let item = {
+				n: r.name,
+				m: r.game.mode.code,
+				pl: r.game.players.length,
+			};
+			list.push(item);
+		}
+		socket.emit("updRooms", list)
+	})
 	rooms.push(room);
 }
 
