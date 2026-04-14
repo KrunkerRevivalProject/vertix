@@ -30,7 +30,7 @@ app.use(
 	}),
 );
 app.get("/getIP", (c) => {
-	let room;
+	let room: Room;
 	if (c.req.query("room") !== "") {
 		room = rooms.find((r) => r.name === c.req.query("room")) || rooms[0];
 	} else {
