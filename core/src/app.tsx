@@ -2966,7 +2966,7 @@ function createRoomList(rooms: any[]) {
 	let res: Node[] = [];
 	for (const [i, room] of rooms.entries()) {
 		res.push(
-			<div className="roomSelectItem" id={`room${i}`} onClick={() => joinRoom(i)}>
+			<div className="roomSelectItem" id={`room${i}`} onClick={() => joinRoom(rooms[i].n)}>
 				<span>{`${room.m}_${room.n}`}</span>
 				<span>{`${room.pl}/8`}</span>
 			</div>,
@@ -2975,8 +2975,22 @@ function createRoomList(rooms: any[]) {
 	roomList.replaceChildren(...res);
 	roomSelector.style.display = "block";
 }
-function joinRoom(i: number) {
-	console.log(i);
+async function joinRoom(roomName: string) {
+	const resp = await fetch(`http://localhost:1118/getIP?room=${roomName}`);
+	const { ip, port, room } = await resp.json();
+	if (changingLobby) return;
+	changingLobby = true;
+	const s = io(`http://${ip}:${port}/${room}`, {
+		reconnection: true,
+		forceNew: true,
+	});
+	socket.close();
+	changingLobby = false;
+	socket = s;
+	st.socket = s;
+	setupSocket(socket);
+	st.kicked = false;
+	disconnected = false;
 }
 
 var currentClassID = 0;
