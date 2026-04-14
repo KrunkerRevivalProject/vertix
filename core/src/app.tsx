@@ -41,7 +41,7 @@ import {
 	updateParticles,
 } from "./visual/particle.ts";
 import { screenShake, updateScreenShake } from "./visual/shake.ts";
-import RoomList from "./components/RoomList.svelte";
+import RoomList from "./components/roomList.svelte";
 
 const { shootNextBullet, getNextBullet, setupMap, wallCol, getCurrentWeapon, randomInt, canSee } =
 	utils;

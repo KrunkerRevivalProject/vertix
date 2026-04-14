@@ -6,10 +6,7 @@ import { Room } from "./room.ts";
 
 const io = new Server({
 	cors: {
-		origin: [
-			"http://localhost:5173",
-			"http://localhost:1118",
-		],
+		origin: ["http://localhost:5173", "http://localhost:1118"],
 		methods: ["GET"],
 	},
 });
