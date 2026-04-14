@@ -41,6 +41,7 @@ import {
 	updateParticles,
 } from "./visual/particle.ts";
 import { screenShake, updateScreenShake } from "./visual/shake.ts";
+import RoomList from "./components/RoomList.svelte";
 
 const { shootNextBullet, getNextBullet, setupMap, wallCol, getCurrentWeapon, randomInt, canSee } =
 	utils;
@@ -50,7 +51,6 @@ var playerClassIndex: number | undefined;
 var playerNameInput = document.getElementById("playerNameInput") as HTMLInputElement;
 var socket: Socket | undefined;
 var reason: string | undefined;
-var room: any;
 var currentFPS = 0;
 var fillCounter = 0;
 var currentLikeButton: number = null;
@@ -96,7 +96,7 @@ function enterGame() {
 	screenWidth = window.innerWidth;
 	screenHeight = window.innerHeight;
 	document.getElementById("startMenuWrapper").style.display = "none";
-	if (!room) {
+	if (!st.room) {
 		socket.emit("create");
 	}
 	socket.emit("respawn");
@@ -241,8 +241,6 @@ window.onload = async () => {
 		st.socket = socket;
 		setupSocket(socket);
 	}
-	const roomsResp = await fetch(`http://localhost:1118/getRooms`);
-	createRoomList(await roomsResp.json());
 	socket.once("connect", () => {
 		var logKey = localStorage.getItem("logKey");
 		var userName = localStorage.getItem("userName");
@@ -741,6 +739,10 @@ mount(Settings, {
 mount(Controls, {
 	target: document.getElementById("controls"),
 });
+mount(RoomList, {
+	target: document.getElementById("roomWrapper"),
+	props: { joinRoom },
+});
 
 Array.from(document.getElementsByClassName("tablinks") as HTMLCollectionOf<HTMLElement>).map(
 	(elem) =>
@@ -764,7 +766,7 @@ function changeMenuTab(event: MouseEvent, tabId: string) {
 	(event.currentTarget as HTMLElement).className += " active";
 }
 function kickPlayer(secondReason: string) {
-	if (disconnected) return;
+	if (disconnected || changingLobby) return;
 	hideStatTable();
 	hideUI(true);
 	hideMenuUI();
@@ -788,7 +790,6 @@ var shirtSelector = document.getElementById("shirtSelector");
 var lobbyCSelector = document.getElementById("lobbyCSelector");
 var charSelectorCont = document.getElementById("charSelectorCont");
 var lobbySelectorCont = document.getElementById("lobbySelectorCont");
-let roomSelector = document.getElementById("roomSelector");
 function showLobbySelector() {
 	charSelectorCont.style.display = "none";
 	lobbySelectorCont.style.display = "none";
@@ -854,7 +855,7 @@ function setupSocket(sock: Socket) {
 		sock.emit("ping1");
 	}, 2000);
 	sock.on("yourRoom", (a, d) => {
-		room = a;
+		st.room = a;
 		serverKeyTxt.textContent = d;
 	});
 	sock.on("connect_failed", () => {
@@ -871,7 +872,7 @@ function setupSocket(sock: Socket) {
 	sock.on("welcome", (b, d) => {
 		st.player.id = b.id;
 		st.player.room = b.room;
-		room = st.player.room;
+		st.room = st.player.room;
 		st.player.name = playerName;
 		st.player.classIndex = playerClassIndex;
 		b.name = st.player.name;
@@ -2961,20 +2962,6 @@ function updateBullets(delta: number) {
 	}
 }
 
-let roomList = document.getElementById("roomList");
-function createRoomList(rooms: any[]) {
-	let res: Node[] = [];
-	for (const [i, room] of rooms.entries()) {
-		res.push(
-			<div className="roomSelectItem" id={`room${i}`} onClick={() => joinRoom(rooms[i].n)}>
-				<span>{`${room.m}_${room.n}`}</span>
-				<span>{`${room.pl}/8`}</span>
-			</div>,
-		);
-	}
-	roomList.replaceChildren(...res);
-	roomSelector.style.display = "block";
-}
 async function joinRoom(roomName: string) {
 	const resp = await fetch(`http://localhost:1118/getIP?room=${roomName}`);
 	const { ip, port, room } = await resp.json();
