@@ -241,6 +241,8 @@ window.onload = async () => {
 		st.socket = socket;
 		setupSocket(socket);
 	}
+	const roomsResp = await fetch(`http://localhost:1118/getRooms`);
+	createRoomList(await roomsResp.json());
 	socket.once("connect", () => {
 		var logKey = localStorage.getItem("logKey");
 		var userName = localStorage.getItem("userName");
@@ -1084,7 +1086,6 @@ function setupSocket(sock: Socket) {
 	sock.on("upd", updateUserValue);
 	sock.on("vt", updateVoteStats);
 	sock.on("add", addUser);
-	sock.on("updRooms", createRoomList);
 	sock.on("updHt", updateHatList);
 	sock.on("updShrt", updateShirtList);
 	sock.on("updCmo", updateCamosList);
