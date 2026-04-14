@@ -2966,8 +2966,9 @@ function createRoomList(rooms: any[]) {
 	let res: Node[] = [];
 	for (const [i, room] of rooms.entries()) {
 		res.push(
-			<div class="hatSelectItem" id={`room${i}`} onClick={() => joinRoom(i)}>
-				{`${room.n} - ${room.m} - ${room.pl}`}
+			<div className="roomSelectItem" id={`room${i}`} onClick={() => joinRoom(i)}>
+				<span>{`${room.m}_${room.n}`}</span>
+				<span>{`${room.pl}/8`}</span>
 			</div>,
 		);
 	}

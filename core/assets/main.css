@@ -683,6 +683,27 @@ div {
 	font-size: 14px;
 }
 
+.roomSelectItem {
+	font-size: 12px;
+	padding: 5px;
+	cursor: pointer;
+	position: relative;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.roomSelectItem:hover {
+	background: rgba(0, 0, 0, 0.1);
+	font-size: 14px;
+}
+
+.roomSelectItem:hover span {
+	font-size: 14px;
+}
+
 .hatSelectItem {
 	font-size: 12px;
 	padding: 5px;
