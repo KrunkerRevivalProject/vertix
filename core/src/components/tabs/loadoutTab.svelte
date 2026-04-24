@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { st } from "../../state.svelte.ts";
 	import { getItemRarityColor } from "../../utils.ts";
+    import CosmeticTooltip from "./cosmeticTooltip.svelte";
 
 	let currentScreen:
 		| "main"
@@ -72,6 +73,9 @@
 			style:color={st.loadout.hat ? getItemRarityColor(st.loadout.hat.chance) : undefined}
 		>
 			{st.loadout.hat?.name ?? "Default"}
+			{#if st.loadout.hat}
+				<CosmeticTooltip type="hat" item={st.loadout.hat} />
+			{/if}
 		</div>
 	</div>
 	<div id="charShirt" onclick={() => currentScreen = "shirt"} style="margin-top:-5px;">
@@ -83,6 +87,9 @@
 			style:color={st.loadout.shirt ? getItemRarityColor(st.loadout.shirt.chance) : undefined}
 		>
 			{st.loadout.shirt?.name ?? "Default"}
+			{#if st.loadout.shirt}
+				<CosmeticTooltip type="shirt" item={st.loadout.shirt} />
+			{/if}
 		</div>
 	</div>
 	<div id="charSpray" onclick={() => currentScreen = "spray"} style="margin-top:-5px;">
@@ -126,6 +133,7 @@
 			>
 				{camo.name}
 				x{camo.count + 1}
+				<!-- tooltip? -->
 			</div>
 		{/each}
 	</div>
@@ -144,18 +152,7 @@
 				>
 					{hat.name}
 					x{hat.count + 1}
-					<div class="hoverTooltip">
-						<img class="itemDisplayImage" src={`/images/hats/${hat.id}/d.png`}>
-						<div style:color={getItemRarityColor(hat.chance)} style:font-size={"16px"} style:margin-top={"5px"}>
-							{hat.name}
-						</div>
-						<div style="color: #ffd100; font-size: 12px; margin-top: 0px">droprate {hat.chance}%</div>
-						<div style="font-size: 8px; color: #d8d8d8; margin-top: 1px"><i>wearable</i></div>
-						<div style="font-size: 12px; margin-top: 5px">{hat.desc}</div>
-						{#if hat.creator !== "EatMyApples"}
-							<div style="font-size: 8px; color: #d8d8d8, margin-top: 5px"><i>Artist: {hat.creator}</i></div>
-						{/if}
-					</div>
+					<CosmeticTooltip type="hat" item={hat} />
 				</div>
 			{/each}
 		{:else}
@@ -181,15 +178,7 @@
 			>
 				{shirt.name}
 				x{shirt.count + 1}
-				<div class="hoverTooltip">
-					<img class="shirtDisplayImage" src={`/images/shirts/${shirt.id}/d.png`}>
-					<div style:color={getItemRarityColor(shirt.chance)} style="font-size: 16px; margin-top: 5px">
-						{shirt.name}
-					</div>
-					<div style="color: #ffd100; font-size: 12px; margin-top: 0px">droprate {shirt.chance}%</div>
-					<div style="font-size: 8px; color: #d8d8d8; margin-top: 1px"><i>shirt</i></div>
-					<div style="font-size: 12px; margin-top: 5px">{shirt.desc}</div>
-				</div>
+				<CosmeticTooltip type="shirt" item={shirt} />
 			</div>
 		{/each}
 	</div>
