@@ -1,4 +1,6 @@
 import type { Socket } from "socket.io-client";
+import { characterClasses } from "./loadouts.ts";
+import type * as cosmetics from "./skins.ts";
 import type { MapData, Player, Sprite } from "./types.ts";
 
 export const st = $state({
@@ -14,6 +16,20 @@ export const st = $state({
 		weapons: [],
 	} as any as Player,
 	playerName: "", // content of the player name input box
+	loadout: {
+		class: characterClasses[0] as (typeof characterClasses)[number],
+		primaryCamo: null as ((typeof cosmetics.camos)[number] & { count: 0 }) | null,
+		secondaryCamo: null as ((typeof cosmetics.camos)[number] & { count: 0 }) | null,
+		hat: null as ((typeof cosmetics.hats)[number] & { count: 0 }) | null,
+		shirt: null as ((typeof cosmetics.shirts)[number] & { count: 0 }) | null,
+		spray: 1 as number, // we have no spray data? :(
+	},
+	cosmetics: {
+		hats: [] as typeof cosmetics.hats & { count: 0 }[],
+		shirts: [] as typeof cosmetics.shirts & { count: 0 }[],
+		camos: [] as (typeof cosmetics.camos)[] & { count: 0 }[][],
+	},
+	characterClasses,
 	shake: {
 		x: 0,
 		y: 0,
