@@ -45,23 +45,43 @@
 	</div>
 	<div id="charWpn" onclick={() => currentScreen = "primaryCamo"} style="margin-top:-5px;">
 		<b>Primary: </b>
-		<div class="hatSelectItem" style="display:inline-block">
+		<div
+			class="hatSelectItem"
+			style="display:inline-block"
+			style:color={st.loadout.primaryCamo ? getItemRarityColor(st.loadout.primaryCamo.chance) : undefined}
+		>
 			{st.loadout.primaryCamo?.name ?? st.loadout.class.pWeapon}
 		</div>
 	</div>
 	<div id="charWpn2" onclick={() => currentScreen = "secondaryCamo"} style="margin-top:-5px;">
 		<b>Secondary: </b>
-		<div class="hatSelectItem" style="display:inline-block">
+		<div
+			class="hatSelectItem"
+			style="display:inline-block"
+			style:color={st.loadout.secondaryCamo ? getItemRarityColor(st.loadout.secondaryCamo.chance) : undefined}
+		>
 			{st.loadout.secondaryCamo?.name ?? st.loadout.class.sWeapon}
 		</div>
 	</div>
 	<div id="charHat" onclick={() => currentScreen = "hat"} style="margin-top:-5px;">
 		<b>Hat:</b>
-		<div class="hatSelectItem" id="currentHat" style="display:inline-block">{st.loadout.hat?.name ?? "Default"}</div>
+		<div
+			class="hatSelectItem"
+			id="currentHat"
+			style="display:inline-block"
+			style:color={st.loadout.hat ? getItemRarityColor(st.loadout.hat.chance) : undefined}
+		>
+			{st.loadout.hat?.name ?? "Default"}
+		</div>
 	</div>
 	<div id="charShirt" onclick={() => currentScreen = "shirt"} style="margin-top:-5px;">
 		<b>Shirt:</b>
-		<div class="hatSelectItem" id="currentShirt" style="display:inline-block">
+		<div
+			class="hatSelectItem"
+			id="currentShirt"
+			style="display:inline-block"
+			style:color={st.loadout.shirt ? getItemRarityColor(st.loadout.shirt.chance) : undefined}
+		>
 			{st.loadout.shirt?.name ?? "Default"}
 		</div>
 	</div>
