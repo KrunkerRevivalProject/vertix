@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { st } from "../../state.svelte.ts";
 	import { getItemRarityColor } from "../../utils.ts";
-    import CosmeticTooltip from "./cosmeticTooltip.svelte";
+	import CosmeticTooltip from "./cosmeticTooltip.svelte";
 
 	let currentScreen:
 		| "main"
@@ -14,6 +14,35 @@
 		| "joinServer"
 		| "createServer" = $state("main");
 
+	// sync preferences to localStorage
+	function savePref(key: string, value: string | undefined) {
+		console.log(`saving ${value} to ${key}`);
+		if (value) {
+			localStorage.setItem(key, value);
+		} else {
+			localStorage.removeItem(key);
+		}
+	}
+	$effect(() => {
+		savePref("prevHat", st.loadout.hat?.id.toString());
+	});
+	$effect(() => {
+		savePref("prevShirt", st.loadout.shirt?.id.toString());
+	});
+	$effect(() => {
+		savePref("prevSpray", st.loadout.spray?.toString());
+	});
+	$effect(() => {
+		savePref("prevPrimaryCamo", st.loadout.primaryCamo?.id.toString());
+	});
+	$effect(() => {
+		savePref("prevSecondaryCamo", st.loadout.secondaryCamo?.id.toString());
+	});
+	$effect(() => {
+		savePref("prevClass", st.loadout.class?.folderName.toString());
+	});
+
+	// sync selected cosmetics to server
 	$effect(() => {
 		st.socket?.emit("cCamo", {
 			weaponID: st.loadout.class.weaponIndexes[0],

@@ -1,7 +1,15 @@
 import type { Socket } from "socket.io-client";
 import { characterClasses } from "./loadouts.ts";
-import type * as cosmetics from "./skins.ts";
+import * as cosmetics from "./skins.ts";
 import type { MapData, Player, Sprite } from "./types.ts";
+
+function getPref<T extends { id: number }>(data: T[], key: string): T | null {
+	const value = localStorage.getItem(key);
+	console.log(`loading ${value} from ${key}`);
+	if (value && !Number.isNaN(parseInt(value)))
+		return data.find((item) => item.id === parseInt(value)) ?? null;
+	return null;
+}
 
 export const st = $state({
 	gameMap: null as any as MapData,
@@ -18,10 +26,10 @@ export const st = $state({
 	playerName: "", // content of the player name input box
 	loadout: {
 		class: characterClasses[0] as (typeof characterClasses)[number],
-		primaryCamo: null as ((typeof cosmetics.camos)[number] & { count: 0 }) | null,
-		secondaryCamo: null as ((typeof cosmetics.camos)[number] & { count: 0 }) | null,
-		hat: null as ((typeof cosmetics.hats)[number] & { count: 0 }) | null,
-		shirt: null as ((typeof cosmetics.shirts)[number] & { count: 0 }) | null,
+		primaryCamo: getPref(cosmetics.camos, "prevPrimaryCamo"),
+		secondaryCamo: getPref(cosmetics.camos, "prevSecondaryCamo"),
+		hat: getPref(cosmetics.hats, "prevHat"),
+		shirt: getPref(cosmetics.shirts, "prevShirt"),
 		spray: 1 as number, // we have no spray data? :(
 	},
 	cosmetics: {
