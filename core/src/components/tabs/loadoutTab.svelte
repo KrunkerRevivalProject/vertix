@@ -16,7 +16,7 @@
 
 	// sync preferences to localStorage
 	function savePref(key: string, value: string | undefined) {
-		console.log(`saving ${value} to ${key}`);
+		console.debug(`saving ${value} to ${key}`);
 		if (value) {
 			localStorage.setItem(key, value);
 		} else {

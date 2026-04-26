@@ -5,7 +5,7 @@ import type { MapData, Player, Sprite } from "./types.ts";
 
 function getPref<T extends { id: number }>(data: T[], key: string): T | null {
 	const value = localStorage.getItem(key);
-	console.log(`loading ${value} from ${key}`);
+	console.debug(`loading ${value} from ${key}`);
 	if (value && !Number.isNaN(parseInt(value)))
 		return data.find((item) => item.id === parseInt(value)) ?? null;
 	return null;
