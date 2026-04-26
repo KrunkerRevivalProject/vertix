@@ -10,7 +10,11 @@
 </script>
 
 <div class="hoverTooltip">
-	<img class:itemDisplayImage={type === "hat"} class:shirtDisplayImage={type === "shirt"} src={`/images/${type}s/${item.id}/d.png`}>
+	<img
+		class:itemDisplayImage={type === "hat"}
+		class:shirtDisplayImage={type === "shirt"}
+		src={`/images/${type}s/${item.id}/d.png`}
+	>
 	<div style:color={getItemRarityColor(item.chance)} style:font-size={"16px"} style:margin-top={"5px"}>{item.name}</div>
 	<div style="color: #ffd100; font-size: 12px; margin-top: 0px">droprate {item.chance}%</div>
 	<div style="font-size: 8px; color: #d8d8d8; margin-top: 1px"><i>wearable</i></div>
