@@ -44,6 +44,8 @@ const {
 	setupMap,
 	wallCol,
 	getCurrentWeapon,
+	snapAngleToCardinal,
+	isWeaponFacingFront,
 	randomInt,
 	canSee,
 	getItemRarityColor,
@@ -1318,11 +1320,11 @@ function addRowToStatTable(data: StatTableRow[], b: boolean) {
 function addUser(userString: string) {
 	let parsed = JSON.parse(userString);
 	if (parsed.index !== st.player.index) {
-		const b = findUserByIndex(parsed.index);
-		if (b == null) {
+		const existingUser = findUserByIndex(parsed.index);
+		if (existingUser == null) {
 			players.push(parsed);
 		} else {
-			players[players.indexOf(b)] = parsed;
+			players[players.indexOf(existingUser)] = parsed;
 		}
 	}
 }
@@ -1390,61 +1392,56 @@ function updateUserValue(data: any) {
 		}
 	}
 }
-function fetchUserWithIndex(a: number) {
-	socket.emit("ftc", a);
+function fetchUserWithIndex(index: number) {
+	socket.emit("ftc", index);
 }
 function receiveServerData(data: number[]) {
 	if (!st.gameOver) {
 		players.forEach((obj) => {
 			obj.onScreen = false;
 		});
-		for (let d = 0; d < data.length; ) {
-			let b = data[0 + d];
-			const tmpUser = findUserByIndex(data[1 + d]);
-			if (data[1 + d] === st.player.index && tmpUser != null) {
-				if (b > 2) {
-					tmpUser.x = data[2 + d];
+		for (let cursor = 0; cursor < data.length; ) {
+			const packetLength = data[0 + cursor];
+			const playerIndex = data[1 + cursor];
+			const tmpUser = findUserByIndex(playerIndex);
+			if (playerIndex === st.player.index && tmpUser != null) {
+				if (packetLength > 2) {
+					tmpUser.x = data[2 + cursor];
 				}
-				if (b > 3) {
-					tmpUser.y = data[3 + d];
+				if (packetLength > 3) {
+					tmpUser.y = data[3 + cursor];
 				}
-				if (b > 4) {
-					tmpUser.angle = data[4 + d];
+				if (packetLength > 4) {
+					tmpUser.angle = data[4 + cursor];
 				}
-				if (b > 5) {
-					tmpUser.isn = data[5 + d];
+				if (packetLength > 5) {
+					tmpUser.isn = data[5 + cursor];
 				}
 				tmpUser.onScreen = true;
 			} else if (tmpUser != null) {
-				if (b > 2) {
-					tmpUser.xSpeed = Math.abs(tmpUser.x - data[2 + d]);
-					tmpUser.x = data[2 + d];
+				if (packetLength > 2) {
+					tmpUser.xSpeed = Math.abs(tmpUser.x - data[2 + cursor]);
+					tmpUser.x = data[2 + cursor];
 				}
-				if (b > 3) {
-					tmpUser.ySpeed = Math.abs(tmpUser.y - data[3 + d]);
-					tmpUser.y = data[3 + d];
+				if (packetLength > 3) {
+					tmpUser.ySpeed = Math.abs(tmpUser.y - data[3 + cursor]);
+					tmpUser.y = data[3 + cursor];
 				}
-				if (b > 4) {
-					tmpUser.angle = data[4 + d];
+				if (packetLength > 4) {
+					tmpUser.angle = data[4 + cursor];
 				}
-				if (getCurrentWeapon(tmpUser)) {
-					const wepAngle = Math.round((tmpUser.angle % 360) / 90) * 90;
-					if (wepAngle === 0 || wepAngle === 360) {
-						getCurrentWeapon(tmpUser).front = true;
-					} else if (wepAngle === 180) {
-						getCurrentWeapon(tmpUser).front = false;
-					} else {
-						getCurrentWeapon(tmpUser).front = true;
-					}
+				const currentWeapon = getCurrentWeapon(tmpUser);
+				if (currentWeapon) {
+					currentWeapon.front = isWeaponFacingFront(snapAngleToCardinal(tmpUser.angle));
 				}
-				if (b > 5) {
-					tmpUser.nameYOffset = data[5 + d];
+				if (packetLength > 5) {
+					tmpUser.nameYOffset = data[5 + cursor];
 				}
 				tmpUser.onScreen = true;
 			} else {
-				fetchUserWithIndex(data[1 + d]);
+				fetchUserWithIndex(playerIndex);
 			}
-			d += b;
+			cursor += packetLength;
 		}
 	}
 	for (const plr of players) {
@@ -1453,27 +1450,28 @@ function receiveServerData(data: number[]) {
 			thisInput = [];
 		}
 		if (plr.dead) continue;
-		let i = 0;
-		while (i < thisInput.length) {
-			if (thisInput[i].isn <= plr.isn!) {
-				thisInput.splice(i, 1);
+		let inputCursor = 0;
+		while (inputCursor < thisInput.length) {
+			if (thisInput[inputCursor].isn <= plr.isn!) {
+				thisInput.splice(inputCursor, 1);
 				continue;
 			}
-			let hdt = thisInput[i].hdt;
-			let vdt = thisInput[i].vdt;
-			const e = Math.sqrt(
-				thisInput[i].hdt * thisInput[i].hdt + thisInput[i].vdt * thisInput[i].vdt,
+			let horizontalDelta = thisInput[inputCursor].hdt;
+			let verticalDelta = thisInput[inputCursor].vdt;
+			const inputMagnitude = Math.sqrt(
+				thisInput[inputCursor].hdt * thisInput[inputCursor].hdt +
+					thisInput[inputCursor].vdt * thisInput[inputCursor].vdt,
 			);
-			if (e !== 0) {
-				hdt /= e;
-				vdt /= e;
+			if (inputMagnitude !== 0) {
+				horizontalDelta /= inputMagnitude;
+				verticalDelta /= inputMagnitude;
 			}
 			plr.oldX = plr.x;
 			plr.oldY = plr.y;
-			plr.x += hdt * plr.speed * thisInput[i].delta;
-			plr.y += vdt * plr.speed * thisInput[i].delta;
+			plr.x += horizontalDelta * plr.speed * thisInput[inputCursor].delta;
+			plr.y += verticalDelta * plr.speed * thisInput[inputCursor].delta;
 			wallCol(plr, st.gameMap.tiles, clutter);
-			i++;
+			inputCursor++;
 		}
 		plr.x = Math.round(plr.x);
 		plr.y = Math.round(plr.y);
@@ -1679,14 +1677,7 @@ function updateGameLoop() {
 				plr.angle = ((target.f + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) + 90;
 				const currentWeapon = getCurrentWeapon(plr);
 				if (currentWeapon) {
-					const snappedAngle = Math.round((plr.angle % 360) / 90) * 90;
-					if (snappedAngle === 0 || snappedAngle === 360) {
-						currentWeapon.front = true;
-					} else if (snappedAngle === 180) {
-						currentWeapon.front = false;
-					} else {
-						currentWeapon.front = true;
-					}
+					currentWeapon.front = isWeaponFacingFront(snapAngleToCardinal(plr.angle));
 				}
 				if (plr.jumpCountdown > 0) {
 					plr.jumpCountdown -= delta;
@@ -2182,7 +2173,7 @@ function playerEquipWeapon(tmpPlayer: Player, weaponId: number) {
 	tmpPlayer.currentWeapon = weaponId;
 }
 function shootBullet(source: Player) {
-	let sourceWep = getCurrentWeapon(source);
+	const sourceWep = getCurrentWeapon(source);
 	if (
 		source.dead ||
 		!sourceWep ||
@@ -2201,13 +2192,15 @@ function shootBullet(source: Player) {
 		}
 		let spread = sourceWep.spread[sourceWep.spreadIndex];
 		spread = utils.roundNumber(target.f + Math.PI + spread, 2);
-		let dist = sourceWep.holdDist + sourceWep.bDist;
-		let x = Math.round(source.x + dist * Math.cos(spread));
-		dist = Math.round(source.y - sourceWep.yOffset - source.jumpY + dist * Math.sin(spread));
+		const muzzleDistance = sourceWep.holdDist + sourceWep.bDist;
+		const spawnX = Math.round(source.x + muzzleDistance * Math.cos(spread));
+		const spawnY = Math.round(
+			source.y - sourceWep.yOffset - source.jumpY + muzzleDistance * Math.sin(spread),
+		);
 		shootNextBullet(
 			{
-				x: x,
-				y: dist,
+				x: spawnX,
+				y: spawnY,
 				d: spread,
 				si: -1,
 			},
@@ -2225,17 +2218,15 @@ function shootBullet(source: Player) {
 	}
 }
 function playerReload(player: Player, shouldEmit: boolean) {
-	if (
-		getCurrentWeapon(player).reloadTime <= 0 &&
-		getCurrentWeapon(player).ammo !== getCurrentWeapon(player).maxAmmo
-	) {
-		getCurrentWeapon(player).reloadTime = getCurrentWeapon(player).reloadSpeed;
-		getCurrentWeapon(player).spreadIndex = 0;
+	const currentWeapon = getCurrentWeapon(player);
+	if (currentWeapon.reloadTime <= 0 && currentWeapon.ammo !== currentWeapon.maxAmmo) {
+		currentWeapon.reloadTime = currentWeapon.reloadSpeed;
+		currentWeapon.spreadIndex = 0;
 		showNotification("Reloading");
 		if (shouldEmit) {
 			socket.emit("r");
 		}
-		window.setCooldownAnimation(player.currentWeapon, getCurrentWeapon(player).reloadTime, true);
+		window.setCooldownAnimation(player.currentWeapon, currentWeapon.reloadTime, true);
 	}
 }
 function findServerBullet(bulletIndex: number) {
@@ -2254,11 +2245,11 @@ function updateBullets(delta: number) {
 	for (const bullet of bullets) {
 		bullet.update(delta, currentTime, clutter, st.gameMap.tiles, players);
 		if (bullet.active) {
-			let b = bullet.x - st.startX;
-			let d = bullet.y - st.startY;
-			if (canSee(b, d, bullet.height, bullet.height)) {
+			const screenX = bullet.x - st.startX;
+			const screenY = bullet.y - st.startY;
+			if (canSee(screenX, screenY, bullet.height, bullet.height)) {
 				graph.save();
-				graph.translate(b, d);
+				graph.translate(screenX, screenY);
 				if (bullet.spriteIndex === 2) {
 					graph.globalCompositeOperation = "lighter";
 					graph.globalAlpha = 0.3;
@@ -2828,9 +2819,6 @@ const playerContext = playerCanvas.getContext("2d")!;
 playerContext.imageSmoothingEnabled = false;
 
 function drawGameObjects(delta: number) {
-	var e = null;
-	var f = null;
-	var d = null;
 	for (const plr of players) {
 		if (!plr.dead && (plr.index === st.player.index || plr.onScreen)) {
 			if (plr.jumpY === undefined) {
@@ -2840,54 +2828,53 @@ function drawGameObjects(delta: number) {
 			playerContext.save();
 			playerContext.globalAlpha = 0.9;
 			playerContext.translate(playerCanvas.width / 2, playerCanvas.height / 2);
-			let m = (Math.PI / 180) * plr.angle;
-			let k = Math.round((plr.angle % 360) / 90) * 90;
-			let h = plr.x - st.startX;
-			let g = plr.y - plr.jumpY - st.startY;
+			const weaponAngle = (Math.PI / 180) * plr.angle;
+			const snappedAngle = snapAngleToCardinal(plr.angle);
+			const screenX = plr.x - st.startX;
+			let screenY = plr.y - plr.jumpY - st.startY;
 			if (plr.animIndex === 1) {
-				g -= 3;
+				screenY -= 3;
 			}
-			if (plr.weapons.length > 0) {
-				e = getWeaponSprite(
-					getCurrentWeapon(plr).weaponIndex,
-					getCurrentWeapon(plr).camo!, // this isn't set anywhere..?
-					k,
-				);
-				f = classSpriteSheets[plr.classIndex]?.arm;
-				if (!getCurrentWeapon(plr).front && e != undefined) {
+			const currentWeapon = plr.weapons.length > 0 ? getCurrentWeapon(plr) : null;
+			const weaponSprite = currentWeapon
+				? getWeaponSprite(currentWeapon.weaponIndex, currentWeapon.camo!, snappedAngle)
+				: null;
+			const armSprite = classSpriteSheets[plr.classIndex]?.arm;
+			if (currentWeapon) {
+				if (!currentWeapon.front && weaponSprite != null) {
 					playerContext.save();
-					playerContext.translate(0, -getCurrentWeapon(plr).yOffset);
-					playerContext.rotate(m);
-					playerContext.translate(0, getCurrentWeapon(plr).holdDist);
+					playerContext.translate(0, -currentWeapon.yOffset);
+					playerContext.rotate(weaponAngle);
+					playerContext.translate(0, currentWeapon.holdDist);
 					drawSprite(
 						playerContext,
-						e,
-						-(getCurrentWeapon(plr).width / 2),
+						weaponSprite,
+						-(currentWeapon.width / 2),
 						0,
-						getCurrentWeapon(plr).width,
-						getCurrentWeapon(plr).length,
+						currentWeapon.width,
+						currentWeapon.length,
 						0,
 						false,
 						0,
 						0,
 						0,
 					);
-					playerContext.translate(0, -getCurrentWeapon(plr).holdDist + 6);
-					if (f != undefined && f != null) {
+					playerContext.translate(0, -currentWeapon.holdDist + 6);
+					if (armSprite != null) {
 						playerContext.translate(3, -10);
-						drawSprite(playerContext, f, 0, 0, 8, 32, 0, false, 0, 0, 0);
+						drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
 						playerContext.translate(-16, -8);
-						drawSprite(playerContext, f, 0, 0, 8, 32, 0, false, 0, 0, 0);
+						drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
 						playerContext.restore();
 					}
 				}
 			}
 			playerContext.globalAlpha = 1;
-			d = getPlayerSprite(plr.classIndex, k, plr.animIndex + 1);
-			if (d != null) {
+			const lowerBodySprite = getPlayerSprite(plr.classIndex, snappedAngle, plr.animIndex + 1);
+			if (lowerBodySprite != null) {
 				drawSprite(
 					playerContext,
-					d,
+					lowerBodySprite,
 					-(plr.width / 2),
 					-(plr.height * 0.318),
 					plr.width,
@@ -2899,11 +2886,11 @@ function drawGameObjects(delta: number) {
 					0,
 				);
 			}
-			d = getPlayerSprite(plr.classIndex, k, 0);
-			if (d != null) {
+			const upperBodySprite = getPlayerSprite(plr.classIndex, snappedAngle, 0);
+			if (upperBodySprite != null) {
 				drawSprite(
 					playerContext,
-					d,
+					upperBodySprite,
 					-(plr.width / 2),
 					-plr.height,
 					plr.width,
@@ -2915,12 +2902,12 @@ function drawGameObjects(delta: number) {
 					0,
 				);
 			}
-			d = getShirtSprite(plr, k);
-			if (d != null) {
+			const shirtSprite = getShirtSprite(plr, snappedAngle);
+			if (shirtSprite != null) {
 				playerContext.globalAlpha = 0.9;
 				drawSprite(
 					playerContext,
-					d,
+					shirtSprite,
 					-(plr.width / 2),
 					-plr.height,
 					plr.width,
@@ -2933,17 +2920,17 @@ function drawGameObjects(delta: number) {
 				);
 				playerContext.globalAlpha = 1;
 			}
-			let p = plr.width * 0.833;
-			d = getHatSprite(plr, k);
-			if (d != null) {
+			const hatScale = plr.width * 0.833;
+			const hatSprite = getHatSprite(plr, snappedAngle);
+			if (hatSprite != null) {
 				drawSprite(
 					playerContext,
-					d,
-					-(p / 2),
-					-(plr.height + p * 0.045),
+					hatSprite,
+					-(hatScale / 2),
+					-(plr.height + hatScale * 0.045),
 					//-(b.height + p * 0.095),
-					p,
-					p,
+					hatScale,
+					hatScale,
 					0,
 					false,
 					0,
@@ -2951,48 +2938,48 @@ function drawGameObjects(delta: number) {
 					0,
 				);
 			}
-			if (plr.weapons.length > 0) {
+			if (currentWeapon) {
 				playerContext.globalAlpha = 0.9;
-				if (getCurrentWeapon(plr).front && e != undefined) {
+				if (currentWeapon.front && weaponSprite != null) {
 					playerContext.save();
-					playerContext.translate(0, -getCurrentWeapon(plr).yOffset);
-					playerContext.rotate(m);
-					playerContext.translate(0, getCurrentWeapon(plr).holdDist);
+					playerContext.translate(0, -currentWeapon.yOffset);
+					playerContext.rotate(weaponAngle);
+					playerContext.translate(0, currentWeapon.holdDist);
 					drawSprite(
 						playerContext,
-						e,
-						-(getCurrentWeapon(plr).width / 2),
+						weaponSprite,
+						-(currentWeapon.width / 2),
 						0,
-						getCurrentWeapon(plr).width,
-						getCurrentWeapon(plr).length,
+						currentWeapon.width,
+						currentWeapon.length,
 						0,
 						false,
 						0,
 						0,
 						0,
 					);
-					playerContext.translate(0, -getCurrentWeapon(plr).holdDist + 10);
-					if (f != undefined && f != null) {
-						if (k == 270) {
+					playerContext.translate(0, -currentWeapon.holdDist + 10);
+					if (armSprite != null) {
+						if (snappedAngle == 270) {
 							playerContext.restore();
 							playerContext.save();
-							playerContext.translate(-4, -getCurrentWeapon(plr).yOffset + 8);
-							playerContext.rotate(m);
-							drawSprite(playerContext, f, 0, 0, 8, 32, 0, false, 0, 0, 0);
-						} else if (k == 90) {
+							playerContext.translate(-4, -currentWeapon.yOffset + 8);
+							playerContext.rotate(weaponAngle);
+							drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
+						} else if (snappedAngle == 90) {
 							playerContext.restore();
 							playerContext.save();
-							playerContext.translate(0, -getCurrentWeapon(plr).yOffset);
-							playerContext.rotate(m);
-							drawSprite(playerContext, f, 0, 0, 8, 32, 0, false, 0, 0, 0);
+							playerContext.translate(0, -currentWeapon.yOffset);
+							playerContext.rotate(weaponAngle);
+							drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
 						} else {
 							playerContext.translate(10, -13);
 							playerContext.rotate(0.7);
-							drawSprite(playerContext, f, 0, 0, 8, 32, 0, false, 0, 0, 0);
+							drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
 							playerContext.rotate(-0.7);
 							playerContext.translate(-28, -1);
 							playerContext.rotate(-0.25);
-							drawSprite(playerContext, f, 0, 0, 8, 32, 0, false, 0, 0, 0);
+							drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
 							playerContext.rotate(0.25);
 						}
 						playerContext.restore();
@@ -3029,8 +3016,8 @@ function drawGameObjects(delta: number) {
 			drawSprite(
 				graph,
 				playerCanvas,
-				h - playerCanvas.width / 2,
-				g - playerCanvas.height / 2,
+				screenX - playerCanvas.width / 2,
+				screenY - playerCanvas.height / 2,
 				playerCanvas.width,
 				playerCanvas.height,
 				0,
@@ -3083,9 +3070,6 @@ function drawGameObjects(delta: number) {
 		}
 	}
 	graph.globalAlpha = 1;
-	e = null;
-	f = null;
-	d = null;
 }
 function drawPlayerNames() {
 	const playerConfig = {
@@ -3103,8 +3087,8 @@ function drawPlayerNames() {
 	for (const plr of players) {
 		if (plr.dead || (plr.index !== st.player.index && !plr.onScreen)) continue;
 
-		let d = plr.height / 3.2;
-		let e = Math.min(200, (plr.maxHealth / 100) * 100);
+		const nameTextSize = plr.height / 3.2;
+		const healthBarWidth = Math.min(200, (plr.maxHealth / 100) * 100);
 		let shapeX = plr.x - st.startX;
 		let shapeY = plr.y - plr.jumpY - plr.nameYOffset - st.startY;
 		if (plr.account !== undefined && plr.account.hat != null) {
@@ -3115,7 +3099,13 @@ function drawPlayerNames() {
 		// h = graph.measureText(playerName);
 		let nameColor = plr.team !== st.player.team ? "#d95151" : "#5151d9";
 		if (st.settings.showNames) {
-			const renderedName = renderShadedAnimText(playerName, d * textSizeMult, "#ffffff", 5, "");
+			const renderedName = renderShadedAnimText(
+				playerName,
+				nameTextSize * textSizeMult,
+				"#ffffff",
+				5,
+				"",
+			);
 			graph.drawImage(
 				renderedName,
 				shapeX - renderedName.width / 2,
@@ -3126,7 +3116,7 @@ function drawPlayerNames() {
 			if (rankText) {
 				const renderedRank = renderShadedAnimText(
 					rankText,
-					d * 1.6 * textSizeMult,
+					nameTextSize * 1.6 * textSizeMult,
 					"#ffffff",
 					6,
 					"",
@@ -3142,7 +3132,7 @@ function drawPlayerNames() {
 			if (plr.account?.clan) {
 				const renderedClan = renderShadedAnimText(
 					` [${plr.account?.clan}]`,
-					d * textSizeMult,
+					nameTextSize * textSizeMult,
 					nameColor,
 					5,
 					"",
@@ -3158,9 +3148,9 @@ function drawPlayerNames() {
 		}
 		graph.fillStyle = nameColor;
 		graph.fillRect(
-			shapeX - (e / 2) * (plr.health / plr.maxHealth),
+			shapeX - (healthBarWidth / 2) * (plr.health / plr.maxHealth),
 			shapeY - plr.height * 1.16,
-			(plr.health / plr.maxHealth) * e,
+			(plr.health / plr.maxHealth) * healthBarWidth,
 			10,
 		);
 	}
@@ -3266,7 +3256,7 @@ function getCachedFloor(tile: Tile) {
 		tmpCanvas.width = tile.scale;
 		tmpCanvas.height = tile.scale * (tile.bottom ? 0.51 : 1);
 		ctx.drawImage(floorSprites[tile.spriteIndex], 0, 0, tile.scale, tile.scale);
-		let s = tile.scale / tilesPerFloorTile;
+		const s = tile.scale / tilesPerFloorTile;
 		if (tile.topLeft === 1) {
 			renderSideWalks(ctx, 1, s, 0, 0, 0, 0, 0);
 		}

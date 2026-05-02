@@ -327,25 +327,25 @@ export function renderShadedAnimText(
 		let tmpCanvas = document.createElement("canvas");
 		let ctx = tmpCanvas.getContext("2d");
 		if (ctx === null) throw new Error("failed to get canvas ctx");
+		const renderFont = `${fontExtra + fontSize}px mainFont`;
 
 		ctx.imageSmoothingEnabled = false;
 
 		ctx.textAlign = "center";
-		ctx.font = `${fontExtra + fontSize}px mainFont`;
+		ctx.font = renderFont;
 		tmpCanvas.width = ctx.measureText(text).width * 1.08;
 		tmpCanvas.height = fontSize * 1.8 + layerCount;
+		const centerX = tmpCanvas.width / 2;
+		const centerY = tmpCanvas.height / 2;
 		ctx.fillStyle = shadeColor(color, -18);
-		ctx.font = `${fontExtra + fontSize}px mainFont`;
+		ctx.font = renderFont;
 		ctx.textBaseline = "middle";
 		ctx.textAlign = "center";
 		for (let i = 1; i < layerCount; ++i) {
-			ctx.fillText(text, tmpCanvas.width / 2, tmpCanvas.height / 2 + i);
+			ctx.fillText(text, centerX, centerY + i);
 		}
 		ctx.fillStyle = color;
-		ctx.font = `${fontExtra + fontSize}px mainFont`;
-		ctx.textBaseline = "middle";
-		ctx.textAlign = "center";
-		ctx.fillText(text, tmpCanvas.width / 2, tmpCanvas.height / 2);
+		ctx.fillText(text, centerX, centerY);
 		cachedText = tmpCanvas;
 		cachedTextRenders[tmpIndex] = cachedText;
 	}

@@ -62,23 +62,45 @@ export function shootNextBullet(
 	bullet.selfDamage = !!weapon.selfDamage;
 	bullet.activate();
 }
-export function setupMap(a: any, mapTileScale: number, flags: any[]) {
-	var b = a.genData;
-	var d = -(mapTileScale * 2);
-	var e = -(mapTileScale * 2);
-	var f = 0;
-	var h = b.height;
-	a.tilePerCol = h;
-	a.width = (b.width - 4) * mapTileScale;
-	a.height = (b.height - 4) * mapTileScale;
-	a.scoreToWin = a.gameMode.score;
-	var l = b.data.data || b.data;
-	for (let i = 0; i < b.width; i++) {
-		for (let j = 0; j < b.height; j++) {
-			const tileDataBaseIdx = (b.width * j + i) << 2;
-			let p = `${l[tileDataBaseIdx]} ${l[tileDataBaseIdx + 1]} ${l[tileDataBaseIdx + 2]}`;
-			const n: Tile = {
-				index: f,
+export function snapAngleToCardinal(angle: number) {
+	return Math.round((angle % 360) / 90) * 90;
+}
+export function isWeaponFacingFront(snappedAngle: number) {
+	return snappedAngle !== 180;
+}
+const FLAG_WIDTH = 70;
+const FLAG_HEIGHT = 152;
+const FLAG_OFFSET = 40;
+const FLAG_EDGE_INSET = 30;
+function pushFlag(flags: any[], tile: Tile, xOffset: number, yOffset: number) {
+	flags.push({
+		type: "flag",
+		team: tile.objTeam,
+		x: tile.x + xOffset,
+		y: tile.y + yOffset,
+		w: FLAG_WIDTH,
+		h: FLAG_HEIGHT,
+		ai: randomInt(0, 2),
+		ac: 0,
+	});
+}
+export function setupMap(gameMap: any, mapTileScale: number, flags: any[]) {
+	const genData = gameMap.genData;
+	const startX = -(mapTileScale * 2);
+	const startY = -(mapTileScale * 2);
+	let tileIndex = 0;
+	const tilePerCol = genData.height;
+	gameMap.tilePerCol = tilePerCol;
+	gameMap.width = (genData.width - 4) * mapTileScale;
+	gameMap.height = (genData.height - 4) * mapTileScale;
+	gameMap.scoreToWin = gameMap.gameMode.score;
+	const tileData = genData.data.data || genData.data;
+	for (let col = 0; col < genData.width; col++) {
+		for (let row = 0; row < genData.height; row++) {
+			const tileDataBaseIdx = (genData.width * row + col) << 2;
+			let colorKey = `${tileData[tileDataBaseIdx]} ${tileData[tileDataBaseIdx + 1]} ${tileData[tileDataBaseIdx + 2]}`;
+			const newTile: Tile = {
+				index: tileIndex,
 				scale: mapTileScale,
 				x: 0,
 				y: 0,
@@ -98,56 +120,56 @@ export function setupMap(a: any, mapTileScale: number, flags: any[]) {
 				objTeam: "e",
 				edgeTile: false,
 			};
-			n.x = d + mapTileScale * i;
-			n.y = e + mapTileScale * j;
-			if (i === 0 && j === 0) {
-				p = "0 0 0";
+			newTile.x = startX + mapTileScale * col;
+			newTile.y = startY + mapTileScale * row;
+			if (col === 0 && row === 0) {
+				colorKey = "0 0 0";
 			}
 			let tmpTile: Tile;
-			if (p === "0 0 0") {
-				n.wall = true;
-				n.hasCollision = true;
-				tmpTile = a.tiles[f - h];
+			if (colorKey === "0 0 0") {
+				newTile.wall = true;
+				newTile.hasCollision = true;
+				tmpTile = gameMap.tiles[tileIndex - tilePerCol];
 				if (tmpTile !== undefined) {
 					if (tmpTile.wall) {
-						n.left = 1;
-						n.neighbours += 1;
+						newTile.left = 1;
+						newTile.neighbours += 1;
 					}
 					tmpTile.right = 1;
 					tmpTile.neighbours += 1;
 				}
-				tmpTile = a.tiles[f - h - 1];
+				tmpTile = gameMap.tiles[tileIndex - tilePerCol - 1];
 				if (tmpTile?.wall) {
 					tmpTile.spriteIndex = 0;
 				}
-				tmpTile = a.tiles[f - h - 1];
+				tmpTile = gameMap.tiles[tileIndex - tilePerCol - 1];
 				if (tmpTile?.wall) {
-					n.topLeft = 1;
+					newTile.topLeft = 1;
 					tmpTile.bottomRight = 1;
 				}
-				tmpTile = a.tiles[f - h + 1];
+				tmpTile = gameMap.tiles[tileIndex - tilePerCol + 1];
 				if (tmpTile !== undefined) {
 					tmpTile.topRight = 1;
 					if (tmpTile.wall) {
-						n.bottomLeft = 1;
+						newTile.bottomLeft = 1;
 					}
 				}
-				tmpTile = a.tiles[f - 1];
+				tmpTile = gameMap.tiles[tileIndex - 1];
 				if (tmpTile !== undefined) {
 					if (tmpTile.wall) {
-						n.top = 1;
-						n.neighbours += 1;
+						newTile.top = 1;
+						newTile.neighbours += 1;
 					}
 					tmpTile.bottom = 1;
 					tmpTile.neighbours += 1;
 				}
-				if (i <= 0 || j <= 0 || i >= b.width - 1 || j >= b.height - 1) {
-					n.left = 1;
-					n.right = 1;
-					n.top = 1;
-					n.bottom = 1;
-					n.neighbours = 4;
-					n.edgeTile = true;
+				if (col <= 0 || row <= 0 || col >= genData.width - 1 || row >= genData.height - 1) {
+					newTile.left = 1;
+					newTile.right = 1;
+					newTile.top = 1;
+					newTile.bottom = 1;
+					newTile.neighbours = 4;
+					newTile.edgeTile = true;
 				}
 				/*
 				if (n.spriteIndex === 0 && randomInt(0, 2) === 0) {
@@ -155,110 +177,88 @@ export function setupMap(a: any, mapTileScale: number, flags: any[]) {
 				}
 				*/
 			} else {
-				n.spriteIndex = 0;
+				newTile.spriteIndex = 0;
 				/*
 				let rand = randomInt(0, 10);
 				if (rand <= 0) {
 					n.spriteIndex = 1;
 				}
 				*/
-				n.wall = false;
-				tmpTile = a.tiles[f - h];
+				newTile.wall = false;
+				tmpTile = gameMap.tiles[tileIndex - tilePerCol];
 				if (tmpTile?.wall) {
-					n.left = 1;
-					n.neighbours += 1;
+					newTile.left = 1;
+					newTile.neighbours += 1;
 				}
-				tmpTile = a.tiles[f - 1];
+				tmpTile = gameMap.tiles[tileIndex - 1];
 				if (tmpTile?.wall) {
-					n.top = 1;
-					n.neighbours += 1;
+					newTile.top = 1;
+					newTile.neighbours += 1;
 				}
-				tmpTile = a.tiles[f - h - 1];
+				tmpTile = gameMap.tiles[tileIndex - tilePerCol - 1];
 				if (tmpTile?.wall) {
-					n.topLeft = 1;
+					newTile.topLeft = 1;
 				}
-				if (p === "0 255 0") {
-					n.spriteIndex = 2;
-				} else if (p === "255 255 0") {
-					if (a.gameMode.name === "Hardpoint" || a.gameMode.name === "Zone War") {
-						n.hardPoint = true;
-						if (a.gameMode.name === "Zone War") {
-							n.objTeam = i < b.width / 2 ? "red" : "blue";
+				if (colorKey === "0 255 0") {
+					newTile.spriteIndex = 2;
+				} else if (colorKey === "255 255 0") {
+					if (gameMap.gameMode.name === "Hardpoint" || gameMap.gameMode.name === "Zone War") {
+						newTile.hardPoint = true;
+						if (gameMap.gameMode.name === "Zone War") {
+							newTile.objTeam = col < genData.width / 2 ? "red" : "blue";
 						}
 					} else {
-						n.spriteIndex = 1;
+						newTile.spriteIndex = 1;
 					}
-				} else if (p === "255 0 0" && a.gameMode.teams) {
-					n.objTeam = "red";
-				} else if (p === "0 0 255" && a.gameMode.teams) {
-					n.objTeam = "blue";
+				} else if (colorKey === "255 0 0" && gameMap.gameMode.teams) {
+					newTile.objTeam = "red";
+				} else if (colorKey === "0 0 255" && gameMap.gameMode.teams) {
+					newTile.objTeam = "blue";
 				}
 			}
-			a.tiles.push(n);
-			f++;
+			gameMap.tiles.push(newTile);
+			tileIndex++;
 		}
 	}
 	// tmpY = tmpShad = null;
-	for (b = 0; b < a.tiles.length; ++b) {
-		if (a.tiles[b].edgeTile) {
-			a.tiles[b].hasCollision = false;
-		} else if (!a.tiles[b].wall && a.tiles[b].hardPoint) {
-			if (canPlaceFlag(a.tiles[b - h], true) && canPlaceFlag(a.tiles[b - 1], false)) {
-				flags.push({
-					type: "flag",
-					team: a.tiles[b].objTeam,
-					x: a.tiles[b].x + 40,
-					y: a.tiles[b].y + 40,
-					w: 70,
-					h: 152,
-					ai: randomInt(0, 2),
-					ac: 0,
-				});
+	const oppositeOffset = mapTileScale - FLAG_EDGE_INSET - FLAG_OFFSET;
+	for (let tileIdx = 0; tileIdx < gameMap.tiles.length; ++tileIdx) {
+		const tile = gameMap.tiles[tileIdx];
+		if (tile.edgeTile) {
+			tile.hasCollision = false;
+		} else if (!tile.wall && tile.hardPoint) {
+			if (
+				canPlaceFlag(gameMap.tiles[tileIdx - tilePerCol], true) &&
+				canPlaceFlag(gameMap.tiles[tileIdx - 1], false)
+			) {
+				pushFlag(flags, tile, FLAG_OFFSET, FLAG_OFFSET);
 			}
-			if (canPlaceFlag(a.tiles[b + h], true) && canPlaceFlag(a.tiles[b - 1], false)) {
-				flags.push({
-					type: "flag",
-					team: a.tiles[b].objTeam,
-					x: a.tiles[b].x + mapTileScale - 30 - 40,
-					y: a.tiles[b].y + 40,
-					w: 70,
-					h: 152,
-					ai: randomInt(0, 2),
-					ac: 0,
-				});
+			if (
+				canPlaceFlag(gameMap.tiles[tileIdx + tilePerCol], true) &&
+				canPlaceFlag(gameMap.tiles[tileIdx - 1], false)
+			) {
+				pushFlag(flags, tile, oppositeOffset, FLAG_OFFSET);
 			}
-			if (canPlaceFlag(a.tiles[b + h], true) && canPlaceFlag(a.tiles[b + 1], false)) {
-				flags.push({
-					type: "flag",
-					team: a.tiles[b].objTeam,
-					x: a.tiles[b].x + mapTileScale - 30 - 40,
-					y: a.tiles[b].y + mapTileScale - 30 - 40,
-					w: 70,
-					h: 152,
-					ai: randomInt(0, 2),
-					ac: 0,
-				});
+			if (
+				canPlaceFlag(gameMap.tiles[tileIdx + tilePerCol], true) &&
+				canPlaceFlag(gameMap.tiles[tileIdx + 1], false)
+			) {
+				pushFlag(flags, tile, oppositeOffset, oppositeOffset);
 			}
-			if (canPlaceFlag(a.tiles[b - h], true) && canPlaceFlag(a.tiles[b + 1], false)) {
-				flags.push({
-					type: "flag",
-					team: a.tiles[b].objTeam,
-					x: a.tiles[b].x + 40,
-					y: a.tiles[b].y + mapTileScale - 30 - 40,
-					w: 70,
-					h: 152,
-					ai: randomInt(0, 2),
-					ac: 0,
-				});
+			if (
+				canPlaceFlag(gameMap.tiles[tileIdx - tilePerCol], true) &&
+				canPlaceFlag(gameMap.tiles[tileIdx + 1], false)
+			) {
+				pushFlag(flags, tile, FLAG_OFFSET, oppositeOffset);
 			}
 		}
 	}
 }
-function canPlaceFlag(tile: Tile, ignoreWalls: boolean) {
+function canPlaceFlag(tile: Tile | undefined, ignoreWalls: boolean) {
 	if (ignoreWalls) {
-		return tile !== undefined && !tile.wall && !tile.hardPoint;
+		return tile && !tile.wall && !tile.hardPoint;
 	} else {
-		return tile !== undefined && !tile.hardPoint;
+		return tile && !tile.hardPoint;
 	}
 }
 export function wallCol(player: Player, tiles: Tile[], gameObjects: any) {

@@ -40,10 +40,9 @@ for (let i = 0; i < 30; ++i) {
 	flashGlows.push(new FlashGlow());
 }
 export function updateFlashGlows(delta: number) {
-	for (let i = 0; i < flashGlows.length; ++i) {
-		let tmpObject = flashGlows[i];
-		tmpObject.update(delta);
-		tmpObject.draw();
+	for (const glow of flashGlows) {
+		glow.update(delta);
+		glow.draw();
 	}
 }
 
@@ -52,12 +51,12 @@ export function createFlash(x: number, y: number, scale: number) {
 	if (glowIndex >= flashGlows.length) {
 		glowIndex = 0;
 	}
-	let tmpGlow = flashGlows[glowIndex];
-	tmpGlow.x = x;
-	tmpGlow.y = y;
-	tmpGlow.scale = 0;
-	tmpGlow.initScale = scale * 220;
-	tmpGlow.duration = 0;
-	tmpGlow.maxDuration = 180;
-	tmpGlow.active = true;
+	const glow = flashGlows[glowIndex];
+	glow.x = x;
+	glow.y = y;
+	glow.scale = 0;
+	glow.initScale = scale * 220;
+	glow.duration = 0;
+	glow.maxDuration = 180;
+	glow.active = true;
 }

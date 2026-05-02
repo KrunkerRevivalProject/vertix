@@ -123,16 +123,14 @@ export function loadSounds(base: string) {
 		return false;
 	}
 	soundList = {};
-	for (let i = 0; i < soundMeta.length; ++i) {
-		let tmpSound = localStorage.getItem(`${base + soundMeta[i].loc}data`);
-		let tmpFormat = localStorage.getItem(`${base + soundMeta[i].loc}format`);
+	for (const meta of soundMeta) {
+		const tmpSound = localStorage.getItem(`${base + meta.loc}data`);
+		const tmpFormat = localStorage.getItem(`${base + meta.loc}format`);
 		if (!tmpSound || !tmpFormat) {
-			console.error(
-				`sound info for ${soundMeta[i].id} ${soundMeta[i].loc} is missing from localstorage`,
-			);
+			console.error(`sound info for ${meta.id} ${meta.loc} is missing from localstorage`);
 			continue;
 		}
-		loadSound(tmpSound, soundMeta[i], tmpFormat);
+		loadSound(tmpSound, meta, tmpFormat);
 	}
 }
 function loadSound(src: string, sound: (typeof soundMeta)[number], format: string) {
@@ -177,13 +175,13 @@ var maxHearDist = 1500;
 export function playSound(soundId: string, x: number, y: number) {
 	if (!st.kicked && st.doSounds) {
 		try {
-			let tmpDist = getDistance(st.player.x, st.player.y, x, y);
-			if (tmpDist <= maxHearDist) {
-				let tmpSoundEntry = soundList[soundId];
-				if (tmpSoundEntry !== undefined) {
-					let tmpSound = tmpSoundEntry.sound;
-					tmpSound.volume(Math.round((1 - tmpDist / maxHearDist) * 10) / 10);
-					tmpSound.play();
+			const dist = getDistance(st.player.x, st.player.y, x, y);
+			if (dist <= maxHearDist) {
+				const soundEntry = soundList[soundId];
+				if (soundEntry !== undefined) {
+					const { sound } = soundEntry;
+					sound.volume(Math.round((1 - dist / maxHearDist) * 10) / 10);
+					sound.play();
 				}
 			}
 		} catch (e) {
@@ -195,7 +193,7 @@ export function stopAllSounds() {
 	if (!st.doSounds) {
 		return false;
 	}
-	for (let i = 0; i < soundMeta.length; ++i) {
-		soundList[soundMeta[i].id].sound.stop();
+	for (const meta of soundMeta) {
+		soundList[meta.id].sound.stop();
 	}
 }
