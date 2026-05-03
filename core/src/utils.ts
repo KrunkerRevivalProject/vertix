@@ -302,7 +302,7 @@ export function wallCol(player: Player, tiles: Tile[], gameObjects: any) {
 			//canSee(tmpObj.x - st.startX, tmpObj.y - st.startY, tmpObj.w, tmpObj.h) &&
 			player.x + player.width / 2 >= tmpObj.x &&
 			player.x - player.width / 2 <= tmpObj.x + tmpObj.w &&
-			player.y >= tmpObj.y - tmpObj.h * tmpObj.tp &&
+			player.y >= tmpObj.y - (tmpObj.h / 2) * tmpObj.tp &&
 			player.y <= tmpObj.y
 		) {
 			if (player.oldX + player.width / 2 <= tmpObj.x) {
@@ -312,8 +312,8 @@ export function wallCol(player: Player, tiles: Tile[], gameObjects: any) {
 			}
 			if (player.oldY >= tmpObj.y) {
 				player.y = tmpObj.y + 1;
-			} else if (player.oldY <= tmpObj.y - tmpObj.h * tmpObj.tp) {
-				player.y = tmpObj.y - tmpObj.h * tmpObj.tp - 1;
+			} else if (player.oldY <= tmpObj.y - (tmpObj.h / 2) * tmpObj.tp) {
+				player.y = tmpObj.y - (tmpObj.h / 2) * tmpObj.tp - 1;
 			}
 		}
 	}

@@ -535,7 +535,14 @@ export class Room {
 		for (const [i, pkup] of this.game.pickups.entries()) {
 			if (
 				!pkup.active ||
-				!dotInRect(player.x, player.y, pkup.x, pkup.y, 64, 64)
+				!dotInRect(
+					player.x,
+					player.y,
+					pkup.x - pkup.scale / 2,
+					pkup.y - pkup.scale / 2,
+					pkup.scale,
+					pkup.scale,
+				)
 			)
 				continue;
 
