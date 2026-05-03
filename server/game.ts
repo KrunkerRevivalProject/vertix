@@ -141,17 +141,14 @@ export class Game {
 		};
 		setupMap(tmpMap, this.tileScale, []);
 		for (const tl of this.tiles) {
-			if (this.mode.teams) {
-				if (!tl.hardPoint && (tl.objTeam === "red" || tl.objTeam === "blue")) {
+			if (!tl.hardPoint) {
+				if (tl.objTeam === "red") {
 					this.spawnTiles.push(tl);
-				} else if (
-					tl.hardPoint &&
-					(this.mode.code === "hp" || this.mode.code === "zmtch")
-				) {
+				} else if (tl.objTeam === "blue" && this.mode.teams) {
 					this.scoreTiles.push(tl);
 				}
-			} else if (tl.spriteIndex === 2) {
-				this.spawnTiles.push(tl);
+			} else if (this.mode.code === "hp" || this.mode.code === "zmtch") {
+				this.scoreTiles.push(tl);
 			}
 		}
 		return tmpMap;
