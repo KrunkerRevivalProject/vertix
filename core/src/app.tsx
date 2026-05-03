@@ -49,6 +49,7 @@ const {
 	randomInt,
 	canSee,
 	getItemRarityColor,
+	TeamColors,
 } = utils;
 
 mount(App, {
@@ -74,7 +75,6 @@ if (/Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent)) {
 	alert("tried to open google play");
 	// openGooglePlay(false);
 }
-var changingLobby = false;
 var inMainMenu = true;
 
 const loadingWrapper = document.getElementById("loadingWrapper")!;
@@ -86,7 +86,7 @@ declare global {
 }
 window.startGame = startGame;
 async function startGame() {
-	if (!st.startingGame && !changingLobby) {
+	if (!st.startingGame && !st.changingLobby) {
 		st.startingGame = true;
 		st.playerName = st.playerName.replace(/(<([^>]+)>)/gi, "").substring(0, 25);
 
@@ -135,7 +135,6 @@ var clanInvMessage = document.getElementById("clanInvMessage")!;
 var clanChtMessage = document.getElementById("clanChtMessage")!;
 var clanChatLink = document.getElementById("clanChatLink")!;
 var loginMessage = document.getElementById("loginMessage")!;
-var lobbyInput = document.getElementById("lobbyKey")! as HTMLInputElement;
 var lobbyPass = document.getElementById("lobbyPass")! as HTMLInputElement;
 var lobbyMessage = document.getElementById("lobbyMessage")!;
 var serverCreateMessage = document.getElementById("serverCreateMessage")!;
@@ -211,52 +210,6 @@ window.onload = async () => {
 			});
 			clanChtMessage.style.display = "inline-block";
 			clanChtMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("joinLobbyButton")!.onclick = () => {
-			if (changingLobby) return;
-			if (!lobbyInput.value.split("/")[0].trim()) {
-				lobbyMessage.style.display = "block";
-				lobbyMessage.textContent = "Please enter a valid IP";
-				return;
-			}
-			lobbyMessage.style.display = "block";
-			lobbyMessage.textContent = "Please wait...";
-			changingLobby = true;
-			const s = io(`http://${lobbyInput.value.split("/")[0]}:${port}`, {
-				reconnection: true,
-				forceNew: true,
-			});
-			s.once("connect", () => {
-				s.emit("create", {
-					room: lobbyInput.value.split("/")[1],
-					servPass: lobbyPass.value,
-					lgKey: st.loggedIn ? logKey : "",
-					userName: st.loggedIn ? userName : "",
-				});
-				s.once("lobbyRes", (a, d) => {
-					lobbyMessage.textContent = a.resp || a;
-					if (d) {
-						socket.removeListener("disconnect");
-						socket.once("disconnect", () => {
-							socket.close();
-							changingLobby = false;
-							socket = s;
-							st.socket = s;
-							setupSocket(socket);
-						});
-						socket.disconnect();
-					} else {
-						changingLobby = false;
-						s.disconnect();
-						s.close();
-					}
-				});
-			});
-			s.on("connect_error", (_) => {
-				lobbyMessage.textContent = "No Server Found.";
-				changingLobby = false;
-				s.close();
-			});
 		};
 	});
 };
@@ -511,7 +464,7 @@ mapCanvas.height = 200;
 mapContext.imageSmoothingEnabled = false;
 
 function kickPlayer(secondReason: string) {
-	if (disconnected || changingLobby) return;
+	if (disconnected || st.changingLobby) return;
 	hideStatTable();
 	hideUI(true);
 	hideMenuUI();
@@ -552,6 +505,7 @@ function setupSocket(sock: Socket) {
 	}, 2000);
 	sock.on("yourRoom", (roomName) => {
 		st.room = roomName;
+		st.changingLobby = false;
 	});
 	sock.on("connect_failed", () => {
 		kickPlayer("Connection failed. Please check your internet connection.");
@@ -801,12 +755,15 @@ function setupSocket(sock: Socket) {
 		) {
 			screenShake(e / 2, a.dir);
 		}
-		if (a.dID != null && a.dID == st.player.index && b != null && e > 0 && b.onScreen) {
-			if (a.amount < 0) {
-				startMovingAnimText(`${e}`, b.x - b.width / 2, b.y - b.height, "#d95151", e / 10);
-			} else {
-				startMovingAnimText(`${e}`, b.x - b.width / 2, b.y - b.height, "#5ed951", e / 10);
-			}
+		if (
+			a.dID != null &&
+			a.dID == st.player.index &&
+			b != null &&
+			e > 0 &&
+			b.onScreen &&
+			a.amount < 0
+		) {
+			startMovingAnimText(`${e}`, b.x - b.width / 2, b.y - b.height, TeamColors.Red, e / 10);
 		}
 		if (a.bi != null) {
 			let svb = findServerBullet(a.bi);
@@ -829,8 +786,19 @@ function setupSocket(sock: Socket) {
 			}
 		}
 		if (b != null) {
+			const healthDiff = a.h - b.health;
 			b.health = a.h;
 			if (b.index == st.player.index) {
+				if (healthDiff > 0) {
+					// (Is the font size supposed to adjust based on amount of health lost/gained?)
+					startMovingAnimText(
+						`${healthDiff}`,
+						b.x - b.width / 2,
+						b.y - b.height,
+						"#5ed951",
+						healthDiff / 10,
+					);
+				}
 				updatePlayerInfo(b);
 			}
 		}
@@ -863,7 +831,7 @@ function setupSocket(sock: Socket) {
 					2000,
 					true,
 					"#ffffff",
-					"#5151d9",
+					TeamColors.Blue,
 					true,
 					1.25,
 				);
@@ -898,7 +866,16 @@ function setupSocket(sock: Socket) {
 			if (event.ast) {
 				killMsg = "Kill Assist";
 			}
-			startBigAnimText(killMsg, `${event.sS} POINTS`, 2000, true, "#ffffff", "#5151d9", true, 1.25);
+			startBigAnimText(
+				killMsg,
+				`${event.sS} POINTS`,
+				2000,
+				true,
+				"#ffffff",
+				TeamColors.Blue,
+				true,
+				1.25,
+			);
 		}
 		if (event.gID === st.player.index) {
 			hideStatTable();
@@ -942,16 +919,25 @@ function setupSocket(sock: Socket) {
 		if (a.indx === st.player.index) {
 			st.player.x = a.newX;
 			st.player.y = a.newY;
-			startBigAnimText(
-				"ZONE ENTERED",
-				`+${a.scor} POINTS`,
-				2000,
-				true,
-				"#ffffff",
-				"#5151d9",
-				true,
-				1.3,
-			);
+			switch (st.gameMap.gameMode.code) {
+				case "zmtch":
+					startBigAnimText(
+						"ZONE ENTERED",
+						`+${a.score} POINTS`,
+						2000,
+						true,
+						"#ffffff",
+						TeamColors.Blue,
+						true,
+						1.3,
+					);
+					break;
+				case "hp":
+					showNotification(`+${a.score}`);
+					break;
+				default:
+					break;
+			}
 		} else {
 			createSmokePuff(a.oldX, a.oldY, 5, false, 1);
 			showNotification(`${user.name} scored`);
@@ -962,7 +948,7 @@ function setupSocket(sock: Socket) {
 	});
 	sock.on("6", (a, d, e) => {
 		if (!st.player.dead) {
-			startBigAnimText(a, d, 2000, true, "#ffffff", "#5151d9", true, e);
+			startBigAnimText(a, d, 2000, true, "#ffffff", TeamColors.Blue, true, e);
 		}
 	});
 	sock.on("7", (winner, userList, modeVoteData, isFading) => {
@@ -1006,13 +992,22 @@ function showStatTable(
 			let isWinner = st.player.team === winner || st.player.id === winner;
 			if (!isFading) {
 				if (isWinner) {
-					startBigAnimText("Victory", "Well Played!", 2500, true, "#5151d9", "#ffffff", false, 2);
+					startBigAnimText(
+						"Victory",
+						"Well Played!",
+						2500,
+						true,
+						TeamColors.Blue,
+						"#ffffff",
+						false,
+						2,
+					);
 					document.getElementById("winningTeamText")!.textContent = "VICTORY";
-					document.getElementById("winningTeamText")!.style.color = "#5151d9";
+					document.getElementById("winningTeamText")!.style.color = TeamColors.Blue;
 				} else if (st.player.team != "") {
-					startBigAnimText("Defeat", "Bad Luck!", 2500, true, "#d95151", "#ffffff", false, 2);
+					startBigAnimText("Defeat", "Bad Luck!", 2500, true, TeamColors.Red, "#ffffff", false, 2);
 					document.getElementById("winningTeamText")!.textContent = "DEFEAT";
-					document.getElementById("winningTeamText")!.style.color = "#d95151";
+					document.getElementById("winningTeamText")!.style.color = TeamColors.Red;
 				}
 			}
 			if (modeVoteData != null) {
@@ -1099,8 +1094,8 @@ function showStatTable(
 						user.index === st.player.index
 							? "#fff"
 							: user.team !== st.player.team
-								? "#d95151"
-								: "#5151d9",
+								? TeamColors.Red
+								: TeamColors.Blue,
 					userInfo: findUserByIndex(user.index),
 				},
 				{
@@ -1987,7 +1982,7 @@ function getCachedMiniMap() {
 		finalCtx.globalAlpha = 1;
 		for (const tile of st.gameMap.tiles) {
 			if (!tile.hardPoint) continue;
-			finalCtx.fillStyle = tile.objTeam === st.player.team ? "#5151d9" : "#d95151";
+			finalCtx.fillStyle = tile.objTeam === st.player.team ? TeamColors.Blue : TeamColors.Red;
 			finalCtx.fillRect(
 				(tile.x / gameWidth) * mapScale,
 				(tile.y / gameHeight) * mapScale,
@@ -2012,7 +2007,7 @@ function drawMiniMap() {
 			(plr.index === st.player.index || plr.team === st.player.team || plr.isBoss)
 		) {
 			mapContext.fillStyle =
-				plr.index === st.player.index ? "#fff" : plr.isBoss ? "#db4fcd" : "#5151d9";
+				plr.index === st.player.index ? "#fff" : plr.isBoss ? "#db4fcd" : TeamColors.Blue;
 			mapContext.beginPath();
 			mapContext.arc(
 				(plr.x / gameWidth) * mapScale,
@@ -2317,12 +2312,17 @@ declare global {
 
 window.joinRoom = joinRoom;
 async function joinRoom(roomName: string) {
+	if (st.changingLobby) return false;
+	// history.pushState(room, "", `${location.origin}/?${room}`);
+	st.changingLobby = true;
+
 	const resp = await fetch(`http://localhost:1118/getIP?room=${roomName}`);
 	const { ip, port, room } = await resp.json();
-	if (room === st.player.room) return;
-	if (changingLobby) return;
-	// history.pushState(room, "", `${location.origin}/?${room}`);
-	changingLobby = true;
+	if (room === st.player.room || room !== roomName) {
+		st.changingLobby = false;
+		return false;
+	}
+
 	const s = io(`http://${ip}:${port}/${room}`, {
 		reconnection: true,
 		forceNew: true,
@@ -2334,13 +2334,14 @@ async function joinRoom(roomName: string) {
 	socket.removeListener("disconnect");
 	socket.once("disconnect", () => {
 		socket.close();
-		changingLobby = false;
 		socket = s;
 		st.socket = socket;
 		setupSocket(socket);
 	});
 	socket.disconnect();
 	st.chatLines = [];
+
+	return true;
 }
 var classSpriteSheets: {
 	upSprites: Sprite[];
@@ -3097,7 +3098,7 @@ function drawPlayerNames() {
 		let playerName = plr.name;
 		let rankText = plr.loggedIn ? plr.account.rank : "";
 		// h = graph.measureText(playerName);
-		let nameColor = plr.team !== st.player.team ? "#d95151" : "#5151d9";
+		let nameColor = plr.team !== st.player.team ? TeamColors.Red : TeamColors.Blue;
 		if (st.settings.showNames) {
 			const renderedName = renderShadedAnimText(
 				playerName,

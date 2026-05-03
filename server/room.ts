@@ -544,12 +544,13 @@ export class Room {
 				player.health < player.maxHealth &&
 				!player.isBoss
 			) {
-				player.totalHealing += player.maxHealth - player.health;
+				const healing = Math.min(100, player.maxHealth - player.health);
+				player.totalHealing += healing;
 				this.io.emit("upd", {
 					i: player.index,
 					hea: player.totalHealing,
 				});
-				player.health = player.maxHealth;
+				player.health += healing;
 				this.io.emit("1", {
 					gID: player.index,
 					h: player.health,
@@ -582,7 +583,7 @@ export class Room {
 
 				player.scoreCountdown = 1000;
 				const scored = this.game.mode.code === "hp" ? 10 : 100;
-				let tprt: ZoneEvent = { indx: player.index, scor: scored };
+				let tprt: ZoneEvent = { indx: player.index, score: scored };
 				if (this.game.mode.code === "zmtch") {
 					const spawn = this.game.getSpawn(player);
 					player.x = tprt.newX = spawn.x;

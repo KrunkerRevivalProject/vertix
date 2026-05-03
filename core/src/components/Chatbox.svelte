@@ -1,6 +1,7 @@
 <script module lang="ts">
 	import { tick } from "svelte";
 	import { st } from "../state.svelte.ts";
+	import { TeamColors } from "../utils.ts";
 
 	const mainCanvas = document.getElementById("cvs") as HTMLCanvasElement;
 	const refocusCanvas = () => tick().then(() => mainCanvas.focus());
@@ -43,8 +44,8 @@
 		if (st.chatLines.length >= 20) st.chatLines.shift();
 	}
 	const SOURCE_COLORS = {
-		red: "#d95151",
-		blue: "#5151d9",
+		red: TeamColors.Red,
+		blue: TeamColors.Blue,
 		system: "#db4fcd",
 		me: "#fff",
 		notif: "#fff",
