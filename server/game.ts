@@ -142,10 +142,11 @@ export class Game {
 		setupMap(tmpMap, this.tileScale, []);
 		for (const tl of this.tiles) {
 			if (!tl.hardPoint) {
-				if (tl.objTeam === "red") {
+				if (
+					tl.objTeam === "red" ||
+					(tl.objTeam === "blue" && this.mode.teams)
+				) {
 					this.spawnTiles.push(tl);
-				} else if (tl.objTeam === "blue" && this.mode.teams) {
-					this.scoreTiles.push(tl);
 				}
 			} else if (this.mode.code === "hp" || this.mode.code === "zmtch") {
 				this.scoreTiles.push(tl);
@@ -197,7 +198,7 @@ export class Game {
 					y: tl.y,
 					active: true,
 					indx: nextID++,
-					i: 2,
+					i: randomInt(1, 2),
 					w: 48,
 					h: 84,
 					hc: true,

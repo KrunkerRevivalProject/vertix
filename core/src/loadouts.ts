@@ -351,7 +351,7 @@ export const weapons: Weapon[] = [
 		yOffset: 55,
 		holdDist: 5,
 
-		bSpeed: 2,
+		bSpeed: 1.75,
 		bWidth: 12,
 		bHeight: 24,
 		bRandScale: [1, 1],
@@ -390,7 +390,7 @@ export const weapons: Weapon[] = [
 		yOffset: 55,
 		holdDist: 0,
 
-		bSpeed: 2,
+		bSpeed: 1.55,
 		bWidth: 12,
 		bHeight: 24,
 		bRandScale: [1, 1],
@@ -603,7 +603,7 @@ export const weapons: Weapon[] = [
 		lastShot: 0,
 	},
 	{
-		name: "???", //BOSS1 granades
+		name: "???", //BOSS1 grenades
 		weaponIndex: 5,
 		dmg: 50,
 		ammo: 1,

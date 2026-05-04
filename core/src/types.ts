@@ -183,7 +183,7 @@ export type MapObject = {
 };
 
 export interface ClutterObject extends MapObject {
-	i: number;
+	i: number; // 1 = regular barrel; 2 = explosive barrel
 	w: number;
 	h: number;
 	s?: boolean; // has shadows

@@ -210,7 +210,7 @@ export function setupMap(gameMap: any, mapTileScale: number, flags: any[]) {
 					} else {
 						newTile.spriteIndex = 1;
 					}
-				} else if (colorKey === "255 0 0" && gameMap.gameMode.teams) {
+				} else if (colorKey === "255 0 0") {
 					newTile.objTeam = "red";
 				} else if (colorKey === "0 0 255" && gameMap.gameMode.teams) {
 					newTile.objTeam = "blue";
