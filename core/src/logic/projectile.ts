@@ -1,12 +1,10 @@
 import { playSound } from "../sound.ts";
 import { st } from "../state.svelte.ts";
-import type { Player, Tile } from "../types.ts";
+import type { ClutterObject, Player, Tile } from "../types.ts";
 import { dotInRect, getDistance, randomInt } from "../utils.ts";
 import { createLiquid, particleCone, stillDustParticle } from "../visual/particle.ts";
 
 const EXPLOSIVE_CLUTTER_INDEX = 2;
-const EXPLOSIVE_HIT_DAMAGE = 92;
-const EXPLOSIVE_BLAST_RADIUS = 150;
 const BOUNCE_SPEED_RETENTION = 0.65;
 const LINE_INTERSECTION_EPSILON = 1e-7;
 const COLLISION_ADJUST_ATTEMPTS = 100;
@@ -43,6 +41,7 @@ export class Projectile {
 	startTime = 0;
 	maxLifeTime: number | null = 0;
 	explodeOnDeath = false;
+	collidesWithExplosiveClutter = false;
 	updateAccuracy = 3;
 	bounce = false;
 	dustTimer = 0;
@@ -54,11 +53,14 @@ export class Projectile {
 				lifetime = 0;
 				this.startTime = currentTime;
 			}
+
 			for (let updateStep = 0; updateStep < this.updateAccuracy; ++updateStep) {
 				let vel = this.speed * delta;
+
 				if (this.active) {
 					let changeX = (vel * Math.cos(this.dir)) / this.updateAccuracy;
 					let changeY = (vel * Math.sin(this.dir)) / this.updateAccuracy;
+
 					if (this.active && !this.skipMove && this.speed > 0) {
 						this.x += changeX;
 						this.y += changeY;
@@ -67,8 +69,10 @@ export class Projectile {
 							this.startY += changeY;
 						}
 					}
+
 					this.cEndX = this.x + ((vel + this.height) * Math.cos(this.dir)) / this.updateAccuracy;
 					this.cEndY = this.y + ((vel + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
+
 					for (const [i, clt] of clutter.entries()) {
 						if (
 							this.active &&
@@ -76,20 +80,14 @@ export class Projectile {
 							clt.hc &&
 							this.canSeeObject(clt, clt.h) &&
 							clt.h * clt.tp >= this.yOffset &&
-							this.lineInRect(clt.x, clt.y - clt.h, clt.w, clt.h - this.yOffset, true)
+							this.lineInRect(clt.x, clt.y - clt.h / 2, clt.w, clt.h - this.yOffset, true)
 						) {
 							if (this.bounce) {
-								this.bounceDir(this.cEndY <= clt.y - clt.h || this.cEndY >= clt.y - this.yOffset);
+								this.bounceDir(
+									this.cEndY <= clt.y - clt.h / 2 || this.cEndY >= clt.y - this.yOffset,
+								);
 							} else {
-								this.active = false;
-								if (clt.i === EXPLOSIVE_CLUTTER_INDEX) {
-									this.dmg = EXPLOSIVE_HIT_DAMAGE;
-									this.blastRadius = EXPLOSIVE_BLAST_RADIUS;
-									this.explodeOnDeath = true;
-									this.selfDamage = true;
-									this.lastHit.push(i);
-								}
-								this.hitSomething(false, 2);
+								this.handleClutterHit(clt, i);
 							}
 						}
 					}
@@ -150,7 +148,7 @@ export class Projectile {
 								) &&
 								pl.spawnProtection <= 0
 							) {
-								if (this.explodeOnDeath) {
+								if (this.explodeOnDeath || this.collidesWithExplosiveClutter) {
 									this.active = false;
 								} else if (this.dmg > 0) {
 									this.lastHit.push(i);
@@ -177,6 +175,19 @@ export class Projectile {
 					}
 					if (this.maxLifeTime != null && lifetime >= this.maxLifeTime) {
 						this.active = false;
+					}
+					if (!this.active && this.explodeOnDeath && !this.collidesWithExplosiveClutter) {
+						for (const [i, clt] of clutter.entries()) {
+							if (
+								clt.active &&
+								clt.hc &&
+								this.canSeeObject(clt, clt.h) &&
+								clt.h * clt.tp >= this.yOffset &&
+								this.isInExplosionRange(clt)
+							) {
+								this.handleClutterHit(clt, i);
+							}
+						}
 					}
 				}
 			}
@@ -308,5 +319,17 @@ export class Projectile {
 		this.cEndY = collisionY;
 		this.x = this.cEndX;
 		this.y = this.cEndY;
+	}
+	isInExplosionRange(clt: ClutterObject) {
+		const distToClutter = getDistance(this.x, this.y, clt.x, clt.y - clt.h / 2);
+		return distToClutter <= this.blastRadius;
+	}
+	handleClutterHit(clt: ClutterObject, i: number) {
+		this.active = false;
+		if (clt.i === EXPLOSIVE_CLUTTER_INDEX) {
+			this.collidesWithExplosiveClutter = true;
+			this.lastHit.push(i);
+		}
+		this.hitSomething(false, 2);
 	}
 }

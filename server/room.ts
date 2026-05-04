@@ -15,6 +15,9 @@ import {
 } from "core/src/utils.ts";
 import { Game } from "./game.ts";
 
+const EXPLOSIVE_CLUTTER_HIT_DAMAGE = 50;
+const EXPLOSIVE_CLUTTER_BLAST_RADIUS = 150;
+
 export class Room {
 	name;
 	io;
@@ -408,25 +411,41 @@ export class Room {
 
 	updateBullet(bullet: Projectile, player: Player, dir: number) {
 		const tick = () => {
-			if (!bullet.active && bullet.explodeOnDeath) {
-				this.doExplosion(
-					player,
-					bullet.x,
-					bullet.y,
-					bullet.blastRadius!,
-					bullet.dmg,
-					dir,
-					bullet.selfDamage,
-				);
-				if (bullet.lastHit.length > 0) {
+			if (
+				!bullet.active &&
+				(bullet.explodeOnDeath || bullet.collidesWithExplosiveClutter)
+			) {
+				if (bullet.explodeOnDeath) {
+					this.doExplosion(
+						player,
+						bullet.x,
+						bullet.y,
+						bullet.blastRadius!,
+						bullet.dmg,
+						dir,
+						bullet.selfDamage,
+					);
+				}
+				if (bullet.collidesWithExplosiveClutter && bullet.lastHit.length > 0) {
 					const i = bullet.lastHit[0];
 					const clt = this.game.clutter[i];
-					clt.active = false;
-					this.io.emit("4", clt, i, 1);
-					setTimeout(() => {
-						clt.active = true;
+					if (clt.active) {
+						this.doExplosion(
+							player,
+							clt.x,
+							clt.y,
+							EXPLOSIVE_CLUTTER_BLAST_RADIUS,
+							EXPLOSIVE_CLUTTER_HIT_DAMAGE,
+							dir,
+							true,
+						);
+						clt.active = false;
 						this.io.emit("4", clt, i, 1);
-					}, 15000);
+						setTimeout(() => {
+							clt.active = true;
+							this.io.emit("4", clt, i, 1);
+						}, 15000);
+					}
 				}
 			} else if (bullet.lastHit.length > 0) {
 				for (const i of bullet.lastHit) {
@@ -513,8 +532,8 @@ export class Room {
 			if (!selfDamage && pl.index === source.index) continue;
 			const left = pl.x - pl.width / 2;
 			const right = pl.x + pl.width / 2;
-			const top = pl.y - pl.height;
-			const bottom = pl.y;
+			const top = pl.y - pl.height - pl.jumpY;
+			const bottom = pl.y - pl.jumpY;
 			const dist = getDistance(
 				x,
 				y,
