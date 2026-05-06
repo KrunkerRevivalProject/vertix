@@ -324,7 +324,7 @@ export class Projectile {
 		const clutterStartY = clt.y - clt.h / 2;
 		const clutterOriginY = clutterStartY + (clt.h - this.yOffset) / 2;
 		const distToClutter = getDistance(this.x, this.y, clt.x, clutterOriginY);
-		return distToClutter <= this.blastRadius;
+		return distToClutter <= this.blastRadius!;
 	}
 	handleClutterHit(clt: ClutterObject, i: number) {
 		this.active = false;

@@ -1,6 +1,6 @@
 import type { Projectile } from "./logic/projectile.ts";
 import { st } from "./state.svelte.ts";
-import type { GenData, Player, ShootEvent, Tile } from "./types.ts";
+import type { FlagObject, GenData, Player, ShootEvent, Tile } from "./types.ts";
 
 var bulletIndex = 0;
 export function getNextBullet(bullets: Projectile[]) {

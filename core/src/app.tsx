@@ -9,6 +9,7 @@ import { st } from "./state.svelte.ts";
 import type {
 	Account,
 	ClutterObject,
+	FlagObject,
 	GameMode,
 	GameObjectRenderData,
 	InputSendData,
@@ -3041,7 +3042,7 @@ function drawPlayer(plr: Player, delta: number) {
 	}
 }
 
-function drawFlag(flg: Flag) {
+function drawFlag(flg: FlagObject) {
 	flg.ac--;
 	if (flg.ac <= 0) {
 		flg.ac = 5;
@@ -3065,7 +3066,7 @@ function drawFlag(flg: Flag) {
 	);
 }
 
-function drawClutter(clt: Clutter) {
+function drawClutter(clt: ClutterObject) {
 	if (clt.active && canSee(clt.x - st.startX, clt.y - st.startY, clt.w, clt.h)) {
 		drawSprite(
 			graph,
@@ -3091,10 +3092,10 @@ function drawGameObjects(delta: number) {
 				drawPlayer(gameObject.data as Player, delta);
 				break;
 			case "flag":
-				drawFlag(gameObject.data as Flag);
+				drawFlag(gameObject.data as FlagObject);
 				break;
 			case "clutter":
-				drawClutter(gameObject.data as Clutter);
+				drawClutter(gameObject.data as ClutterObject);
 				break;
 		}
 	}
