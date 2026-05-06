@@ -235,11 +235,3 @@ export type ZoneEvent = {
 	newX?: number;
 	newY?: number;
 };
-
-/**
- * Objects in gameplay for which the order of rendering depends on their relative y position.
- */
-export type GameObjectRenderData = {
-	data: Player | ClutterObject | FlagObject;
-	type: "player" | "clutter" | "flag";
-};

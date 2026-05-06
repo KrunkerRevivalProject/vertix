@@ -11,7 +11,6 @@ import type {
 	ClutterObject,
 	FlagObject,
 	GameMode,
-	GameObjectRenderData,
 	InputSendData,
 	Player,
 	ShootEvent,
