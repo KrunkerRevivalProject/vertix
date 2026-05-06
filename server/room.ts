@@ -518,6 +518,12 @@ export class Room {
 		this.updateScore(scored, source);
 	}
 
+	/**
+	 * Creates an explosion at (x, y) and applies splash damage in a circle with specified radius.
+	 * TODO: think splash damage should depend on dir more. Max damage is rare but possible when the explosion comes up from
+	 * the bottom (so hitting the sprite's feet). A high amount can still be done from the sides. It's least effective when
+	 * coming at you from above. Need to ask/search around for relative damage reductions for hits from sides and above.
+	 */
 	doExplosion(
 		source: Player,
 		x: number,
@@ -530,21 +536,10 @@ export class Room {
 		this.io.emit("ex", x, y, 3);
 		for (const pl of this.game.players) {
 			if (!selfDamage && pl.index === source.index) continue;
-			const left = pl.x - pl.width / 2;
-			const right = pl.x + pl.width / 2;
-			const top = pl.y - pl.height - pl.jumpY;
-			const bottom = pl.y - pl.jumpY;
-			const dist = getDistance(
-				x,
-				y,
-				Math.max(left, Math.min(right, x)),
-				Math.max(top, Math.min(bottom, y)),
-			);
+			const dist = getDistance(x, y, pl.x, pl.y - pl.jumpY - pl.height / 2);
+			const roundedDist = Math.round(dist);
 			if (radius > dist) {
-				const dmg =
-					-radius + Math.round(dist) < -maxDmg
-						? -maxDmg
-						: -radius + Math.round(dist);
+				const dmg = Math.max(-maxDmg, -radius + roundedDist);
 				this.handleHit(source, pl, dmg, dir);
 			}
 		}

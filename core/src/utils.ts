@@ -303,15 +303,15 @@ export function wallCol(player: Player, tiles: Tile[], gameObjects: any) {
 			player.x + player.width / 2 >= tmpObj.x &&
 			player.x - player.width / 2 <= tmpObj.x + tmpObj.w &&
 			player.y >= tmpObj.y - (tmpObj.h / 2) * tmpObj.tp &&
-			player.y <= tmpObj.y
+			player.y <= tmpObj.y + (tmpObj.h / 2) * tmpObj.tp
 		) {
 			if (player.oldX + player.width / 2 <= tmpObj.x) {
 				player.x = tmpObj.x - player.width / 2 - 1;
 			} else if (player.oldX - player.width / 2 >= tmpObj.x + tmpObj.w) {
 				player.x = tmpObj.x + tmpObj.w + player.width / 2 + 1;
 			}
-			if (player.oldY >= tmpObj.y) {
-				player.y = tmpObj.y + 1;
+			if (player.oldY >= tmpObj.y + (tmpObj.h / 2) * tmpObj.tp) {
+				player.y = tmpObj.y + (tmpObj.h / 2) * tmpObj.tp + 1;
 			} else if (player.oldY <= tmpObj.y - (tmpObj.h / 2) * tmpObj.tp) {
 				player.y = tmpObj.y - (tmpObj.h / 2) * tmpObj.tp - 1;
 			}

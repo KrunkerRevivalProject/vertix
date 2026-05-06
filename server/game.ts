@@ -70,8 +70,9 @@ export class Game {
 			speed: 0.5,
 			jumpY: 0,
 			jumpDelta: 0,
+			// TODO: different characters should have different jump strengths, this is roughly good for triggerman.
 			jumpStrength: 0.72,
-			gravityStrength: 0.0058,
+			gravityStrength: 0.0042,
 			jumpCountdown: 0,
 			frameCountdown: 0,
 			scoreCountdown: 0,
@@ -203,6 +204,7 @@ export class Game {
 					h: 84,
 					hc: true,
 					tp: 1,
+					s: true,
 				};
 				const randY = randomInt(tl.scale / 4, (tl.scale / 4) * 3);
 				if (tl.left) {
