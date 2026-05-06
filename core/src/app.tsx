@@ -10,6 +10,7 @@ import type {
 	Account,
 	ClutterObject,
 	GameMode,
+	GameObjectRenderData,
 	InputSendData,
 	Player,
 	ShootEvent,
@@ -268,7 +269,7 @@ var target = {
 };
 let players: Player[] = [];
 let clutter: ClutterObject[] = [];
-let flags: any[] = []; // todo
+let flags: FlagObject[] = [];
 let bullets: Projectile[] = [];
 
 var mapTileScale = 0;
@@ -1506,6 +1507,7 @@ function sortUsersByScore(a: Player, b: Player) {
 		return 0;
 	}
 }
+
 function sortUsersByPosition(a: Player, b: Player) {
 	if (a.y < b.y) {
 		return -1;
@@ -1515,6 +1517,15 @@ function sortUsersByPosition(a: Player, b: Player) {
 		return 0;
 	}
 }
+
+function getGameObjectRenderData() {
+	return [
+		...players.map((player): GameObjectRenderData => ({ data: player, type: "player" })),
+		...clutter.map((clutter): GameObjectRenderData => ({ data: clutter, type: "clutter" })),
+		...flags.map((flag): GameObjectRenderData => ({ data: flag, type: "flag" })),
+	].toSorted((a, b) => a.data.y - b.data.y);
+}
+
 function updateLeaderboard(data: number[]) {
 	let test: Node[] = [];
 	test.push(<span class="title">LEADERBOARD</span>);
@@ -2819,259 +2830,277 @@ playerCanvas.height = 500;
 const playerContext = playerCanvas.getContext("2d")!;
 playerContext.imageSmoothingEnabled = false;
 
-function drawGameObjects(delta: number) {
-	for (const plr of players) {
-		if (!plr.dead && (plr.index === st.player.index || plr.onScreen)) {
-			if (plr.jumpY === undefined) {
-				plr.jumpY = 0;
-			}
-			playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
-			playerContext.save();
-			playerContext.globalAlpha = 0.9;
-			playerContext.translate(playerCanvas.width / 2, playerCanvas.height / 2);
-			const weaponAngle = (Math.PI / 180) * plr.angle;
-			const snappedAngle = snapAngleToCardinal(plr.angle);
-			const screenX = plr.x - st.startX;
-			let screenY = plr.y - plr.jumpY - st.startY;
-			if (plr.animIndex === 1) {
-				screenY -= 3;
-			}
-			const currentWeapon = plr.weapons.length > 0 ? getCurrentWeapon(plr) : null;
-			const weaponSprite = currentWeapon
-				? getWeaponSprite(currentWeapon.weaponIndex, currentWeapon.camo!, snappedAngle)
-				: null;
-			const armSprite = classSpriteSheets[plr.classIndex]?.arm;
-			if (currentWeapon) {
-				if (!currentWeapon.front && weaponSprite != null) {
-					playerContext.save();
-					playerContext.translate(0, -currentWeapon.yOffset);
-					playerContext.rotate(weaponAngle);
-					playerContext.translate(0, currentWeapon.holdDist);
-					drawSprite(
-						playerContext,
-						weaponSprite,
-						-(currentWeapon.width / 2),
-						0,
-						currentWeapon.width,
-						currentWeapon.length,
-						0,
-						false,
-						0,
-						0,
-						0,
-					);
-					playerContext.translate(0, -currentWeapon.holdDist + 6);
-					if (armSprite != null) {
-						playerContext.translate(3, -10);
-						drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
-						playerContext.translate(-16, -8);
-						drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
-						playerContext.restore();
-					}
-				}
-			}
-			playerContext.globalAlpha = 1;
-			const lowerBodySprite = getPlayerSprite(plr.classIndex, snappedAngle, plr.animIndex + 1);
-			if (lowerBodySprite != null) {
+function drawPlayer(plr: Player, delta: number) {
+	if (!plr.dead && (plr.index === st.player.index || plr.onScreen)) {
+		if (plr.jumpY === undefined) {
+			plr.jumpY = 0;
+		}
+		playerContext.clearRect(0, 0, playerCanvas.width, playerCanvas.height);
+		playerContext.save();
+		playerContext.globalAlpha = 0.9;
+		playerContext.translate(playerCanvas.width / 2, playerCanvas.height / 2);
+		const weaponAngle = (Math.PI / 180) * plr.angle;
+		const snappedAngle = snapAngleToCardinal(plr.angle);
+		const screenX = plr.x - st.startX;
+		let screenY = plr.y - plr.jumpY - st.startY;
+		if (plr.animIndex === 1) {
+			screenY -= 3;
+		}
+		const currentWeapon = plr.weapons.length > 0 ? getCurrentWeapon(plr) : null;
+		const weaponSprite = currentWeapon
+			? getWeaponSprite(currentWeapon.weaponIndex, currentWeapon.camo!, snappedAngle)
+			: null;
+		const armSprite = classSpriteSheets[plr.classIndex]?.arm;
+		if (currentWeapon) {
+			if (!currentWeapon.front && weaponSprite != null) {
+				playerContext.save();
+				playerContext.translate(0, -currentWeapon.yOffset);
+				playerContext.rotate(weaponAngle);
+				playerContext.translate(0, currentWeapon.holdDist);
 				drawSprite(
 					playerContext,
-					lowerBodySprite,
-					-(plr.width / 2),
-					-(plr.height * 0.318),
-					plr.width,
-					plr.height * 0.318,
+					weaponSprite,
+					-(currentWeapon.width / 2),
 					0,
-					true,
-					plr.jumpY * 1.5,
-					0.5,
-					0,
-				);
-			}
-			const upperBodySprite = getPlayerSprite(plr.classIndex, snappedAngle, 0);
-			if (upperBodySprite != null) {
-				drawSprite(
-					playerContext,
-					upperBodySprite,
-					-(plr.width / 2),
-					-plr.height,
-					plr.width,
-					plr.height * 0.6819999999999999,
-					0,
-					true,
-					plr.jumpY * 1.5 + plr.height * 0.477,
-					0.5,
-					0,
-				);
-			}
-			const shirtSprite = getShirtSprite(plr, snappedAngle);
-			if (shirtSprite != null) {
-				playerContext.globalAlpha = 0.9;
-				drawSprite(
-					playerContext,
-					shirtSprite,
-					-(plr.width / 2),
-					-plr.height,
-					plr.width,
-					plr.height * 0.6819999999999999,
-					0,
-					true,
-					plr.jumpY * 1.5 + plr.height * 0.477,
-					0.5,
-					0,
-				);
-				playerContext.globalAlpha = 1;
-			}
-			const hatScale = plr.width * 0.833;
-			const hatSprite = getHatSprite(plr, snappedAngle);
-			if (hatSprite != null) {
-				drawSprite(
-					playerContext,
-					hatSprite,
-					-(hatScale / 2),
-					-(plr.height + hatScale * 0.045),
-					//-(b.height + p * 0.095),
-					hatScale,
-					hatScale,
+					currentWeapon.width,
+					currentWeapon.length,
 					0,
 					false,
 					0,
-					0.5,
+					0,
 					0,
 				);
-			}
-			if (currentWeapon) {
-				playerContext.globalAlpha = 0.9;
-				if (currentWeapon.front && weaponSprite != null) {
-					playerContext.save();
-					playerContext.translate(0, -currentWeapon.yOffset);
-					playerContext.rotate(weaponAngle);
-					playerContext.translate(0, currentWeapon.holdDist);
-					drawSprite(
-						playerContext,
-						weaponSprite,
-						-(currentWeapon.width / 2),
-						0,
-						currentWeapon.width,
-						currentWeapon.length,
-						0,
-						false,
-						0,
-						0,
-						0,
-					);
-					playerContext.translate(0, -currentWeapon.holdDist + 10);
-					if (armSprite != null) {
-						if (snappedAngle == 270) {
-							playerContext.restore();
-							playerContext.save();
-							playerContext.translate(-4, -currentWeapon.yOffset + 8);
-							playerContext.rotate(weaponAngle);
-							drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
-						} else if (snappedAngle == 90) {
-							playerContext.restore();
-							playerContext.save();
-							playerContext.translate(0, -currentWeapon.yOffset);
-							playerContext.rotate(weaponAngle);
-							drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
-						} else {
-							playerContext.translate(10, -13);
-							playerContext.rotate(0.7);
-							drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
-							playerContext.rotate(-0.7);
-							playerContext.translate(-28, -1);
-							playerContext.rotate(-0.25);
-							drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
-							playerContext.rotate(0.25);
-						}
-						playerContext.restore();
-					}
+				playerContext.translate(0, -currentWeapon.holdDist + 6);
+				if (armSprite != null) {
+					playerContext.translate(3, -10);
+					drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
+					playerContext.translate(-16, -8);
+					drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
+					playerContext.restore();
 				}
 			}
-			if (plr.spawnProtection > 0) {
-				playerContext.globalCompositeOperation = "source-atop";
-				playerContext.fillStyle =
-					plr.team != st.player.team ? "rgba(255,179,179,0.5)" : "rgba(179,231,255,0.5)";
-				playerContext.fillRect(
-					-playerCanvas.width / 2,
-					-playerCanvas.height / 2,
-					playerCanvas.width,
-					playerCanvas.height,
-				);
-				playerContext.globalCompositeOperation = "source-over";
-			}
-			if (plr.hitFlash != undefined && plr.hitFlash > 0) {
-				playerContext.globalCompositeOperation = "source-atop";
-				playerContext.fillStyle = `rgba(255, 255, 255, ${plr.hitFlash})`;
-				playerContext.fillRect(
-					-playerCanvas.width / 2,
-					-playerCanvas.height / 2,
-					playerCanvas.width,
-					playerCanvas.height,
-				);
-				playerContext.globalCompositeOperation = "source-over";
-				plr.hitFlash -= delta * 0.01;
-				if (plr.hitFlash < 0) {
-					plr.hitFlash = 0;
-				}
-			}
+		}
+		playerContext.globalAlpha = 1;
+		const lowerBodySprite = getPlayerSprite(plr.classIndex, snappedAngle, plr.animIndex + 1);
+		if (lowerBodySprite != null) {
 			drawSprite(
-				graph,
-				playerCanvas,
-				screenX - playerCanvas.width / 2,
-				screenY - playerCanvas.height / 2,
-				playerCanvas.width,
-				playerCanvas.height,
+				playerContext,
+				lowerBodySprite,
+				-(plr.width / 2),
+				-(plr.height * 0.318),
+				plr.width,
+				plr.height * 0.318,
 				0,
-				false,
-				0,
-				0,
+				true,
+				plr.jumpY * 1.5,
+				0.5,
 				0,
 			);
-			playerContext.restore();
 		}
-	}
-	for (const flg of flags) {
-		flg.ac--;
-		if (flg.ac <= 0) {
-			flg.ac = 5;
-			flg.ai++;
-			if (flg.ai > 2) {
-				flg.ai = 0;
-			}
-		}
-		drawSprite(
-			graph,
-			flagSprites[flg.ai + (flg.team == st.player.team ? 0 : 3)],
-			flg.x - flg.w / 2 - st.startX,
-			flg.y - flg.h - st.startY,
-			flg.w,
-			flg.h,
-			0,
-			true,
-			0,
-			0.5,
-			0,
-		);
-	}
-	for (const clt of clutter) {
-		if (clt.active && canSee(clt.x - st.startX, clt.y - st.startY, clt.w, clt.h)) {
+		const upperBodySprite = getPlayerSprite(plr.classIndex, snappedAngle, 0);
+		if (upperBodySprite != null) {
 			drawSprite(
-				graph,
-				clutterSprites[clt.i],
-				clt.x - st.startX,
-				clt.y - clt.h - st.startY,
-				clt.w,
-				clt.h,
+				playerContext,
+				upperBodySprite,
+				-(plr.width / 2),
+				-plr.height,
+				plr.width,
+				plr.height * 0.6819999999999999,
 				0,
-				!!clt.s,
+				true,
+				plr.jumpY * 1.5 + plr.height * 0.477,
+				0.5,
+				0,
+			);
+		}
+		const shirtSprite = getShirtSprite(plr, snappedAngle);
+		if (shirtSprite != null) {
+			playerContext.globalAlpha = 0.9;
+			drawSprite(
+				playerContext,
+				shirtSprite,
+				-(plr.width / 2),
+				-plr.height,
+				plr.width,
+				plr.height * 0.6819999999999999,
+				0,
+				true,
+				plr.jumpY * 1.5 + plr.height * 0.477,
+				0.5,
+				0,
+			);
+			playerContext.globalAlpha = 1;
+		}
+		const hatScale = plr.width * 0.833;
+		const hatSprite = getHatSprite(plr, snappedAngle);
+		if (hatSprite != null) {
+			drawSprite(
+				playerContext,
+				hatSprite,
+				-(hatScale / 2),
+				-(plr.height + hatScale * 0.045),
+				//-(b.height + p * 0.095),
+				hatScale,
+				hatScale,
+				0,
+				false,
 				0,
 				0.5,
 				0,
 			);
 		}
+		if (currentWeapon) {
+			playerContext.globalAlpha = 0.9;
+			if (currentWeapon.front && weaponSprite != null) {
+				playerContext.save();
+				playerContext.translate(0, -currentWeapon.yOffset);
+				playerContext.rotate(weaponAngle);
+				playerContext.translate(0, currentWeapon.holdDist);
+				drawSprite(
+					playerContext,
+					weaponSprite,
+					-(currentWeapon.width / 2),
+					0,
+					currentWeapon.width,
+					currentWeapon.length,
+					0,
+					false,
+					0,
+					0,
+					0,
+				);
+				playerContext.translate(0, -currentWeapon.holdDist + 10);
+				if (armSprite != null) {
+					if (snappedAngle == 270) {
+						playerContext.restore();
+						playerContext.save();
+						playerContext.translate(-4, -currentWeapon.yOffset + 8);
+						playerContext.rotate(weaponAngle);
+						drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
+					} else if (snappedAngle == 90) {
+						playerContext.restore();
+						playerContext.save();
+						playerContext.translate(0, -currentWeapon.yOffset);
+						playerContext.rotate(weaponAngle);
+						drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
+					} else {
+						playerContext.translate(10, -13);
+						playerContext.rotate(0.7);
+						drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
+						playerContext.rotate(-0.7);
+						playerContext.translate(-28, -1);
+						playerContext.rotate(-0.25);
+						drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
+						playerContext.rotate(0.25);
+					}
+					playerContext.restore();
+				}
+			}
+		}
+		if (plr.spawnProtection > 0) {
+			playerContext.globalCompositeOperation = "source-atop";
+			playerContext.fillStyle =
+				plr.team != st.player.team ? "rgba(255,179,179,0.5)" : "rgba(179,231,255,0.5)";
+			playerContext.fillRect(
+				-playerCanvas.width / 2,
+				-playerCanvas.height / 2,
+				playerCanvas.width,
+				playerCanvas.height,
+			);
+			playerContext.globalCompositeOperation = "source-over";
+		}
+		if (plr.hitFlash != undefined && plr.hitFlash > 0) {
+			playerContext.globalCompositeOperation = "source-atop";
+			playerContext.fillStyle = `rgba(255, 255, 255, ${plr.hitFlash})`;
+			playerContext.fillRect(
+				-playerCanvas.width / 2,
+				-playerCanvas.height / 2,
+				playerCanvas.width,
+				playerCanvas.height,
+			);
+			playerContext.globalCompositeOperation = "source-over";
+			plr.hitFlash -= delta * 0.01;
+			if (plr.hitFlash < 0) {
+				plr.hitFlash = 0;
+			}
+		}
+		drawSprite(
+			graph,
+			playerCanvas,
+			screenX - playerCanvas.width / 2,
+			screenY - playerCanvas.height / 2,
+			playerCanvas.width,
+			playerCanvas.height,
+			0,
+			false,
+			0,
+			0,
+			0,
+		);
+		playerContext.restore();
+	}
+}
+
+function drawFlag(flg: Flag) {
+	flg.ac--;
+	if (flg.ac <= 0) {
+		flg.ac = 5;
+		flg.ai++;
+		if (flg.ai > 2) {
+			flg.ai = 0;
+		}
+	}
+	drawSprite(
+		graph,
+		flagSprites[flg.ai + (flg.team == st.player.team ? 0 : 3)],
+		flg.x - flg.w / 2 - st.startX,
+		flg.y - flg.h - st.startY,
+		flg.w,
+		flg.h,
+		0,
+		true,
+		0,
+		0.5,
+		0,
+	);
+}
+
+function drawClutter(clt: Clutter) {
+	if (clt.active && canSee(clt.x - st.startX, clt.y - st.startY, clt.w, clt.h)) {
+		drawSprite(
+			graph,
+			clutterSprites[clt.i],
+			clt.x - st.startX,
+			clt.y - clt.h - st.startY,
+			clt.w,
+			clt.h,
+			0,
+			!!clt.s,
+			0,
+			0.5,
+			0,
+		);
+	}
+}
+
+function drawGameObjects(delta: number) {
+	const gameObjects = getGameObjectRenderData();
+	for (const gameObject of gameObjects) {
+		switch (gameObject.type) {
+			case "player":
+				drawPlayer(gameObject.data as Player, delta);
+				break;
+			case "flag":
+				drawFlag(gameObject.data as Flag);
+				break;
+			case "clutter":
+				drawClutter(gameObject.data as Clutter);
+				break;
+		}
 	}
 	graph.globalAlpha = 1;
 }
+
 function drawPlayerNames() {
 	const playerConfig = {
 		border: 6,

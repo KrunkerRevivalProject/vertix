@@ -196,6 +196,14 @@ export interface PickupObject extends MapObject {
 	type: string;
 }
 
+export interface FlagObject extends MapObject {
+	team: string;
+	w: number;
+	h: number;
+	ai: number; // ?
+	ac: number; // ?
+}
+
 export type GenData = {
 	width: number;
 	height: number;
@@ -226,4 +234,12 @@ export type ZoneEvent = {
 	score: number;
 	newX?: number;
 	newY?: number;
+};
+
+/**
+ * Objects in gameplay for which the order of rendering depends on their relative y position.
+ */
+export type GameObjectRenderData = {
+	data: Player | ClutterObject | FlagObject;
+	type: "player" | "clutter" | "flag";
 };

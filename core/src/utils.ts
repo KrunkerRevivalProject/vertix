@@ -72,19 +72,19 @@ const FLAG_WIDTH = 70;
 const FLAG_HEIGHT = 152;
 const FLAG_OFFSET = 40;
 const FLAG_EDGE_INSET = 30;
-function pushFlag(flags: any[], tile: Tile, xOffset: number, yOffset: number) {
+function pushFlag(flags: FlagObject[], tile: Tile, xOffset: number, yOffset: number) {
 	flags.push({
-		type: "flag",
 		team: tile.objTeam,
 		x: tile.x + xOffset,
 		y: tile.y + yOffset,
+		active: true,
 		w: FLAG_WIDTH,
 		h: FLAG_HEIGHT,
 		ai: randomInt(0, 2),
 		ac: 0,
 	});
 }
-export function setupMap(gameMap: any, mapTileScale: number, flags: any[]) {
+export function setupMap(gameMap: any, mapTileScale: number, flags: FlagObject[]) {
 	const genData = gameMap.genData;
 	const startX = -(mapTileScale * 2);
 	const startY = -(mapTileScale * 2);
