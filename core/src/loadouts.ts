@@ -529,9 +529,9 @@ export const weapons: Weapon[] = [
 	{
 		name: "nade launcher",
 		weaponIndex: 5,
-		dmg: 30,
-		ammo: 3,
-		maxAmmo: 3,
+		dmg: 70,
+		ammo: 5,
+		maxAmmo: 5,
 		reloadSpeed: 2000,
 		fireRate: 250,
 		spread: [0, 0.05, -0.1],
@@ -540,7 +540,7 @@ export const weapons: Weapon[] = [
 		yOffset: 55,
 		holdDist: 5,
 
-		bSpeed: 2,
+		bSpeed: 1.75,
 		bWidth: 12,
 		bHeight: 24,
 		bRandScale: [1, 1],
@@ -559,7 +559,7 @@ export const weapons: Weapon[] = [
 		glowWidth: 50,
 		glowHeight: 100,
 		shake: 0.4,
-		selfDamage: true,
+		selfDamage: false,
 
 		reloadTime: 0,
 		spreadIndex: 0,
