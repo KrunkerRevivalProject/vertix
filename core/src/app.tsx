@@ -1519,14 +1519,6 @@ function sortUsersByPosition(a: Player, b: Player) {
 	}
 }
 
-function getGameObjectRenderData() {
-	return [
-		...players.map((player): GameObjectRenderData => ({ data: player, type: "player" })),
-		...clutter.map((clutter): GameObjectRenderData => ({ data: clutter, type: "clutter" })),
-		...flags.map((flag): GameObjectRenderData => ({ data: flag, type: "flag" })),
-	].toSorted((a, b) => a.data.y - b.data.y);
-}
-
 function updateLeaderboard(data: number[]) {
 	let test: Node[] = [];
 	test.push(<span class="title">LEADERBOARD</span>);
@@ -3084,18 +3076,26 @@ function drawClutter(clt: ClutterObject) {
 	}
 }
 
+function getGameObjectRenderData() {
+	return [
+		...players.map((player) => ({ data: player, type: "player" as const })),
+		...clutter.map((clutter) => ({ data: clutter, type: "clutter" as const })),
+		...flags.map((flag) => ({ data: flag, type: "flag" as const })),
+	].toSorted((a, b) => a.data.y - b.data.y);
+}
+
 function drawGameObjects(delta: number) {
 	const gameObjects = getGameObjectRenderData();
 	for (const gameObject of gameObjects) {
 		switch (gameObject.type) {
 			case "player":
-				drawPlayer(gameObject.data as Player, delta);
+				drawPlayer(gameObject.data, delta);
 				break;
 			case "flag":
-				drawFlag(gameObject.data as FlagObject);
+				drawFlag(gameObject.data);
 				break;
 			case "clutter":
-				drawClutter(gameObject.data as ClutterObject);
+				drawClutter(gameObject.data);
 				break;
 		}
 	}
