@@ -1,6 +1,6 @@
 import type { Projectile } from "./logic/projectile.ts";
 import { st } from "./state.svelte.ts";
-import type { GenData, Player, ShootEvent, Tile } from "./types.ts";
+import type { FlagObject, GenData, Player, ShootEvent, Tile } from "./types.ts";
 
 var bulletIndex = 0;
 export function getNextBullet(bullets: Projectile[]) {
@@ -72,19 +72,19 @@ const FLAG_WIDTH = 70;
 const FLAG_HEIGHT = 152;
 const FLAG_OFFSET = 40;
 const FLAG_EDGE_INSET = 30;
-function pushFlag(flags: any[], tile: Tile, xOffset: number, yOffset: number) {
+function pushFlag(flags: FlagObject[], tile: Tile, xOffset: number, yOffset: number) {
 	flags.push({
-		type: "flag",
 		team: tile.objTeam,
 		x: tile.x + xOffset,
 		y: tile.y + yOffset,
+		active: true,
 		w: FLAG_WIDTH,
 		h: FLAG_HEIGHT,
 		ai: randomInt(0, 2),
 		ac: 0,
 	});
 }
-export function setupMap(gameMap: any, mapTileScale: number, flags: any[]) {
+export function setupMap(gameMap: any, mapTileScale: number, flags: FlagObject[]) {
 	const genData = gameMap.genData;
 	const startX = -(mapTileScale * 2);
 	const startY = -(mapTileScale * 2);
@@ -303,15 +303,15 @@ export function wallCol(player: Player, tiles: Tile[], gameObjects: any) {
 			player.x + player.width / 2 >= tmpObj.x &&
 			player.x - player.width / 2 <= tmpObj.x + tmpObj.w &&
 			player.y >= tmpObj.y - (tmpObj.h / 2) * tmpObj.tp &&
-			player.y <= tmpObj.y
+			player.y <= tmpObj.y + (tmpObj.h / 2) * tmpObj.tp
 		) {
 			if (player.oldX + player.width / 2 <= tmpObj.x) {
 				player.x = tmpObj.x - player.width / 2 - 1;
 			} else if (player.oldX - player.width / 2 >= tmpObj.x + tmpObj.w) {
 				player.x = tmpObj.x + tmpObj.w + player.width / 2 + 1;
 			}
-			if (player.oldY >= tmpObj.y) {
-				player.y = tmpObj.y + 1;
+			if (player.oldY >= tmpObj.y + (tmpObj.h / 2) * tmpObj.tp) {
+				player.y = tmpObj.y + (tmpObj.h / 2) * tmpObj.tp + 1;
 			} else if (player.oldY <= tmpObj.y - (tmpObj.h / 2) * tmpObj.tp) {
 				player.y = tmpObj.y - (tmpObj.h / 2) * tmpObj.tp - 1;
 			}

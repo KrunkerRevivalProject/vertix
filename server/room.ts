@@ -15,6 +15,9 @@ import {
 } from "core/src/utils.ts";
 import { Game } from "./game.ts";
 
+const EXPLOSIVE_CLUTTER_HIT_DAMAGE = 50;
+const EXPLOSIVE_CLUTTER_BLAST_RADIUS = 150;
+
 export class Room {
 	name;
 	io;
@@ -408,25 +411,41 @@ export class Room {
 
 	updateBullet(bullet: Projectile, player: Player, dir: number) {
 		const tick = () => {
-			if (!bullet.active && bullet.explodeOnDeath) {
-				this.doExplosion(
-					player,
-					bullet.x,
-					bullet.y,
-					bullet.blastRadius!,
-					bullet.dmg,
-					dir,
-					bullet.selfDamage,
-				);
-				if (bullet.lastHit.length > 0) {
+			if (
+				!bullet.active &&
+				(bullet.explodeOnDeath || bullet.collidesWithExplosiveClutter)
+			) {
+				if (bullet.explodeOnDeath) {
+					this.doExplosion(
+						player,
+						bullet.x,
+						bullet.y,
+						bullet.blastRadius!,
+						bullet.dmg,
+						dir,
+						bullet.selfDamage,
+					);
+				}
+				if (bullet.collidesWithExplosiveClutter && bullet.lastHit.length > 0) {
 					const i = bullet.lastHit[0];
 					const clt = this.game.clutter[i];
-					clt.active = false;
-					this.io.emit("4", clt, i, 1);
-					setTimeout(() => {
-						clt.active = true;
+					if (clt.active) {
+						this.doExplosion(
+							player,
+							clt.x,
+							clt.y,
+							EXPLOSIVE_CLUTTER_BLAST_RADIUS,
+							EXPLOSIVE_CLUTTER_HIT_DAMAGE,
+							dir,
+							true,
+						);
+						clt.active = false;
 						this.io.emit("4", clt, i, 1);
-					}, 15000);
+						setTimeout(() => {
+							clt.active = true;
+							this.io.emit("4", clt, i, 1);
+						}, 15000);
+					}
 				}
 			} else if (bullet.lastHit.length > 0) {
 				for (const i of bullet.lastHit) {
@@ -499,6 +518,12 @@ export class Room {
 		this.updateScore(scored, source);
 	}
 
+	/**
+	 * Creates an explosion at (x, y) and applies splash damage in a circle with specified radius.
+	 * TODO: think splash damage should depend on dir more. Max damage is rare but possible when the explosion comes up from
+	 * the bottom (so hitting the sprite's feet). A high amount can still be done from the sides. It's least effective when
+	 * coming at you from above. Need to ask/search around for relative damage reductions for hits from sides and above.
+	 */
 	doExplosion(
 		source: Player,
 		x: number,
@@ -511,21 +536,10 @@ export class Room {
 		this.io.emit("ex", x, y, 3);
 		for (const pl of this.game.players) {
 			if (!selfDamage && pl.index === source.index) continue;
-			const left = pl.x - pl.width / 2;
-			const right = pl.x + pl.width / 2;
-			const top = pl.y - pl.height;
-			const bottom = pl.y;
-			const dist = getDistance(
-				x,
-				y,
-				Math.max(left, Math.min(right, x)),
-				Math.max(top, Math.min(bottom, y)),
-			);
+			const dist = getDistance(x, y, pl.x, pl.y - pl.jumpY - pl.height / 2);
+			const roundedDist = Math.round(dist);
 			if (radius > dist) {
-				const dmg =
-					-radius + Math.round(dist) < -maxDmg
-						? -maxDmg
-						: -radius + Math.round(dist);
+				const dmg = Math.max(-maxDmg, -radius + roundedDist);
 				this.handleHit(source, pl, dmg, dir);
 			}
 		}

@@ -196,6 +196,14 @@ export interface PickupObject extends MapObject {
 	type: string;
 }
 
+export interface FlagObject extends MapObject {
+	team: string;
+	w: number;
+	h: number;
+	ai: number; // ?
+	ac: number; // ?
+}
+
 export type GenData = {
 	width: number;
 	height: number;
