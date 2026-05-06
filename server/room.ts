@@ -290,7 +290,7 @@ export class Room {
 						if (pl.team === player.team && pl.socketId) {
 							this.io
 								.to(pl.socketId)
-								.emit("cht", [player.index, "(TEAM) " + msg]);
+								.emit("cht", [player.index, `(TEAM) ${msg}`]);
 						}
 					}
 				} else {

@@ -50,8 +50,8 @@ export type Player = {
 	isn?: number;
 	firstReceive?: boolean; // unused?
 	spray?: any; // todo
-	lastItem?: any;
-	hitFlash?: any;
+	lastItem?: any; // todo (server-side)
+	hitFlash?: number;
 };
 
 type WeaponBase = {
@@ -131,10 +131,6 @@ export interface Sprite extends HTMLImageElement {
 	scale?: number;
 	alpha?: number;
 	resolution?: number;
-	//WEAPON
-	wpnImg?: any;
-	flip?: boolean;
-	tmpInx?: string;
 }
 
 export interface SpriteCanvas extends HTMLCanvasElement {

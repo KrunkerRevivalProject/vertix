@@ -1,6 +1,6 @@
 import type { Projectile } from "./logic/projectile.ts";
 import { st } from "./state.svelte.ts";
-import type { FlagObject, GenData, Player, ShootEvent, Tile } from "./types.ts";
+import type { ClutterObject, FlagObject, GenData, Player, ShootEvent, Tile } from "./types.ts";
 
 var bulletIndex = 0;
 export function getNextBullet(bullets: Projectile[]) {
@@ -261,7 +261,7 @@ function canPlaceFlag(tile: Tile | undefined, ignoreWalls: boolean) {
 		return tile && !tile.hardPoint;
 	}
 }
-export function wallCol(player: Player, tiles: Tile[], gameObjects: any) {
+export function wallCol(player: Player, tiles: Tile[], clutter: ClutterObject[]) {
 	if (player.dead) return;
 	player.nameYOffset = 0;
 	for (const tmpTile of tiles) {
@@ -295,7 +295,7 @@ export function wallCol(player: Player, tiles: Tile[], gameObjects: any) {
 			);
 		}
 	}
-	for (const tmpObj of gameObjects) {
+	for (const tmpObj of clutter) {
 		if (!tmpObj.active) continue;
 		if (
 			tmpObj.hc &&

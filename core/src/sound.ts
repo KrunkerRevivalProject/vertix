@@ -148,19 +148,19 @@ function loadSound(src: string, sound: (typeof soundMeta)[number], format: strin
 }
 var currentTrack = 0;
 export function startSoundTrack(id: number) {
-	if (!st.doSounds || soundList.track1 == undefined || soundList.track2 == undefined) {
+	if (!st.doSounds || !soundList.track1 || !soundList.track2) {
 		return false;
 	}
 	try {
-		if (id == 1) {
-			if (currentTrack != id) {
+		if (id === 1) {
+			if (currentTrack !== id) {
 				currentTrack = id;
 				soundList.track1.sound.play();
 				soundList.track1.sound.fade(0, 1, 1000);
 			}
 			soundList.track2.sound.stop();
 		} else {
-			if (currentTrack != id) {
+			if (currentTrack !== id) {
 				currentTrack = id;
 				soundList.track2.sound.play();
 				soundList.track2.sound.fade(0, 1, 1000);

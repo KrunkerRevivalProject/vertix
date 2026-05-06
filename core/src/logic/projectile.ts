@@ -46,7 +46,7 @@ export class Projectile {
 	bounce = false;
 	dustTimer = 0;
 	selfDamage = false;
-	update(delta: number, currentTime: number, clutter: any, tiles: Tile[], players: Player[]) {
+	update(delta: number, currentTime: number, clutter: ClutterObject[], tiles: Tile[], players: Player[]) {
 		if (this.active) {
 			let lifetime = currentTime - this.startTime;
 			if (this.skipMove) {
@@ -212,7 +212,7 @@ export class Projectile {
 		this.active = true;
 		if (typeof window !== "undefined") playSound(`shot${this.weaponIndex}`, this.x, this.y);
 	}
-	canSeeObject(target: any, size: number) {
+	canSeeObject(target: ClutterObject | Tile, size: number) {
 		const xDistance = Math.abs(this.cEndX - target.x);
 		const yDistance = Math.abs(this.cEndY - target.y);
 		return xDistance <= (size + this.height) * 2 && yDistance <= (size + this.height) * 2;

@@ -136,8 +136,6 @@ var clanInvMessage = document.getElementById("clanInvMessage")!;
 var clanChtMessage = document.getElementById("clanChtMessage")!;
 var clanChatLink = document.getElementById("clanChatLink")!;
 var loginMessage = document.getElementById("loginMessage")!;
-var lobbyPass = document.getElementById("lobbyPass")! as HTMLInputElement;
-var lobbyMessage = document.getElementById("lobbyMessage")!;
 var serverCreateMessage = document.getElementById("serverCreateMessage")!;
 
 window.onload = async () => {
@@ -315,7 +313,7 @@ function gameInput(event: MouseEvent) {
 	target.f = utils.roundNumber(target.f, 2);
 	target.d = utils.roundNumber(target.d, 2);
 	target.dOffset = utils.roundNumber(target.d / 4, 1);
-	if (lastAngle != target.f || lastDist != target.d) {
+	if (lastAngle !== target.f || lastDist !== target.d) {
 		targetChanged = true;
 	}
 	// lastTarget = target.f;
@@ -842,7 +840,7 @@ function setupSocket(sock: Socket) {
 		} else if (event.dID === st.player.index && event.gID !== st.player.index) {
 			playSound("kill1", sourcePlayer.x, sourcePlayer.y);
 			let killMsg = "";
-			if (destPlayer.team != sourcePlayer.team) {
+			if (destPlayer.team !== sourcePlayer.team) {
 				event.sS = `+${event.sS}`;
 				killMsg =
 					event.kd <= 1 || event.kd === undefined
@@ -2767,7 +2765,7 @@ function getShirtSprite(playerObj: Player, dir: number) {
 	}
 }
 function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
-	let tmpIndex = `${weaponIndex}${camo}${angle}`;
+	const tmpIndex = `${weaponIndex}${camo}${angle}`;
 	let tmpSprite = cachedWeaponSprites[tmpIndex];
 	if (!tmpSprite) {
 		let wepSprites = st.sprites.weapons[weaponIndex];
@@ -2795,9 +2793,8 @@ function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 		cachedWeaponSprites[tmpIndex] = tmpSprite;
 		if (camo >= 0) {
 			let img = new Image() as Sprite;
-			img.wpnImg = tmpSprite;
-			img.flip = wepSprite.flipped;
-			img.tmpInx = tmpIndex;
+			let wpnImg = tmpSprite;
+			let flip = wepSprite.flipped;
 			img.onload = () => {
 				var canvas = document.createElement("canvas");
 				var ctx = canvas.getContext("2d")!;
@@ -2805,11 +2802,11 @@ function getWeaponSprite(weaponIndex: number, camo: number, angle: number) {
 				canvas.width = img.width;
 				canvas.height = img.height;
 				img.onload = null;
-				ctx.drawImage(img.wpnImg, 0, 0, img.width, img.height);
+				ctx.drawImage(wpnImg, 0, 0, img.width, img.height);
 				ctx.globalCompositeOperation = "source-atop";
 				ctx.globalAlpha = 0.75;
-				ctx.drawImage(img.flip ? flipSprite(img, true) : img, 0, 0, img.width, img.height);
-				cachedWeaponSprites[img.tmpInx!] = canvas;
+				ctx.drawImage(flip ? flipSprite(img, true) : img, 0, 0, img.width, img.height);
+				cachedWeaponSprites[tmpIndex] = canvas;
 			};
 			img.src = `/images/camos/${camo + 1}.png`;
 		}
@@ -2992,7 +2989,7 @@ function drawPlayer(plr: Player, delta: number) {
 	if (plr.spawnProtection > 0) {
 		playerContext.globalCompositeOperation = "source-atop";
 		playerContext.fillStyle =
-			plr.team != st.player.team ? "rgba(255,179,179,0.5)" : "rgba(179,231,255,0.5)";
+			plr.team !== st.player.team ? "rgba(255,179,179,0.5)" : "rgba(179,231,255,0.5)";
 		playerContext.fillRect(
 			-playerCanvas.width / 2,
 			-playerCanvas.height / 2,

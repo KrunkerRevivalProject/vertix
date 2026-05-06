@@ -12,7 +12,7 @@ function getPref<T extends { id: number }>(data: T[], key: string): T | null {
 }
 
 export const st = $state({
-	gameMap: null as any as MapData,
+	gameMap: null as unknown as MapData,
 	maxScreenWidth: 1920,
 	maxScreenHeight: 1080,
 	viewMult: 1,
@@ -22,7 +22,7 @@ export const st = $state({
 	player: {
 		dead: true,
 		weapons: [],
-	} as any as Player,
+	} as unknown as Player,
 	loggedIn: false,
 	clanData: {} as Record<string, string | number>,
 	playerName: "", // content of the player name input box
