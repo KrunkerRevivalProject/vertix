@@ -110,7 +110,7 @@ for (let i = 0; i < 700; ++i) {
 export function updateParticles(delta: number, layer: number) {
 	for (let i = 0; i < cachedParticles.length; ++i) {
 		if (
-			(localStorage.getItem("showParticles") === "true" || cachedParticles[i].forceShow) &&
+			(st.settings.showParticles || cachedParticles[i].forceShow) &&
 			cachedParticles[i].active &&
 			canSee(
 				cachedParticles[i].x - st.startX,
@@ -148,7 +148,7 @@ export function particleCone(
 	spriteIndex: number,
 	addBulletHole: boolean,
 ) {
-	if (localStorage.getItem("showParticles") !== "true") return;
+	if (!st.settings.showParticles) return;
 	for (let i = 0; i < count; ++i) {
 		let tmpParticle = getReadyParticle();
 		tmpParticle.forceShow = false;

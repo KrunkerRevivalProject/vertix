@@ -34,6 +34,7 @@ somewhat of a mess
       - need longer trails in general
       - should have the trails persist after hitting wall for much less time in general
       - bullet shots fired into visible walls and non-explosive barrels should create bullet holes occasionally, which persist ~8-10 seconds before fading
+      - bullet particles on collision with wall should be smaller
 
     - notifs/events:
       - the "3d" text notifications' extruded effect should use a darkened shade of the notification text color to indicate depth, not be completely black
@@ -47,9 +48,8 @@ somewhat of a mess
       - reloading and associated text notification shouldn't occur if ammo is depleted, but the player just died
 
     - misc:
-      - there should be blood spatters when players are hit by bullets
-      - players should have brief particle trails following them when they walk
-      - grenades, rockets should have particle trails as well
+      - shirts should be rotating with the player sprite when they face sideways
+      - grenades, rockets should have particle trails (similar to behind walking players)
       - different characters should have different jump strengths
       - on death, a player should continue to see the game progress with players moving around in the background of the main menu
       - duck jump's explosion should cause self-damage (100)
