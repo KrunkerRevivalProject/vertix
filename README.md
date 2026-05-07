@@ -33,8 +33,7 @@ somewhat of a mess
         - (more generally, damage reductions for side/above hits should probably be proportions?)
       - need longer trails in general
       - should have the trails persist after hitting wall for much less time in general
-      - bullet shots fired into visible walls and non-explosive barrels should create bullet holes occasionally, which persist ~8-10 seconds before fading
-      - bullet particles on collision with wall should be smaller
+      - bullet particles on collision with wall should be smaller generally
 
     - notifs/events:
       - the "3d" text notifications' extruded effect should use a darkened shade of the notification text color to indicate depth, not be completely black
