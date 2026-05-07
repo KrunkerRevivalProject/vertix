@@ -936,8 +936,10 @@ function setupSocket(sock: Socket) {
 					break;
 			}
 		} else {
-			createSmokePuff(a.oldX, a.oldY, 5, false, 1);
-			showNotification(`${user.name} scored`);
+			if (st.gameMap.gameMode.code === "zmtch") {
+				createSmokePuff(a.oldX, a.oldY, 5, false, 1);
+				showNotification(`${user.name} scored`);
+			}
 		}
 	});
 	sock.on("5", (a) => {

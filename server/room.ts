@@ -17,6 +17,7 @@ import { Game } from "./game.ts";
 
 const EXPLOSIVE_CLUTTER_HIT_DAMAGE = 50;
 const EXPLOSIVE_CLUTTER_BLAST_RADIUS = 150;
+const LOOTCRATE_POINTS = 100;
 
 export class Room {
 	name;
@@ -501,7 +502,13 @@ export class Room {
 		dest.onScreen = false;
 		let scored = 0;
 		if (source.index !== dest.index) {
-			scored = dest.isBoss ? 2000 : 100;
+			if (dest.isBoss) {
+				scored = 2000;
+			} else if (this.game.mode.code === "zmtch") {
+				scored = 50;
+			} else {
+				scored = 100;
+			}
 			source.kills += 1;
 		}
 		this.io.emit("3", {
@@ -584,12 +591,12 @@ export class Room {
 					health: player.health,
 				});
 			} else if (pkup.type === "lootcrate" && this.game.mode.code === "lc") {
-				player.score += 50;
+				player.score += LOOTCRATE_POINTS;
 				this.io.emit("upd", {
 					i: player.index,
 					s: player.score,
 				});
-				this.updateScore(50, player);
+				this.updateScore(LOOTCRATE_POINTS, player);
 			} else {
 				return;
 			}
