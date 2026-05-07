@@ -46,7 +46,13 @@ export class Projectile {
 	bounce = false;
 	dustTimer = 0;
 	selfDamage = false;
-	update(delta: number, currentTime: number, clutter: ClutterObject[], tiles: Tile[], players: Player[]) {
+	update(
+		delta: number,
+		currentTime: number,
+		clutter: ClutterObject[],
+		tiles: Tile[],
+		players: Player[],
+	) {
 		if (this.active) {
 			let lifetime = currentTime - this.startTime;
 			if (this.skipMove) {

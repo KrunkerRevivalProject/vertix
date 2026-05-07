@@ -185,15 +185,15 @@ export class Room {
 					const newY = Math.round(
 						y - currentWeapon.yOffset - jumpY + origin * Math.sin(dir),
 					);
-					let bulletData = {
+					const bullet = getNextBullet(this.game.bullets);
+					const bulletData = {
 						i: player.index,
 						x: newX,
 						y: newY,
 						d: dir,
-						si: -1,
+						si: bullet.serverIndex,
 					};
 					this.io.emit("2", bulletData);
-					const bullet = getNextBullet(this.game.bullets);
 					shootNextBullet(bulletData, player, targetD, currentTime, bullet);
 					this.updateBullet(bullet, player, dir);
 				}
@@ -449,7 +449,13 @@ export class Room {
 				}
 			} else if (bullet.lastHit.length > 0) {
 				for (const i of bullet.lastHit) {
-					this.handleHit(player, this.game.players[i], -bullet.dmg, dir, -1);
+					this.handleHit(
+						player,
+						this.game.players[i],
+						-bullet.dmg,
+						dir,
+						bullet.serverIndex,
+					);
 				}
 			} else if (bullet.active) {
 				bullet.update(
@@ -480,9 +486,9 @@ export class Room {
 			dID: source.index,
 			gID: dest.index,
 			dir: dir,
-			amount: dmg,
-			bi: bi ? bi : null,
-			h: dest.health,
+			healthDelta: dmg,
+			bulletIndex: bi ?? null,
+			health: dest.health,
 		});
 		source.totalDamage += -dmg;
 		this.io.emit("upd", {
@@ -574,7 +580,8 @@ export class Room {
 				player.health += healing;
 				this.io.emit("1", {
 					gID: player.index,
-					h: player.health,
+					healthDelta: healing,
+					health: player.health,
 				});
 			} else if (pkup.type === "lootcrate" && this.game.mode.code === "lc") {
 				player.score += 50;

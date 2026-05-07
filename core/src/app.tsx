@@ -743,62 +743,60 @@ function setupSocket(sock: Socket) {
 	sock.on("kick", (a) => {
 		kickPlayer(a);
 	});
-	sock.on("1", (a) => {
-		var b = findUserByIndex(a.gID);
-		var e = Math.abs(a.amount);
-		if (
-			(a.dID != st.player.index || a.gID == st.player.index) &&
-			a.amount <= 0 &&
-			a.gID == st.player.index &&
-			e != 0
-		) {
-			screenShake(e / 2, a.dir);
+	sock.on("1", (healthUpdate) => {
+		const player = findUserByIndex(healthUpdate.gID);
+		const healthDelta = healthUpdate.healthDelta;
+		if (healthUpdate.gID === st.player.index && healthDelta < 0) {
+			screenShake(healthDelta / 2, healthUpdate.dir);
 		}
 		if (
-			a.dID != null &&
-			a.dID == st.player.index &&
-			b != null &&
-			e > 0 &&
-			b.onScreen &&
-			a.amount < 0
+			healthUpdate.dID !== null &&
+			healthUpdate.dID === st.player.index &&
+			player?.onScreen &&
+			healthDelta < 0
 		) {
-			startMovingAnimText(`${e}`, b.x - b.width / 2, b.y - b.height, TeamColors.Red, e / 10);
+			const damage = Math.abs(healthDelta);
+			startMovingAnimText(
+				`${damage}`,
+				player.x - player.width / 2,
+				player.y - player.height,
+				TeamColors.Red,
+				damage / 10,
+			);
 		}
-		if (a.bi != null) {
-			let svb = findServerBullet(a.bi);
-			if (svb && svb.owner!.index !== st.player.index) {
-				if (b.onScreen && a.amount < 0) {
+		if (healthUpdate.bulletIndex !== null) {
+			let serverBullet = findServerBullet(healthUpdate.bulletIndex);
+			if (serverBullet && serverBullet.owner!.index !== st.player.index) {
+				if (player.onScreen && healthDelta < 0) {
 					particleCone(
 						12,
-						b.x,
-						b.y - b.height / 2 - b.jumpY,
-						svb.dir + Math.PI,
+						player.x,
+						player.y - player.height / 2 - player.jumpY,
+						serverBullet.dir + Math.PI,
 						Math.PI / randomInt(5, 7),
 						0.5,
 						16,
 						0,
 						true,
 					);
-					createLiquid(b.x, b.y, svb.dir, 4);
+					createLiquid(player.x, player.y, serverBullet.dir, 4);
 				}
-				svb.active = false;
+				serverBullet.active = false;
 			}
 		}
-		if (b != null) {
-			const healthDiff = a.h - b.health;
-			b.health = a.h;
-			if (b.index == st.player.index) {
-				if (healthDiff > 0) {
-					// (Is the font size supposed to adjust based on amount of health lost/gained?)
+		if (player) {
+			player.health = healthUpdate.health;
+			if (player.index === st.player.index) {
+				if (healthDelta > 0) {
 					startMovingAnimText(
-						`${healthDiff}`,
-						b.x - b.width / 2,
-						b.y - b.height,
+						`${healthDelta}`,
+						player.x - player.width / 2,
+						player.y - player.height,
 						"#5ed951",
-						healthDiff / 10,
+						healthDelta / 10,
 					);
 				}
-				updatePlayerInfo(b);
+				updatePlayerInfo(player);
 			}
 		}
 	});
@@ -2193,17 +2191,18 @@ function shootBullet(source: Player) {
 		const spawnY = Math.round(
 			source.y - sourceWep.yOffset - source.jumpY + muzzleDistance * Math.sin(spread),
 		);
+		const nextBullet = getNextBullet(bullets);
 		shootNextBullet(
 			{
 				x: spawnX,
 				y: spawnY,
 				d: spread,
-				si: -1,
+				si: nextBullet.serverIndex,
 			},
 			source,
 			target.d,
 			currentTime,
-			getNextBullet(bullets),
+			nextBullet,
 		);
 	}
 	socket.emit("1", source.x, source.y, source.jumpY, target.f, target.d, currentTime);
@@ -2230,9 +2229,10 @@ function findServerBullet(bulletIndex: number) {
 }
 function someoneShot(evt: ShootEvent) {
 	if (evt.i !== st.player.index) {
-		let tmpPlayer = findUserByIndex(evt.i);
-		if (tmpPlayer != null) {
-			shootNextBullet(evt, tmpPlayer, target.d, currentTime, getNextBullet(bullets));
+		const tmpPlayer = findUserByIndex(evt.i);
+		const bullet = findServerBullet(evt.si);
+		if (tmpPlayer && bullet) {
+			shootNextBullet(evt, tmpPlayer, target.d, currentTime, bullet);
 		}
 	}
 }
