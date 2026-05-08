@@ -18,11 +18,13 @@ somewhat of a mess
     - [some reference images](https://docs.google.com/document/d/1MVG3LtUC43gxpqoxGqKq_0YmhUDt0kAWT85CMT4Ojk0/edit?usp=sharing)
 
     - player mechanics:
-      - player y position might be too high in general:
-        - likely the root cause for some issues like jump clipping wall, collision bounds not matching up right?
+      - player y position is too high in general:
+        - likely the root cause for some issues like jump clipping wall, bullet holes too high, collision bounds not matching up right
         - affects both sprite and hitbox, and seemingly can see a thin horizontal line in the character shadow of where the player should really be standing
       - player hitboxes should be shorter, narrower; current hitboxes allow bullets to hit in blank spaces outside of the sprite
       - spawn protection should be enabled when a player spawns (~2 seconds)
+      - players should always spawn at the spawn point furthest from all other active players
+        - maybe due to this? certain spawn point tiles on some maps should actually never be used, e.g. players should always spawn at one of the four outer corners on the celtic map even if no other players present
 
     - bullets:
       - with pierce should phase through players and continue dealing damage if hit again for up to pierceCount times
@@ -31,9 +33,6 @@ somewhat of a mess
         - wiki claims for rocket:
         > If a rocket directly hits a player from above, the rocket can only hope to deal at most 69 damage. From the sides, that number is increased to 100 damage as long as it hits the legs. The bottom of an enemy is the most vulnerable, notable, as a direct hit from below can deal as much as 110 damage.
         - (more generally, damage reductions for side/above hits should probably be proportions?)
-      - need longer trails in general
-      - should have the trails persist after hitting wall for much less time in general
-      - bullet particles on collision with wall should be smaller generally
 
     - notifs/events:
       - the "3d" text notifications' extruded effect should use a darkened shade of the notification text color to indicate depth, not be completely black
@@ -48,7 +47,6 @@ somewhat of a mess
 
     - misc:
       - shirts should be rotating with the player sprite when they face sideways
-      - grenades, rockets should have particle trails (similar to behind walking players)
       - different characters should have different jump strengths
       - on death, a player should continue to see the game progress with players moving around in the background of the main menu
       - duck jump's explosion should cause self-damage (100)
