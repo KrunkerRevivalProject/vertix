@@ -17,6 +17,7 @@ import type {
 	Sprite,
 	SpriteCanvas,
 	Tile,
+	ZoneEvent,
 } from "./types.ts";
 import * as utils from "./utils.ts";
 import {
@@ -889,33 +890,33 @@ function setupSocket(sock: Socket) {
 			startSoundTrack(1);
 		}
 	});
-	sock.on("4", (a, d, e) => {
-		if (e == 0) {
-			if (st.gameMap != null && a.active != undefined) {
-				st.gameMap.pickups[d].active = a.active;
+	sock.on("4", (cData: ClutterObject, index: number, type: number) => {
+		if (type === 0) {
+			if (st.gameMap != null && cData.active != undefined) {
+				st.gameMap.pickups[index].active = cData.active;
 			}
-		} else if (clutter[d]) {
-			let clt = clutter[d];
-			if (a.active != undefined) {
-				clt.active = a.active;
+		} else if (clutter[index]) {
+			let clt = clutter[index];
+			if (cData.active != undefined) {
+				clt.active = cData.active;
 			}
-			if (a.x != undefined) {
-				clt.x = a.x;
+			if (cData.x != undefined) {
+				clt.x = cData.x;
 			}
-			if (a.y != undefined) {
-				clt.y = a.y;
+			if (cData.y != undefined) {
+				clt.y = cData.y;
 			}
 		}
 	});
-	sock.on("tprt", (a) => {
+	sock.on("tprt", (a: ZoneEvent) => {
 		var user = findUserByIndex(a.indx);
 		if (!user) return;
-		user.x = a.newX;
-		user.y = a.newY;
+		user.x = a.newX!;
+		user.y = a.newY!;
 		createSmokePuff(user.x, user.y, 5, false, 1);
 		if (a.indx === st.player.index) {
-			st.player.x = a.newX;
-			st.player.y = a.newY;
+			st.player.x = a.newX!;
+			st.player.y = a.newY!;
 			switch (st.gameMap.gameMode.code) {
 				case "zmtch":
 					startBigAnimText(
@@ -937,27 +938,28 @@ function setupSocket(sock: Socket) {
 			}
 		} else {
 			if (st.gameMap.gameMode.code === "zmtch") {
+				//@ts-ignore TODO
 				createSmokePuff(a.oldX, a.oldY, 5, false, 1);
 				showNotification(`${user.name} scored`);
 			}
 		}
 	});
-	sock.on("5", (a) => {
-		showNotification(a);
+	sock.on("5", (text: string) => {
+		showNotification(text);
 	});
 	sock.on("6", (a, d, e) => {
 		if (!st.player.dead) {
 			startBigAnimText(a, d, 2000, true, "#ffffff", TeamColors.Blue, true, e);
 		}
 	});
-	sock.on("7", (winner, userList, modeVoteData, isFading) => {
+	sock.on("7", (winner: string, userList: Player[], modeVoteData, isFading: boolean) => {
 		st.gameOver = true;
 		document.getElementById("startMenuWrapper")!.style.display = "none";
 		showStatTable(userList, modeVoteData, winner, false, isFading, true);
 		startSoundTrack(1);
 	});
-	sock.on("8", (a) => {
-		document.getElementById("nextGameTimer")!.textContent = `${a}: UNTIL NEXT ROUND`;
+	sock.on("8", (timeLeft: number) => {
+		document.getElementById("nextGameTimer")!.textContent = `${timeLeft}: UNTIL NEXT ROUND`;
 	});
 }
 function updateVoteStats(a: any) {
