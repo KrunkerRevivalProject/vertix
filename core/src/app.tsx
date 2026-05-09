@@ -915,31 +915,20 @@ function setupSocket(sock: Socket) {
 		if (a.indx === st.player.index) {
 			st.player.x = a.newX!;
 			st.player.y = a.newY!;
-			switch (st.gameMap.gameMode.code) {
-				case "zmtch":
-					startBigAnimText(
-						"ZONE ENTERED",
-						`+${a.score} POINTS`,
-						2000,
-						true,
-						"#ffffff",
-						TeamColors.Blue,
-						true,
-						1.3,
-					);
-					break;
-				case "hp":
-					showNotification(`+${a.score}`);
-					break;
-				default:
-					break;
-			}
+			startBigAnimText(
+				"ZONE ENTERED",
+				`+${a.score} POINTS`,
+				2000,
+				true,
+				"#ffffff",
+				TeamColors.Blue,
+				true,
+				1.3,
+			);
 		} else {
-			if (st.gameMap.gameMode.code === "zmtch") {
-				//@ts-ignore TODO
-				createSmokePuff(a.oldX, a.oldY, 5, false, 1);
-				showNotification(`${user.name} scored`);
-			}
+			//@ts-ignore TODO
+			createSmokePuff(a.oldX, a.oldY, 5, false, 1);
+			showNotification(`${user.name} scored`);
 		}
 	});
 	sock.on("5", (text: string) => {

@@ -36,7 +36,6 @@ somewhat of a mess
         - (more generally, damage reductions for side/above hits should probably be proportions?)
 
     - notifs/events:
-      - the "3d" text notifications' extruded effect should use a darkened shade of the notification text color to indicate depth, not be completely black
       - if GUEST1 kills GUEST2, but GUEST3 dealt some damage to GUEST2 just before that was not healed back, then GUEST1 should only get a proportional amount of points for the kill to the damage they dealt, and GUEST3 should receive the remaining points for a kill assist
         - GUEST3 should see a big anim text when the kill occurs: main text "KILL ASSIST", subtext "+XX POINTS"
       - reloading and associated text notification shouldn't occur if ammo is depleted, but the player just died

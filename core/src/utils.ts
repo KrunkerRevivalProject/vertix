@@ -344,20 +344,16 @@ export function getDistance(x1: number, y1: number, x2: number, y2: number) {
 export function getAngle(x1: number, y1: number, x2: number, y2: number) {
 	return Math.atan2(y2 - y1, x2 - x1);
 }
+export function getShadedRgbComponent(hexComponent: string, percent: number) {
+	const hexNumber = parseInt(hexComponent, 16);
+	const shadedHexNumber = Math.min(255, Math.round((hexNumber * (100 + percent)) / 100));
+	return shadedHexNumber.toString(16).padStart(2, "0");
+}
 export function shadeColor(hexColor: string, percent: number) {
-	var r = parseInt(hexColor.substring(1, 3), 16);
-	var g = parseInt(hexColor.substring(3, 5), 16);
-	var b = parseInt(hexColor.substring(5, 7), 16);
-	r = (r * (100 + percent)) / 100;
-	g = (g * (100 + percent)) / 100;
-	b = (b * (100 + percent)) / 100;
-	r = r < 255 ? r : 255;
-	g = g < 255 ? g : 255;
-	b = b < 255 ? b : 255;
-	var rstr = r.toString(16).length === 1 ? `0${r.toString(16)}` : r.toString(16);
-	var gstr = g.toString(16).length === 1 ? `0${g.toString(16)}` : g.toString(16);
-	var bstr = b.toString(16).length === 1 ? `0${b.toString(16)}` : b.toString(16);
-	return `#${rstr}${gstr}${bstr}`;
+	const red = getShadedRgbComponent(hexColor.substring(1, 3), percent);
+	const green = getShadedRgbComponent(hexColor.substring(3, 5), percent);
+	const blue = getShadedRgbComponent(hexColor.substring(5, 7), percent);
+	return `#${red}${green}${blue}`;
 }
 export function randomFloat(min: number, max: number) {
 	return min + Math.random() * (max - min);

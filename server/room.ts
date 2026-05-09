@@ -18,6 +18,8 @@ import { Game } from "./game.ts";
 const EXPLOSIVE_CLUTTER_HIT_DAMAGE = 50;
 const EXPLOSIVE_CLUTTER_BLAST_RADIUS = 150;
 const LOOTCRATE_POINTS = 100;
+const HARDPOINT_POINTS = 10;
+const ZONE_WAR_POINTS = 100;
 
 export class Room {
 	name;
@@ -619,7 +621,7 @@ export class Room {
 				this.io.emit("4", pkup, i, 0);
 			}, 15000);
 		}
-		if (this.game.mode.code === "hp" || this.game.mode.code === "zmtch") {
+		if (this.game.mode.code === "hp") {
 			for (const tl of this.game.scoreTiles) {
 				if (
 					!dotInRect(player.x, player.y, tl.x, tl.y, tl.scale, tl.scale) ||
@@ -629,25 +631,45 @@ export class Room {
 					continue;
 
 				player.scoreCountdown = 1000;
-				const scored = this.game.mode.code === "hp" ? 10 : 100;
-				let tprt: ZoneEvent = { indx: player.index, score: scored };
-				if (this.game.mode.code === "zmtch") {
-					const spawn = this.game.getSpawn(player);
-					player.x = tprt.newX = spawn.x;
-					player.y = tprt.newY = spawn.y;
-					player.totalGoals += 1;
+				if (player.socketId) {
+					this.io.to(player.socketId).emit("5", `+${HARDPOINT_POINTS}`);
 				}
-				this.io.emit("tprt", tprt);
-				player.score += scored;
+
+				player.score += HARDPOINT_POINTS;
 				this.io.emit("upd", {
 					i: player.index,
 					s: player.score,
 					goa: player.totalGoals,
 				});
-				this.updateScore(scored, player);
+				this.updateScore(HARDPOINT_POINTS, player);
 			}
+
 			if (player.scoreCountdown >= 0) {
 				player.scoreCountdown -= player.delta;
+			}
+		}
+		if (this.game.mode.code === "zmtch") {
+			for (const tl of this.game.scoreTiles) {
+				if (
+					!dotInRect(player.x, player.y, tl.x, tl.y, tl.scale, tl.scale) ||
+					tl.objTeam === player.team
+				)
+					continue;
+
+				const tprt: ZoneEvent = { indx: player.index, score: ZONE_WAR_POINTS };
+				const spawn = this.game.getSpawn(player);
+				player.x = tprt.newX = spawn.x;
+				player.y = tprt.newY = spawn.y;
+				player.totalGoals += 1;
+				this.io.emit("tprt", tprt);
+
+				player.score += ZONE_WAR_POINTS;
+				this.io.emit("upd", {
+					i: player.index,
+					s: player.score,
+					goa: player.totalGoals,
+				});
+				this.updateScore(ZONE_WAR_POINTS, player);
 			}
 		}
 	}
