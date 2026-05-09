@@ -28,6 +28,7 @@ somewhat of a mess
 
     - bullets:
       - with pierce should phase through players and continue dealing damage if hit again for up to pierceCount times
+        - this sometimes works and sometimes doesn't (???)
       - should not go through barrels when standing right underneath them and shooting upwards
       - explosion damage from oil barrels or explosive bullets should be direction-dependent:
         - wiki claims for rocket:
@@ -36,13 +37,8 @@ somewhat of a mess
 
     - notifs/events:
       - the "3d" text notifications' extruded effect should use a darkened shade of the notification text color to indicate depth, not be completely black
-      - everyone should see small text notifications when anyone kills someone: "GUEST1 KILLED GUEST2"
-        - if a player suicides: "GUEST1 COMMITTED SUICIDE"
-        - notifications should stack vertically if multiple kills occur at the same time
       - if GUEST1 kills GUEST2, but GUEST3 dealt some damage to GUEST2 just before that was not healed back, then GUEST1 should only get a proportional amount of points for the kill to the damage they dealt, and GUEST3 should receive the remaining points for a kill assist
         - GUEST3 should see a big anim text when the kill occurs: main text "KILL ASSIST", subtext "+XX POINTS"
-      - on lootcrate collection, a player should see a big anim text: main text "LOOTCRATE COLLECTED", subtext "+100 POINTS"
-      - after reloading finishes for weapon with >1 ammo, a small text notification should show to the player: "AMMO FULL"
       - reloading and associated text notification shouldn't occur if ammo is depleted, but the player just died
 
     - misc:

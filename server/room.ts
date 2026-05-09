@@ -482,6 +482,7 @@ export class Room {
 		bi?: number,
 	) {
 		if (dest?.dead) return;
+
 		dest.health += dmg;
 		this.io.emit("1", {
 			dID: source.index,
@@ -491,44 +492,50 @@ export class Room {
 			bulletIndex: bi ?? null,
 			health: dest.health,
 		});
-		source.totalDamage += -dmg;
+
+		source.totalDamage -= dmg;
 		this.io.emit("upd", {
 			i: source.index,
 			dmg: source.totalDamage,
 		});
-		const dead = dest.health <= 0;
-		if (!dead) return;
+
+		if (dest.health <= 0) {
+			this.handleKill(source, dest);
+		}
+	}
+
+	handleKill(source: Player, dest: Player) {
 		dest.dead = true;
 		dest.onScreen = false;
+		dest.deaths++;
+		this.io.emit("upd", {
+			i: dest.index,
+			dea: dest.deaths,
+		});
+
 		let scored = 0;
-		if (source.index !== dest.index) {
-			if (dest.isBoss) {
-				scored = 2000;
-			} else if (this.game.mode.code === "zmtch") {
-				scored = 50;
-			} else {
-				scored = 100;
-			}
-			source.kills += 1;
+		if (source.index === dest.index) {
+			this.io.emit("5", `${source.name} committed suicide`);
+		} else {
+			source.kills++;
+			scored = dest.isBoss ? 2000 : 100 * this.game.mode.killScoreMult;
+			this.io.emit("5", `${source.name} killed ${dest.name}`);
 		}
+
 		this.io.emit("3", {
 			dID: source.index,
 			gID: dest.index,
 			sS: scored,
 			kB: dest.isBoss,
 		});
-		source.score += scored * this.game.mode.killScoreMult;
+
+		source.score += scored;
+		this.updateScore(scored, source);
 		this.io.emit("upd", {
 			i: source.index,
 			s: source.score,
 			kil: source.kills,
 		});
-		dest.deaths += 1;
-		this.io.emit("upd", {
-			i: dest.index,
-			dea: dest.deaths,
-		});
-		this.updateScore(scored, source);
 	}
 
 	/**
@@ -597,6 +604,11 @@ export class Room {
 					s: player.score,
 				});
 				this.updateScore(LOOTCRATE_POINTS, player);
+				if (player.socketId) {
+					this.io
+						.to(player.socketId)
+						.emit("6", "Loot Collected", `+${LOOTCRATE_POINTS} points`, 1.3);
+				}
 			} else {
 				return;
 			}

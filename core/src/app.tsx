@@ -804,17 +804,15 @@ function setupSocket(sock: Socket) {
 	sock.on("2", someoneShot);
 	sock.on("jum", otherJump);
 	sock.on("ex", createExplosion);
-	sock.on("r", (a) => {
-		var b = findUserByIndex(st.player.index);
-		if (b != null) {
-			/*
-      if (b.weapons[a].ammo == b.weapons[a].maxAmmo) {
-        showNotification("Ammo Full");
-      }
-      */
-			b.weapons[a].reloadTime = 0;
-			b.weapons[a].ammo = b.weapons[a].maxAmmo;
-			window.setCooldownAnimation(a, b.weapons[a].reloadTime, false);
+	sock.on("r", (weaponIndex: number) => {
+		const player = findUserByIndex(st.player.index);
+		if (player) {
+			if (weaponIndex === 0 && player.weapons[weaponIndex].maxAmmo > 1) {
+				showNotification("Ammo Full");
+			}
+			player.weapons[weaponIndex].reloadTime = 0;
+			player.weapons[weaponIndex].ammo = player.weapons[weaponIndex].maxAmmo;
+			window.setCooldownAnimation(weaponIndex, player.weapons[weaponIndex].reloadTime, false);
 		}
 	});
 	sock.on("3", (event) => {
@@ -947,9 +945,18 @@ function setupSocket(sock: Socket) {
 	sock.on("5", (text: string) => {
 		showNotification(text);
 	});
-	sock.on("6", (a, d, e) => {
+	sock.on("6", (text: string, secondaryText: string, fontSizeMult: number) => {
 		if (!st.player.dead) {
-			startBigAnimText(a, d, 2000, true, "#ffffff", TeamColors.Blue, true, e);
+			startBigAnimText(
+				text,
+				secondaryText,
+				2000,
+				true,
+				"#ffffff",
+				TeamColors.Blue,
+				true,
+				fontSizeMult,
+			);
 		}
 	});
 	sock.on("7", (winner: string, userList: Player[], modeVoteData, isFading: boolean) => {

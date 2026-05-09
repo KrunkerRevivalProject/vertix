@@ -93,10 +93,7 @@ for (let i = 0; i < 3; ++i) {
 var notificationIndex = 0;
 export function showNotification(text: string) {
 	text = text.toUpperCase();
-	notificationIndex++;
-	if (notificationIndex >= notifications.length) {
-		notificationIndex = 0;
-	}
+	notificationIndex = (notificationIndex + 1) % notifications.length;
 	notifications[notificationIndex].text = text;
 	notifications[notificationIndex].alpha = 1;
 	notifications[notificationIndex].x = st.maxScreenWidth / 2;
