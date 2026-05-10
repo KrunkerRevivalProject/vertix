@@ -329,7 +329,7 @@ export class Projectile {
 	isInExplosionRange(clt: ClutterObject) {
 		const clutterStartY = clt.y - clt.h / 2;
 		const clutterOriginY = clutterStartY + (clt.h - this.yOffset) / 2;
-		const distToClutter = getDistance(this.x, this.y, clt.x, clutterOriginY);
+		const distToClutter = getDistance(this.x + clt.w / 2, this.y, clt.x, clutterOriginY);
 		return distToClutter <= this.blastRadius!;
 	}
 	handleClutterHit(clt: ClutterObject, i: number) {

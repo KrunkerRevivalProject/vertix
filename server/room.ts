@@ -16,7 +16,9 @@ import {
 import { Game } from "./game.ts";
 
 const EXPLOSIVE_CLUTTER_HIT_DAMAGE = 50;
-const EXPLOSIVE_CLUTTER_BLAST_RADIUS = 150;
+const EXPLOSIVE_CLUTTER_BLAST_RADIUS = 160;
+const DUCK_HIT_DAMAGE = 150; // ?
+const DUCK_HIT_RADIUS = 160; // ?
 const LOOTCRATE_POINTS = 100;
 const HARDPOINT_POINTS = 10;
 const ZONE_WAR_POINTS = 100;
@@ -248,11 +250,12 @@ export class Room {
 								player,
 								player.x,
 								player.y,
-								100,
-								100,
+								DUCK_HIT_RADIUS,
+								DUCK_HIT_DAMAGE,
 								dir,
 								false,
 							);
+							this.handleHit(player, player, -100, dir);
 						}
 					}
 					player.jumpY = Math.round(player.jumpY);
@@ -433,10 +436,12 @@ export class Room {
 					const i = bullet.lastHit[0];
 					const clt = this.game.clutter[i];
 					if (clt.active) {
+						const clutterStartY = clt.y - clt.h / 2;
+						const clutterOriginY = clutterStartY + (clt.h - bullet.yOffset) / 2;
 						this.doExplosion(
 							player,
-							clt.x,
-							clt.y,
+							clt.x + clt.w / 2,
+							clutterOriginY,
 							EXPLOSIVE_CLUTTER_BLAST_RADIUS,
 							EXPLOSIVE_CLUTTER_HIT_DAMAGE,
 							dir,
@@ -542,9 +547,7 @@ export class Room {
 
 	/**
 	 * Creates an explosion at (x, y) and applies splash damage in a circle with specified radius.
-	 * TODO: think splash damage should depend on dir more. Max damage is rare but possible when the explosion comes up from
-	 * the bottom (so hitting the sprite's feet). A high amount can still be done from the sides. It's least effective when
-	 * coming at you from above. Need to ask/search around for relative damage reductions for hits from sides and above.
+	 * Explosions coming up from the bottom are most effective, followed by those coming from the sides.
 	 */
 	doExplosion(
 		source: Player,
@@ -558,10 +561,9 @@ export class Room {
 		this.io.emit("ex", x, y, 3);
 		for (const pl of this.game.players) {
 			if (!selfDamage && pl.index === source.index) continue;
-			const dist = getDistance(x, y, pl.x, pl.y - pl.jumpY - pl.height / 2);
-			const roundedDist = Math.round(dist);
+			const dist = getDistance(x, y, pl.x, pl.y - pl.jumpY);
 			if (radius > dist) {
-				const dmg = Math.max(-maxDmg, -radius + roundedDist);
+				const dmg = Math.round(-maxDmg * Math.min(1, 1.15 * (radius - dist) / radius));
 				this.handleHit(source, pl, dmg, dir);
 			}
 		}

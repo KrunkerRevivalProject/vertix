@@ -30,10 +30,6 @@ somewhat of a mess
       - with pierce should phase through players and continue dealing damage if hit again for up to pierceCount times
         - this sometimes works and sometimes doesn't (???)
       - should not go through barrels when standing right underneath them and shooting upwards
-      - explosion damage from oil barrels or explosive bullets should be direction-dependent:
-        - wiki claims for rocket:
-        > If a rocket directly hits a player from above, the rocket can only hope to deal at most 69 damage. From the sides, that number is increased to 100 damage as long as it hits the legs. The bottom of an enemy is the most vulnerable, notable, as a direct hit from below can deal as much as 110 damage.
-        - (more generally, damage reductions for side/above hits should probably be proportions?)
 
     - notifs/events:
       - if GUEST1 kills GUEST2, but GUEST3 dealt some damage to GUEST2 just before that was not healed back, then GUEST1 should only get a proportional amount of points for the kill to the damage they dealt, and GUEST3 should receive the remaining points for a kill assist
@@ -44,7 +40,6 @@ somewhat of a mess
       - shirts should be rotating with the player sprite when they face sideways
       - different characters should have different jump strengths
       - on death, a player should continue to see the game progress with players moving around in the background of the main menu
-      - duck jump's explosion should cause self-damage (100)
       - spray draw positions should be influenced by where weapon is pointing / influenced slightly by cursor direction, not necessarily placed directly on the player's position
 </details>
 
