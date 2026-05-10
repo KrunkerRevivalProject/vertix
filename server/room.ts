@@ -19,6 +19,9 @@ const EXPLOSIVE_CLUTTER_HIT_DAMAGE = 50;
 const EXPLOSIVE_CLUTTER_BLAST_RADIUS = 160;
 const DUCK_HIT_DAMAGE = 150; // ?
 const DUCK_HIT_RADIUS = 160; // ?
+
+const SPAWN_PROTECTION_DURATION = 2000;
+
 const LOOTCRATE_POINTS = 100;
 const HARDPOINT_POINTS = 10;
 const ZONE_WAR_POINTS = 100;
@@ -106,6 +109,7 @@ export class Room {
 				player.x = spawn.x;
 				player.y = spawn.y;
 				player.dead = false;
+				player.spawnProtection = SPAWN_PROTECTION_DURATION;
 
 				const gameSetup = {
 					mapData: this.game.mapData,
@@ -226,6 +230,15 @@ export class Room {
 				player.angle =
 					((player.targetF + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) +
 					90;
+				if (player.spawnProtection > 0) {
+					player.spawnProtection = Math.max(0, player.spawnProtection - delta);
+					if (player.spawnProtection === 0) {
+						this.io.emit("upd", {
+							i: player.index,
+							sp: 0,
+						});
+					}
+				}
 				//TODO
 				if (space === 1) {
 					this.io.emit("jum", player.index);
@@ -490,17 +503,18 @@ export class Room {
 	) {
 		if (dest?.dead) return;
 
-		dest.health += dmg;
+		const cappedDmg = Math.max(-dest.health, dmg);
+		dest.health += cappedDmg;
 		this.io.emit("1", {
 			dID: source.index,
 			gID: dest.index,
 			dir: dir,
-			healthDelta: dmg,
+			healthDelta: cappedDmg,
 			bulletIndex: bi ?? null,
 			health: dest.health,
 		});
 
-		source.totalDamage -= dmg;
+		source.totalDamage -= cappedDmg;
 		this.io.emit("upd", {
 			i: source.index,
 			dmg: source.totalDamage,

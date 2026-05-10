@@ -22,7 +22,6 @@ somewhat of a mess
         - likely the root cause for some issues like jump clipping wall, bullet holes too high, collision bounds not matching up right
         - affects both sprite and hitbox, and seemingly can see a thin horizontal line in the character shadow of where the player should really be standing
       - player hitboxes should be shorter, narrower; current hitboxes allow bullets to hit in blank spaces outside of the sprite
-      - spawn protection should be enabled when a player spawns (~2 seconds)
       - players should always spawn at the spawn point furthest from all other active players
         - maybe due to this? certain spawn point tiles on some maps should actually never be used, e.g. players should always spawn at one of the four outer corners on the celtic map even if no other players present
 
