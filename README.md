@@ -39,7 +39,6 @@ somewhat of a mess
       - shirts should be rotating with the player sprite when they face sideways
       - different characters should have different jump strengths
       - on death, a player should continue to see the game progress with players moving around in the background of the main menu
-      - spray draw positions should be influenced by where weapon is pointing / influenced slightly by cursor direction, not necessarily placed directly on the player's position
 </details>
 
 ## How to install and play locally

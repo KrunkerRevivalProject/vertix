@@ -366,7 +366,19 @@ export class Room {
 				this.game.newRound(modeIndex, genData);
 			});
 			socket.on("crtSpr", () => {
-				this.io.emit("crtSpr", player.index, player.x, player.y);
+				const currentWeapon = getCurrentWeapon(player);
+				const muzzleDistance = currentWeapon.holdDist + currentWeapon.bDist;
+				const muzzleAngle = player.targetF + Math.PI;
+				const muzzleEndX = Math.round(
+					player.x + muzzleDistance * Math.cos(muzzleAngle),
+				);
+				const muzzleEndY = Math.round(
+					player.y -
+						player.jumpY -
+						currentWeapon.yOffset +
+						muzzleDistance * Math.sin(muzzleAngle),
+				);
+				this.io.emit("crtSpr", player.index, muzzleEndX, muzzleEndY);
 			});
 			socket.on("create", (lobby) => {});
 		});
@@ -577,7 +589,9 @@ export class Room {
 			if (!selfDamage && pl.index === source.index) continue;
 			const dist = getDistance(x, y, pl.x, pl.y - pl.jumpY);
 			if (radius > dist) {
-				const dmg = Math.round(-maxDmg * Math.min(1, 1.15 * (radius - dist) / radius));
+				const dmg = Math.round(
+					-maxDmg * Math.min(1, (1.15 * (radius - dist)) / radius),
+				);
 				this.handleHit(source, pl, dmg, dir);
 			}
 		}
