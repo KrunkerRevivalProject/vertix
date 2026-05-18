@@ -68,6 +68,70 @@ app.get("/getRooms", (c) => {
 	return c.json(list);
 });
 
+// Temp data.
+const MOCK_PLAYER_LB_ENTRIES = [
+	{
+		name: "Lord Melorak",
+		clan: " A1 ",
+		rank: 383,
+		numKills: 308045,
+		numDeaths: 83959,
+	},
+	{
+		name: "Dr.K",
+		clan: "ＮＯＶＡ",
+		rank: 339,
+		numKills: 318081,
+		numDeaths: 128460,
+	},
+];
+const MOCK_CLAN_LB_ENTRIES = [
+	{
+		name: "s8n",
+		rank: 209,
+		numMembers: 136,
+		numKills: 308045,
+		numDeaths: 83959,
+	},
+	{
+		name: "Ani",
+		rank: 198,
+		numMembers: 93,
+		numKills: 318081,
+		numDeaths: 128460,
+	},
+];
+
+app.get("/getLbs", (c) => {
+	const mockLbs = [
+		{
+			type: "playerRank",
+			entries: MOCK_PLAYER_LB_ENTRIES,
+		},
+		{
+			type: "kdrThousand",
+			entries: MOCK_PLAYER_LB_ENTRIES,
+		},
+		{
+			type: "kdrAny",
+			entries: MOCK_PLAYER_LB_ENTRIES,
+		},
+		{
+			type: "kills",
+			entries: MOCK_PLAYER_LB_ENTRIES,
+		},
+		{
+			type: "clanRank",
+			entries: MOCK_CLAN_LB_ENTRIES,
+		},
+		{
+			type: "clanKdr",
+			entries: MOCK_CLAN_LB_ENTRIES,
+		},
+	];
+	return c.json(mockLbs);
+});
+
 const server = serve({
 	fetch: app.fetch,
 	port: 1118,

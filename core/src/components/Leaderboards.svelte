@@ -1,145 +1,120 @@
 <script lang="ts">
-	import { io, type Socket } from "socket.io-client";
+	import type { ClanLeaderboardEntry, Leaderboard, PlayerLeaderboardEntry } from "../types";
 	import NavigationBar from "./NavigationBar.svelte";
 
-	// WAIT FOR WINDOW TO LOAD:
-	let socket: Socket;
-	const fetchedBoards: string[] = [];
-	const rankLeaderboard = document.getElementById("rankLeaderboard")!;
-	const kdrLeaderboard = document.getElementById("kdrLeaderboard")!;
-	const kdrLeaderboard2 = document.getElementById("kdr2Leaderboard")!;
-	const killsLeaderboard = document.getElementById("killsLeaderboard")!;
-	const clnRankLeaderboard = document.getElementById("clnRankLeaderboard")!;
-	const clnKdrLeaderboard = document.getElementById("clnKdrLeaderboard")!;
 	let linkedBoard = $state("rank");
 
 	window.onload = async () => {
-		const resp = await fetch("http://localhost:1118/getIP");
-		const { ip, port } = await resp.json();
+        const rankLeaderboard = document.getElementById("rankLeaderboard")!;
+        const kdrAnyLeaderboard = document.getElementById("kdrAnyLeaderboard")!;
+        const kdrThousandLeaderboard = document.getElementById("kdrThousandLeaderboard")!;
+        const killsLeaderboard = document.getElementById("killsLeaderboard")!;
+        const clnRankLeaderboard = document.getElementById("clnRankLeaderboard")!;
+        const clnKdrLeaderboard = document.getElementById("clnKdrLeaderboard")!;
 
-		// for now
-		socket = io(`https://${ip}:${port}`, {
-			autoConnect: false, // temporary
-			reconnection: false,
-			forceNew: true,
-			query: {
-				fetchLeaderboards: true,
-			},
-		});
+		const res = await fetch("http://localhost:1118/getLbs");
+		const lbData: Leaderboard[] = await res.json();
 
-		socket.on("getLeaderboards", (leaderList: any[], lType: string, errorMessage?: string) => {
-			if (errorMessage) {
-				document.getElementById(`${lType}Leaderboard`)!.innerHTML =
-					`<div class='leaderMessage'><b>${errorMessage}</b></div>`;
-				return;
-			}
-
+		for (const lb of lbData) {
 			let tmpHTML = "";
-			switch (lType) {
-				case "rank":
-					for (const [i, item] of leaderList.entries()) {
+			switch (lb.type) {
+				case "playerRank": {
+                    const entries = lb.entries as PlayerLeaderboardEntry[];
+					for (let i = 0; i < entries.length; ++i) {
 						tmpHTML +=
 							"<div onclick='showUserStatPage(\"" +
-							item.user_name +
+							entries[i].name +
 							"\")' class='leaderboardItemWrapper'>" +
 							(i + 1) +
 							". <span class='clanDisplay'>" +
-							(item.user_clan ? `[${item.user_clan.toUpperCase()}] ` : "") +
+							(entries[i].clan.length ? `[${entries[i].clan.toUpperCase()}] ` : "") +
 							"</span><span class='leaderNameDisplay'>" +
-							item.user_name +
+							entries[i].name +
 							" RNK " +
-							item.user_rank +
+							entries[i].rank +
 							"</span></div>";
 					}
 					rankLeaderboard.innerHTML = tmpHTML;
 					break;
-				case "kills":
-					for (const [i, item] of leaderList.entries()) {
+                }
+				case "kills": {
+                    const entries = lb.entries as PlayerLeaderboardEntry[];
+					for (let i = 0; i < entries.length; ++i) {
 						tmpHTML +=
 							"<div onclick='showUserStatPage(\"" +
-							item.user_name +
+							entries[i].name +
 							"\")' class='leaderboardItemWrapper'>" +
 							(i + 1) +
 							". <span class='clanDisplay'>" +
-							(item.user_clan ? `[${item.user_clan.toUpperCase()}] ` : "") +
+							(entries[i].clan.length ? `[${entries[i].clan.toUpperCase()}] ` : "") +
 							"</span><span class='leaderNameDisplay'>" +
-							item.user_name +
+							entries[i].name +
 							" " +
-							item.user_kills +
+							entries[i].numKills +
 							" KILLS</span></div>";
 					}
 					killsLeaderboard.innerHTML = tmpHTML;
 					break;
-				case "clnRank":
-				case "clnKdr":
-					for (const [i, item] of leaderList.entries()) {
+                }
+				case "clanRank":
+				case "clanKdr": {
+                    const entries = lb.entries as ClanLeaderboardEntry[];
+					for (let i = 0; i < entries.length; ++i) {
+                        const clanKdr = ((Math.max(1, entries[i].numKills) / Math.max(1, entries[i].numDeaths)).toFixed(2));
 						tmpHTML +=
 							"<div class='leaderboardItemWrapper'>" +
 							(i + 1) +
 							". <span class='clanDisplay'>[" +
-							item.clan_name +
+							entries[i].name +
 							"] (" +
-							item.clan_members +
+							entries[i].numMembers +
 							" members)</span><span class='leaderNameDisplay'> RNK " +
-							item.clan_level +
+							entries[i].rank +
 							" KDR " +
-							item.clan_kd +
+							clanKdr +
 							"</span></div>";
 					}
-					if (lType === "clnRank") {
-						clnRankLeaderboard.innerHTML = tmpHTML;
-					} else if (lType === "clnKdr") {
-						clnKdrLeaderboard.innerHTML = tmpHTML;
-					}
+                    const lbElement = lb.type === "clanRank" ? clnRankLeaderboard : clnKdrLeaderboard;
+                    lbElement.innerHTML = tmpHTML;
 					break;
-				case "kdr":
-				case "kdr2":
-					for (const [i, item] of leaderList.entries()) {
-						let tmpKD = (Math.max(1, item.user_kills) / Math.max(1, item.user_deaths)).toFixed(2);
+                }
+				case "kdrThousand":
+				case "kdrAny": {
+                    const entries = lb.entries as PlayerLeaderboardEntry[];
+					for (let i = 0; i < entries.length; ++i) {
+                        const kdr = ((Math.max(1, entries[i].numKills) / Math.max(1, entries[i].numDeaths)).toFixed(2));
 						tmpHTML +=
 							"<div onclick='showUserStatPage(\"" +
-							item.user_name +
+							entries[i].name +
 							"\")' class='leaderboardItemWrapper'>" +
 							(i + 1) +
 							". <span class='clanDisplay'>" +
-							(item.user_clan ? `[${item.user_clan.toUpperCase()}] ` : "") +
+							(entries[i].clan.length ? `[${entries[i].clan.toUpperCase()}] ` : "") +
 							"</span><span class='leaderNameDisplay'>" +
-							item.user_name +
+							entries[i].name +
 							" KDR " +
-							tmpKD +
+							kdr +
 							" (" +
-							item.user_kills +
+							entries[i].numKills +
 							"/" +
-							item.user_deaths +
+							entries[i].numDeaths +
 							")</span></div>";
 					}
-					if (lType === "kdr") {
-						kdrLeaderboard.innerHTML = tmpHTML;
-					} else if (lType === "kdr2") {
-						kdrLeaderboard2.innerHTML = tmpHTML;
-					}
+                    const lbElement = lb.type === "kdrThousand" ? kdrThousandLeaderboard : kdrAnyLeaderboard;
+                    lbElement.innerHTML = tmpHTML;
 					break;
+                }
 				default:
+                    console.error("Unrecognized leaderboard:", lb.type);
 					break;
 			}
-		});
-
-		// socket.on("connect_failed", () => {
-		// 	serverMessage.textContent = "Connection Failed. Try again later.";
-		// });
+        }
 
 		toggleLeaderboardDisplay(linkedBoard || "rank");
 	};
 
 	// CHANGE DISPLAY:
 	function toggleLeaderboardDisplay(board: string) {
-		// FETCH DATA:
-		if (socket && !fetchedBoards.find((fetchedBoard) => fetchedBoard === board)) {
-			fetchedBoards.push(board);
-			socket.emit("ftchLead", board);
-		}
-
-		// SHOW BOARD:
 		linkedBoard = board;
 	}
 
@@ -162,17 +137,17 @@
 				<b>Rank</b>
 			</div>
 			<div
-				id="kdr2Button"
-				onclick={() => toggleLeaderboardDisplay("kdr2")}
-				class:activeButton={linkedBoard === "kdr2"}
+				id="kdrThousandButton"
+				onclick={() => toggleLeaderboardDisplay("kdrThousand")}
+				class:activeButton={linkedBoard === "kdrThousand"}
 				class="changeLeaderboardButton"
 			>
 				<b>KDR (1000+)</b>
 			</div>
 			<div
-				id="kdrButton"
-				onclick={() => toggleLeaderboardDisplay("kdr")}
-				class:activeButton={linkedBoard === "kdr"}
+				id="kdrAny"
+				onclick={() => toggleLeaderboardDisplay("kdrAny")}
+				class:activeButton={linkedBoard === "kdrAny"}
 				class="changeLeaderboardButton"
 			>
 				<b>KDR (Any)</b>
@@ -205,10 +180,10 @@
 			<div id="rankLeaderboard" class:activeLeaderboard={linkedBoard === "rank"} class="leaderboardContainer">
 				<div class="leaderMessage"><b>Loading...</b></div>
 			</div>
-			<div id="kdrLeaderboard" class:activeLeaderboard={linkedBoard === "kdr2"} class="leaderboardContainer">
+			<div id="kdrThousandLeaderboard" class:activeLeaderboard={linkedBoard === "kdrThousand"} class="leaderboardContainer">
 				<div class="leaderMessage"><b>Loading...</b></div>
 			</div>
-			<div id="kdr2Leaderboard" class:activeLeaderboard={linkedBoard === "kdr"} class="leaderboardContainer">
+			<div id="kdrAnyLeaderboard" class:activeLeaderboard={linkedBoard === "kdrAny"} class="leaderboardContainer">
 				<div class="leaderMessage"><b>Loading...</b></div>
 			</div>
 			<div id="killsLeaderboard" class:activeLeaderboard={linkedBoard === "kills"} class="leaderboardContainer">
