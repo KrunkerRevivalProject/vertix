@@ -231,3 +231,21 @@ export type ZoneEvent = {
 	newX?: number;
 	newY?: number;
 };
+
+// For the external leaderboard page, not the in-game leaderboard.
+export type LeaderboardEntry = {
+	type: "playerRank" | "kdrThousand" | "kdrAny" | "kills" | "clanRank" | "clanKdr";
+	name: string;
+	rank: number;
+};
+
+export interface PlayerLeaderboardEntry extends LeaderboardEntry {
+	clan: string;
+	numKills: number;
+	numDeaths: number;
+}
+
+export interface ClanLeaderboardEntry extends LeaderboardEntry {
+	numMembers: number;
+	kdr: number;
+}
