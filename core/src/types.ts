@@ -232,23 +232,42 @@ export type ZoneEvent = {
 	newY?: number;
 };
 
-// The external leaderboard page, not the in-game leaderboard.
-export type Leaderboard = {
-	type: "playerRank" | "kdrThousand" | "kdrAny" | "kills" | "clanRank" | "clanKdr";
-	entries: LeaderboardEntry[];
+export type LeaderboardData = {
+	rank: PlayerProfile[];
+	kdrThousand: PlayerProfile[];
+	kdrAny: PlayerProfile[];
+	kills: PlayerProfile[];
+	clanRank: ClanProfile[];
+	clanKdr: ClanProfile[];
 };
+
+export type LeaderboardType = keyof LeaderboardData;
 
 export type LeaderboardEntry = {
-	name: string;
-	rank: number;
-	numKills: number;
-	numDeaths: number;
+	position: number;
+	clanText: string;
+	text: string;
+	link?: string;
 };
 
-export interface PlayerLeaderboardEntry extends LeaderboardEntry {
-	clan: string;
-}
+export type PlayerProfile = {
+	name: string;
+	position: number; // AKA world rank
+	rank: number;
+	score: number;
+	kdr: number;
+	numKills: number;
+	numDeaths: number;
+	numLikes: number;
+	numHats: number;
+	clan?: string;
+};
 
-export interface ClanLeaderboardEntry extends LeaderboardEntry {
+export type ClanProfile = {
+	name: string;
+	position: number;
+	rank: number;
+	kdr: number;
+	owner: string;
 	numMembers: number;
-}
+};

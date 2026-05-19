@@ -72,63 +72,57 @@ app.get("/getRooms", (c) => {
 const MOCK_PLAYER_LB_ENTRIES = [
 	{
 		name: "Lord Melorak",
+		position: 1,
 		clan: " A1 ",
 		rank: 383,
+		score: 42006308,
+		kdr: 3.67,
 		numKills: 308045,
 		numDeaths: 83959,
+		numLikes: 13086,
+		numHats: 156,
 	},
 	{
 		name: "Dr.K",
+		position: 2,
 		clan: "ＮＯＶＡ",
 		rank: 339,
+		score: 36470728,
+		kdr: 2.48,
 		numKills: 318081,
 		numDeaths: 128460,
+		numLikes: 11111,
+		numHats: 256,
 	},
 ];
 const MOCK_CLAN_LB_ENTRIES = [
 	{
 		name: "s8n",
+		position: 1,
 		rank: 209,
+		kdr: 11.44,
+		owner: "meatman2tasty",
 		numMembers: 136,
-		numKills: 308045,
-		numDeaths: 83959,
 	},
 	{
 		name: "Ani",
+		position: 2,
 		rank: 198,
+		kdr: 2.08,
+		owner: "Animaker",
 		numMembers: 93,
-		numKills: 318081,
-		numDeaths: 128460,
 	},
 ];
 
 app.get("/getLbs", (c) => {
-	const mockLbs = [
-		{
-			type: "playerRank",
-			entries: MOCK_PLAYER_LB_ENTRIES,
-		},
-		{
-			type: "kdrThousand",
-			entries: MOCK_PLAYER_LB_ENTRIES,
-		},
-		{
-			type: "kdrAny",
-			entries: MOCK_PLAYER_LB_ENTRIES,
-		},
-		{
-			type: "kills",
-			entries: MOCK_PLAYER_LB_ENTRIES,
-		},
-		{
-			type: "clanRank",
-			entries: MOCK_CLAN_LB_ENTRIES,
-		},
-		{
-			type: "clanKdr",
-			entries: MOCK_CLAN_LB_ENTRIES,
-		},
-	];
+	const mockLbs = {
+		rank: MOCK_PLAYER_LB_ENTRIES,
+		kdrThousand: MOCK_PLAYER_LB_ENTRIES,
+		kdrAny: MOCK_PLAYER_LB_ENTRIES,
+		kills: MOCK_PLAYER_LB_ENTRIES,
+		clanRank: MOCK_CLAN_LB_ENTRIES,
+		clanKdr: MOCK_CLAN_LB_ENTRIES,
+	};
 	return c.json(mockLbs);
 });
 
