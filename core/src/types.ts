@@ -231,3 +231,42 @@ export type ZoneEvent = {
 	newX?: number;
 	newY?: number;
 };
+
+export type LeaderboardData = {
+	rank: PlayerProfile[];
+	kdrThousand: PlayerProfile[];
+	kdrAny: PlayerProfile[];
+	kills: PlayerProfile[];
+	clanRank: ClanProfile[];
+	clanKdr: ClanProfile[];
+};
+
+export type LeaderboardType = keyof LeaderboardData;
+
+export type LeaderboardEntry = {
+	clanText: string;
+	text: string;
+	link?: string;
+};
+
+export type PlayerProfile = {
+	name: string;
+	worldRank: number;
+	rank: number;
+	score: number;
+	kdr: number;
+	numKills: number;
+	numDeaths: number;
+	numLikes: number;
+	numHats: number;
+	clan?: string;
+};
+
+export type ClanProfile = {
+	name: string;
+	position: number;
+	rank: number;
+	kdr: number;
+	owner: string;
+	numMembers: number;
+};

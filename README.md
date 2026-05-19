@@ -10,8 +10,9 @@ somewhat of a mess
     - clearer side effects
     - way to cleanly open and close custom rooms
   - finish moving all ui logic to svelte components, remove jsx-dom
-    - the largest part remaining is the leaderboard/game over menu
+    - the largest part remaining is the game over menu
   - simplify `setupSocket` logic (can we keep the same `io` instance and the same event handlers when reconnecting/switching rooms?)
+  - set up database for accounts, clans (probably lower priority)
 
   - gameplay:
 
