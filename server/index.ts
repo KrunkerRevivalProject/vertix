@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { Server, type Socket } from "socket.io";
+import type { ClanProfile, PlayerProfile } from "core/src/types.ts";
 import { Room } from "./room.ts";
 
 const io = new Server({
@@ -68,60 +69,45 @@ app.get("/getRooms", (c) => {
 	return c.json(list);
 });
 
-// Temp data.
-const MOCK_PLAYER_LB_ENTRIES = [
-	{
-		name: "Lord Melorak",
-		position: 1,
-		clan: " A1 ",
-		rank: 383,
-		score: 42006308,
-		kdr: 3.67,
-		numKills: 308045,
-		numDeaths: 83959,
-		numLikes: 13086,
-		numHats: 156,
-	},
-	{
-		name: "Dr.K",
-		position: 2,
-		clan: "ＮＯＶＡ",
-		rank: 339,
-		score: 36470728,
-		kdr: 2.48,
-		numKills: 318081,
-		numDeaths: 128460,
-		numLikes: 11111,
-		numHats: 256,
-	},
-];
-const MOCK_CLAN_LB_ENTRIES = [
-	{
-		name: "s8n",
-		position: 1,
-		rank: 209,
-		kdr: 11.44,
-		owner: "meatman2tasty",
-		numMembers: 136,
-	},
-	{
-		name: "Ani",
-		position: 2,
-		rank: 198,
-		kdr: 2.08,
-		owner: "Animaker",
-		numMembers: 93,
-	},
-];
-
+// TODO: replace generated data here with actual data.
 app.get("/getLbs", (c) => {
+	const mockPlayerLbData: PlayerProfile[] = [];
+	for (let i = 0; i < 50; ++i) {
+		const randNumKills = Math.floor(Math.random() * 50000) + 50000;
+		const randNumDeaths = Math.floor(Math.random() * 50000) + 40000;
+		mockPlayerLbData.push({
+			name: `Player ${i + 1}`,
+			worldRank: i + 1,
+			clan: Math.random() > 0.2 ? `C${i + 1}` : undefined,
+			rank: 200 - i,
+			score: 100000,
+			kdr: Math.round((randNumKills / randNumDeaths) * 100) / 100,
+			numKills: randNumKills,
+			numDeaths: randNumDeaths,
+			numLikes: 5000,
+			numHats: 256,
+		});
+	}
+
+	const mockClanLbData: ClanProfile[] = [];
+	for (let i = 0; i < 50; ++i) {
+		mockClanLbData.push({
+			name: `C${i + 1}`,
+			position: i + 1,
+			rank: 200 - i,
+			kdr: 1 + Math.round(Math.random() * 200) / 100,
+			owner: `Player ${i + 1}`,
+			numMembers: Math.floor(Math.random() * 100) + 1,
+		});
+	}
+
 	const mockLbs = {
-		rank: MOCK_PLAYER_LB_ENTRIES,
-		kdrThousand: MOCK_PLAYER_LB_ENTRIES,
-		kdrAny: MOCK_PLAYER_LB_ENTRIES,
-		kills: MOCK_PLAYER_LB_ENTRIES,
-		clanRank: MOCK_CLAN_LB_ENTRIES,
-		clanKdr: MOCK_CLAN_LB_ENTRIES,
+		rank: mockPlayerLbData,
+		kdrThousand: mockPlayerLbData.toSorted((p1, p2) => p2.kdr - p1.kdr),
+		kdrAny: mockPlayerLbData.toSorted((p1, p2) => p2.kdr - p1.kdr),
+		kills: mockPlayerLbData.toSorted((p1, p2) => p2.numKills - p1.numKills),
+		clanRank: mockClanLbData,
+		clanKdr: mockClanLbData.toSorted((c1, c2) => c2.kdr - c1.kdr),
 	};
 	return c.json(mockLbs);
 });

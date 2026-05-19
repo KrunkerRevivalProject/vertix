@@ -244,7 +244,6 @@ export type LeaderboardData = {
 export type LeaderboardType = keyof LeaderboardData;
 
 export type LeaderboardEntry = {
-	position: number;
 	clanText: string;
 	text: string;
 	link?: string;
@@ -252,7 +251,7 @@ export type LeaderboardEntry = {
 
 export type PlayerProfile = {
 	name: string;
-	position: number; // AKA world rank
+	worldRank: number;
 	rank: number;
 	score: number;
 	kdr: number;

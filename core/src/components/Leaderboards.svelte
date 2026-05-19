@@ -25,7 +25,6 @@
 
 	function getBasePlayerLeaderboardEntry(player: PlayerProfile) {
 		return {
-			position: player.position,
 			clanText: player.clan ? `[${player.clan.toUpperCase()}]` : "",
 			link: `/profile.html?${player.name}`,
 		};
@@ -34,15 +33,14 @@
 	function getPlayerKdrLeaderboardEntry(player: PlayerProfile) {
 		return {
 			...getBasePlayerLeaderboardEntry(player),
-			text: `${player.name} KDR ${player.kdr} (${player.numKills}/${player.numDeaths})`,
+			text: `${player.name} KDR ${player.kdr.toFixed(2)} (${player.numKills}/${player.numDeaths})`,
 		};
 	}
 
 	function getClanLeaderboardEntry(clan: ClanProfile) {
 		return {
-			position: clan.position,
 			clanText: `[${clan.name}] (${clan.numMembers} members)`,
-			text: `RNK ${clan.rank} KDR ${clan.kdr}`,
+			text: `RNK ${clan.rank} KDR ${clan.kdr.toFixed(2)}`,
 		};
 	}
 
@@ -88,9 +86,9 @@
 				</div>
 			{/each}
 			<div class="leaderboardContainer">
-				{#each selectedLeaderboard as entry}
+				{#each selectedLeaderboard as entry, i}
 					<div class="leaderboardItemWrapper" onclick={() => onClickLeaderboardEntry(entry)}>
-						{entry.position}.
+						{i + 1}.
 						<span class="clanDisplay">{entry.clanText}</span>
 						<span class="leaderNameDisplay">{entry.text}</span>
 					</div>
