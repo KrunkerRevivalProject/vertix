@@ -79,62 +79,10 @@ h4 {
 	background: none;
 }
 
-.leaderboardContainer {
-	font-size: 16px;
-	margin-top: 0px;
-	padding: 10px;
-}
-
-.leaderboardItemWrapper {
-	margin-bottom: 1px;
-	padding: 12px;
-	font-weight: bold;
-	cursor: pointer;
-}
-
-.leaderboardItemWrapper:hover {
-	background-color: #e6e6e6;
-}
-
-.leaderMessage {
-	color: rgba(0, 0, 0, 0.4);
-	padding: 10px;
-}
-
-.changeLeaderboardButton {
-	cursor: pointer;
-	display: inline-block;
-	padding: 15px;
-	font-size: 16px;
-	margin-top: 10px;
-	margin-left: 10px;
-	color: rgba(0, 0, 0, 0.5);
-	background: rgba(0, 0, 0, 0.1);
-}
-
-.activeButton {
-	background: rgba(0, 0, 0, 0.2);
-}
-
-.leaderNameDisplay {
-	color: rgba(0, 0, 0, 0.5);
-}
-
-.clanDisplay {
-	color: rgba(0, 0, 0, 0.7);
-}
-
 #content {
 	display: block;
 	width: 820px;
 	margin: 0 auto;
-}
-
-.contentCard {
-	padding: 10px;
-	box-shadow: inset 0 -5px #e0e0e0;
-	background-color: white;
-	box-sizing: border-box;
 }
 
 #left {
