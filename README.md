@@ -37,7 +37,6 @@ somewhat of a mess
       - reloading and associated text notification shouldn't occur if ammo is depleted, but the player just died
 
     - misc:
-      - shirts should be rotating with the player sprite when they face sideways
       - different characters should have different jump strengths
       - on death, a player should continue to see the game progress with players moving around in the background of the main menu
 </details>

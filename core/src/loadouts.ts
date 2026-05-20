@@ -527,7 +527,7 @@ export const weapons: Weapon[] = [
 		lastShot: 0,
 	},
 	{
-		name: "nade launcher",
+		name: "orblauncher",
 		weaponIndex: 5,
 		dmg: 70,
 		ammo: 5,
