@@ -3,7 +3,7 @@ import { gameModes } from "core/src/gamemodes.ts";
 import { characterClasses } from "core/src/loadouts.ts";
 import type { Projectile } from "core/src/logic/projectile.ts";
 import { camos, hats, shirts } from "core/src/skins.ts";
-import type { Player, ZoneEvent } from "core/src/types.ts";
+import type { PickupObject, Player, ZoneEvent } from "core/src/types.ts";
 import {
 	dotInRect,
 	getCurrentWeapon,
@@ -23,6 +23,7 @@ const DUCK_HIT_RADIUS = 160; // ?
 const SPAWN_PROTECTION_DURATION = 2000;
 
 const LOOTCRATE_POINTS = 100;
+const MAX_ACTIVE_LOOT = 3;
 const HARDPOINT_POINTS = 10;
 const ZONE_WAR_POINTS = 100;
 
@@ -41,6 +42,7 @@ export class Room {
 		this.io = io.of(this.name);
 		this.game = new Game(this.name);
 		this.sortCosmetics();
+		this.startCheckLootInterval();
 	}
 	handleSocket() {
 		this.io.on("connection", (socket: Socket) => {
@@ -402,9 +404,9 @@ export class Room {
 			lbScore = source.score / (this.game.mode.score / 100);
 			this.io.emit("ts");
 		}
-		const leading = lbScore > this.game.score.lb ? lbScore : this.game.score.lb;
+		const leading = Math.max(lbScore, this.game.score.lb);
 		this.game.score.lb = roundNumber(leading, 0);
-		if (lbScore >= 100 && !this.game.roundEnd) {
+		if (lbScore + 1e-7 >= 100 && !this.game.roundEnd) {
 			this.game.roundEnd = true;
 			this.io.emit(
 				"7",
@@ -618,39 +620,45 @@ export class Room {
 				!player.isBoss
 			) {
 				const healing = Math.min(100, player.maxHealth - player.health);
+
 				player.totalHealing += healing;
 				this.io.emit("upd", {
 					i: player.index,
 					hea: player.totalHealing,
 				});
+
 				player.health += healing;
 				this.io.emit("1", {
 					gID: player.index,
 					healthDelta: healing,
 					health: player.health,
 				});
+
+				setTimeout(() => {
+					pkup.active = true;
+					this.io.emit("4", pkup, i, 0);
+				}, 15000);
 			} else if (pkup.type === "lootcrate" && this.game.mode.code === "lc") {
 				player.score += LOOTCRATE_POINTS;
 				this.io.emit("upd", {
 					i: player.index,
 					s: player.score,
 				});
+
 				this.updateScore(LOOTCRATE_POINTS, player);
 				if (player.socketId) {
 					this.io
 						.to(player.socketId)
-						.emit("6", "Loot Collected", `+${LOOTCRATE_POINTS} points`, 1.3);
+						.emit("6", "Loot Collected", `+${LOOTCRATE_POINTS} points`, 1.25);
 				}
 			} else {
 				return;
 			}
+
 			pkup.active = false;
 			this.io.emit("4", pkup, i, 0);
-			setTimeout(() => {
-				pkup.active = true;
-				this.io.emit("4", pkup, i, 0);
-			}, 15000);
 		}
+
 		if (this.game.mode.code === "hp") {
 			for (const tl of this.game.scoreTiles) {
 				if (
@@ -742,5 +750,31 @@ export class Room {
 				count: 0,
 			}))
 			.toSorted((a, b) => a.chance - b.chance);
+	}
+
+	startCheckLootInterval() {
+		setInterval(() => {
+			if (this.game.roundEnd || this.game.mode.code !== "lc") {
+				return;
+			}
+
+			const loot = this.game.pickups.filter((p) => p.type === "lootcrate");
+			const [inactiveLoot, activeLoot] = loot.reduce(
+				(acc, cur) => {
+					acc[cur.active ? 1 : 0].push(cur);
+					return acc;
+				},
+				[[] as PickupObject[], [] as PickupObject[]],
+			);
+			if (activeLoot.length >= MAX_ACTIVE_LOOT || inactiveLoot.length === 0) {
+				return;
+			}
+
+			const lootToActivate =
+				inactiveLoot[Math.floor(Math.random() * inactiveLoot.length)];
+			const i = this.game.pickups.indexOf(lootToActivate);
+			lootToActivate.active = true;
+			this.io.emit("4", lootToActivate, i, 0);
+		}, 5000);
 	}
 }

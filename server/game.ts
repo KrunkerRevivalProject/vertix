@@ -226,12 +226,13 @@ export class Game {
 			let pkup = {
 				x: tl.x + mid,
 				y: tl.y + mid,
-				active: true,
+				active: false,
 				scale: 64,
 				type: "",
 			};
 			if (tl.spriteIndex === 2) {
 				pkup.type = "healthpack";
+				pkup.active = true;
 				this.pickups.push(pkup);
 			} else if (tl.spriteIndex === 1 && this.mode.code === "lc") {
 				pkup.type = "lootcrate";
