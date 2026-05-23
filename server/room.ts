@@ -368,8 +368,15 @@ export class Room {
 				this.game.newRound(modeIndex, genData);
 			});
 			socket.on("crtSpr", () => {
+				let weaponYOffset = 55;
+				let muzzleDistance = 50;
+
 				const currentWeapon = getCurrentWeapon(player);
-				const muzzleDistance = currentWeapon.holdDist + currentWeapon.bDist;
+				if (currentWeapon) {
+					weaponYOffset = currentWeapon.yOffset;
+					muzzleDistance = currentWeapon.holdDist + currentWeapon.bDist;
+				}
+
 				const muzzleAngle = player.targetF + Math.PI;
 				const muzzleEndX = Math.round(
 					player.x + muzzleDistance * Math.cos(muzzleAngle),
@@ -377,7 +384,7 @@ export class Room {
 				const muzzleEndY = Math.round(
 					player.y -
 						player.jumpY -
-						currentWeapon.yOffset +
+						weaponYOffset / 2 +
 						muzzleDistance * Math.sin(muzzleAngle),
 				);
 				this.io.emit("crtSpr", player.index, muzzleEndX, muzzleEndY);
@@ -588,7 +595,13 @@ export class Room {
 	) {
 		this.io.emit("ex", x, y, 3);
 		for (const pl of this.game.players) {
-			if (!selfDamage && pl.index === source.index) continue;
+			if (
+				(!selfDamage && pl.index === source.index) ||
+				(this.game.mode.teams &&
+					pl.index !== source.index &&
+					pl.team === source.team)
+			)
+				continue;
 			const dist = getDistance(x, y, pl.x, pl.y - pl.jumpY);
 			if (radius > dist) {
 				const dmg = Math.round(
