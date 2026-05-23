@@ -95,6 +95,7 @@ export class Game {
 			targetF: 0,
 			animIndex: 0,
 			team: this.getTeam(sid),
+			firstReceive: true,
 			isBoss: false,
 			spray: {
 				src: "/assets/sprays/1.png",

@@ -48,7 +48,8 @@ export type Player = {
 	xSpeed?: number;
 	ySpeed?: number;
 	isn?: number;
-	firstReceive?: boolean; // unused?
+	// Currently setting this to true if first spawn into current round, thus needs to receive game mode banner notif.
+	firstReceive?: boolean;
 	spray?: any; // todo
 	lastItem?: any; // todo (server-side)
 	hitFlash?: number;

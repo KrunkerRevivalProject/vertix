@@ -60,6 +60,7 @@ export function shootNextBullet(
 	bullet.pierceCount = weapon.pierce;
 	bullet.blastRadius = weapon.blastRadius;
 	bullet.selfDamage = !!weapon.selfDamage;
+	bullet.allHitPlayers = [];
 	bullet.activate();
 }
 export function snapAngleToCardinal(angle: number) {

@@ -890,18 +890,18 @@ function setupSocket(sock: Socket) {
 	});
 	sock.on("4", (cData: ClutterObject, index: number, type: number) => {
 		if (type === 0) {
-			if (st.gameMap != null && cData.active != undefined) {
+			if (st.gameMap != null && cData.active !== undefined) {
 				st.gameMap.pickups[index].active = cData.active;
 			}
 		} else if (clutter[index]) {
 			let clt = clutter[index];
-			if (cData.active != undefined) {
+			if (cData.active !== undefined) {
 				clt.active = cData.active;
 			}
-			if (cData.x != undefined) {
+			if (cData.x !== undefined) {
 				clt.x = cData.x;
 			}
-			if (cData.y != undefined) {
+			if (cData.y !== undefined) {
 				clt.y = cData.y;
 			}
 		}
@@ -1001,7 +1001,7 @@ function showStatTable(
 					);
 					document.getElementById("winningTeamText")!.textContent = "VICTORY";
 					document.getElementById("winningTeamText")!.style.color = TeamColors.Blue;
-				} else if (st.player.team != "") {
+				} else if (st.player.team.length) {
 					startBigAnimText("Defeat", "Bad Luck!", 2500, true, TeamColors.Red, "#ffffff", false, 2);
 					document.getElementById("winningTeamText")!.textContent = "DEFEAT";
 					document.getElementById("winningTeamText")!.style.color = TeamColors.Red;
@@ -1335,46 +1335,46 @@ function updateUserValue(data: any) {
 		fetchUserWithIndex(data.i);
 		return;
 	}
-	if (data.s != undefined) {
+	if (data.s !== undefined) {
 		tmpUser.score = data.s;
 		updated = true;
 	}
-	if (data.sp != undefined) {
+	if (data.sp !== undefined) {
 		tmpUser.spawnProtection = data.sp;
 	}
-	if (data.wi != undefined && data.i != st.player.index) {
+	if (data.wi !== undefined && data.i != st.player.index) {
 		playerEquipWeapon(tmpUser, data.wi);
 	}
-	if (data.l != undefined) {
+	if (data.l !== undefined) {
 		tmpUser.likes = data.l;
 		updated = true;
 	}
-	if (data.dea != undefined) {
+	if (data.dea !== undefined) {
 		tmpUser.deaths = data.dea;
 		updated = true;
 	}
-	if (data.kil != undefined) {
+	if (data.kil !== undefined) {
 		tmpUser.kills = data.kil;
 		updated = true;
 	}
-	if (data.dmg != undefined) {
+	if (data.dmg !== undefined) {
 		tmpUser.totalDamage = data.dmg;
 		updated = true;
 	}
-	if (data.hea != undefined) {
+	if (data.hea !== undefined) {
 		tmpUser.totalHealing = data.hea;
 		updated = true;
 	}
-	if (data.goa != undefined) {
+	if (data.goa !== undefined) {
 		tmpUser.totalGoals = data.goa;
 		updated = true;
 	}
-	if (tmpUser.index == st.player.index) {
+	if (tmpUser.index === st.player.index) {
 		updatePlayerInfo(tmpUser);
 	}
 	if (updated) {
 		if (st.gameOver) {
-			if (data.l != undefined) {
+			if (data.l !== undefined) {
 				document
 					.getElementById(`likeStat${tmpUser.index}`)!
 					.replaceChildren(tmpUser.likes!.toString());

@@ -3,8 +3,11 @@
 	import { st } from "../state.svelte.ts";
 	import { TeamColors } from "../utils.ts";
 
-	const mainCanvas = document.getElementById("cvs") as HTMLCanvasElement;
-	const refocusCanvas = () => tick().then(() => mainCanvas.focus());
+	const refocusCanvas = () =>
+		tick().then(() => {
+			const mainCanvas = document.getElementById("cvs") as HTMLCanvasElement;
+			mainCanvas.focus();
+		});
 
 	let currentChatType = $state("ALL");
 	function changeChatType() {

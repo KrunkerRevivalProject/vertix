@@ -127,6 +127,13 @@ export class Room {
 
 				socket.emit("gameSetup", JSON.stringify(gameSetup), true, true);
 
+				if (player.firstReceive) {
+					player.firstReceive = false;
+					const gameModeDesc = player.isBoss
+						? this.game.mode.desc2
+						: this.game.mode.desc1;
+					socket.emit("6", this.game.mode.name, gameModeDesc, 1.25);
+				}
 				this.io.emit("add", JSON.stringify(player));
 				socket.emit(
 					"rsd",
@@ -432,6 +439,7 @@ export class Room {
 					);
 					this.game.newRound(sorted[0].indx);
 					for (const pl of this.game.players) {
+						pl.firstReceive = true;
 						this.io.emit(
 							"welcome",
 							{
@@ -455,12 +463,12 @@ export class Room {
 				!bullet.active &&
 				(bullet.explodeOnDeath || bullet.collidesWithExplosiveClutter)
 			) {
-				if (bullet.explodeOnDeath) {
+				if (bullet.explodeOnDeath && bullet.blastRadius) {
 					this.doExplosion(
 						player,
 						bullet.x,
 						bullet.y,
-						bullet.blastRadius!,
+						bullet.blastRadius,
 						bullet.dmg,
 						dir,
 						bullet.selfDamage,
