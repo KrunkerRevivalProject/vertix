@@ -496,7 +496,7 @@ export class Room {
 						this.game.players[i],
 						-bullet.dmg,
 						dir,
-						bullet.serverIndex,
+						bullet,
 					);
 				}
 			} else if (bullet.active) {
@@ -520,18 +520,19 @@ export class Room {
 		dest: Player,
 		dmg: number,
 		dir: number,
-		bi?: number,
+		bullet?: Projectile,
 	) {
-		if (dest?.dead) return;
+		if (dest?.dead || bullet?.allHitPlayers.includes(dest)) return;
 
 		const cappedDmg = Math.max(-dest.health, dmg);
 		dest.health += cappedDmg;
+		bullet?.allHitPlayers.push(dest);
 		this.io.emit("1", {
 			dID: source.index,
 			gID: dest.index,
 			dir: dir,
 			healthDelta: cappedDmg,
-			bulletIndex: bi ?? null,
+			bulletIndex: bullet?.serverIndex ?? null,
 			health: dest.health,
 		});
 

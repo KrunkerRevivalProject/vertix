@@ -157,35 +157,35 @@ export class Game {
 	}
 
 	getSpawn(player: Player) {
-		const mid = this.tileScale / 2;
-		let spawn = { x: 0, y: 0 };
-		for (const tl of this.spawnTiles) {
-			if (this.mode.teams) {
-				if (tl.objTeam === player.team) {
-					spawn = {
-						x: tl.x + mid,
-						y: tl.y + mid,
-					};
-				}
-			} else {
-				let valid = this.players.every((pl: Player) => {
-					const dist = getDistance(
-						pl.x,
-						pl.y + pl.width / 2,
-						tl.x + mid,
-						tl.y + mid,
-					);
-					return dist > this.tileScale * 4 || pl.dead;
-				});
-				if (valid) {
-					spawn = {
-						x: tl.x + mid,
-						y: tl.y + mid,
-					};
-				}
+		const spawnTiles = this.mode.teams
+			? this.spawnTiles.filter((tile) => tile.objTeam === player.team)
+			: this.spawnTiles;
+		const activeEnemies = this.players.filter(
+			(plr) =>
+				!plr.dead &&
+				plr.onScreen &&
+				plr.index !== player.index &&
+				(!this.mode.teams || plr.team !== player.team),
+		);
+		const tileMid = this.tileScale / 2;
+
+		let bestSpawnPosition = { x: tileMid, y: tileMid };
+		let bestSpawnDistance = -Infinity;
+
+		for (const tl of spawnTiles) {
+			const spawnPosition = { x: tl.x + tileMid, y: tl.y + tileMid };
+			const totalDistance = activeEnemies.reduce(
+				(dist, plr) =>
+					dist + getDistance(plr.x, plr.y, spawnPosition.x, spawnPosition.y),
+				0,
+			);
+			if (totalDistance > bestSpawnDistance) {
+				bestSpawnPosition = spawnPosition;
+				bestSpawnDistance = totalDistance;
 			}
 		}
-		return spawn;
+
+		return bestSpawnPosition;
 	}
 
 	genClutter() {

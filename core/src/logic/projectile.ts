@@ -36,6 +36,7 @@ export class Projectile {
 	owner: Player | null = null;
 	dmg = 0;
 	lastHit: number[] = [];
+	allHitPlayers: Player[] = [];
 	serverIndex = 0;
 	skipMove = true;
 	startTime = 0;
@@ -138,6 +139,7 @@ export class Projectile {
 							if (
 								pl.index === this.owner!.index ||
 								this.lastHit.includes(pl.index) ||
+								this.allHitPlayers.includes(pl) ||
 								pl.team === this.owner!.team ||
 								!pl.onScreen ||
 								pl.dead
