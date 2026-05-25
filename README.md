@@ -24,18 +24,17 @@ somewhat of a mess
         - affects both sprite and hitbox, and seemingly can see a thin horizontal line in the character shadow of where the player should really be standing
 
     - bullets:
-      - with pierce should phase through players and continue dealing damage if another player gets hit for up to pierceCount times
-        - this sometimes works and sometimes doesn't (???)
       - should not go through barrels when standing right underneath them and shooting upwards
+      - grenade particle trails should cease on nade explosion on opponent screens, but currently keep going through the hit player
 
     - notifs/events:
       - if GUEST1 kills GUEST2, but GUEST3 dealt some damage to GUEST2 just before that was not healed back, then GUEST1 should only get a proportional amount of points for the kill to the damage they dealt, and GUEST3 should receive the remaining points for a kill assist
         - GUEST3 should see a big anim text when the kill occurs: main text "KILL ASSIST", subtext "+XX POINTS"
+      - "Kill", "Double Kill", ..., "Godlike" notifs are not working for consecutive kills
       - reloading and associated text notification shouldn't occur if ammo is depleted, but the player just died prior
 
     - misc:
       - different characters should have different jump strengths
-      - on death, a player should continue to see the game progress with players moving around in the background of the main menu
       - points in notifications should accumulate when player in hardpoint ("+10", "+20", "+30")
         - actual point increment is still +10 per second, points stack just in the notification
         - if kills made while in hardpoint, those should add to to the notification's displayed increment ("+10", "+110")

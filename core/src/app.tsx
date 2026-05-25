@@ -702,7 +702,9 @@ function setupSocket(sock: Socket) {
 			cachedMiniMap = null;
 			deactivateSprays();
 			for (let i = 0; i < 100; i++) {
-				bullets.push(new Projectile());
+				const newBullet = new Projectile();
+				newBullet.serverIndex = i;
+				bullets.push(newBullet);
 			}
 		}
 		if (e) {
@@ -767,8 +769,8 @@ function setupSocket(sock: Socket) {
 		}
 		if (healthUpdate.bulletIndex !== null) {
 			let serverBullet = findServerBullet(healthUpdate.bulletIndex);
-			if (serverBullet && serverBullet.owner!.index !== st.player.index) {
-				if (player.onScreen && healthDelta < 0) {
+			if (serverBullet && serverBullet.owner?.index !== st.player.index) {
+				if (player.onScreen && healthDelta < 0 && serverBullet.spriteIndex !== 2) {
 					particleCone(
 						12,
 						player.x,
@@ -782,7 +784,8 @@ function setupSocket(sock: Socket) {
 					);
 					createLiquid(player.x, player.y, serverBullet.dir, 4);
 				}
-				serverBullet.active = false;
+				if (serverBullet.pierceCount > 0) serverBullet.pierceCount--;
+				if (serverBullet.pierceCount <= 0) serverBullet.active = false;
 			}
 		}
 		if (player) {
@@ -1705,7 +1708,7 @@ function updateGameLoop() {
 				inputNumber++;
 				thisInput.push(sendData);
 				socket.emit("4", sendData);
-				if (userScroll != 0 && !st.gameOver) {
+				if (userScroll !== 0 && !st.gameOver) {
 					playerSwapWeapon(plr, userScroll);
 					userScroll = 0;
 				}

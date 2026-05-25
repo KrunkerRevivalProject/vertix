@@ -217,75 +217,81 @@ export class Room {
 				}
 			});
 			socket.on("4", (data) => {
-				if (player.dead) return;
-				let horizontalDT = data.hdt;
-				let verticalDT = data.vdt;
-				//let currentTime = data.ts;
 				const inputNumber = data.isn;
-				const space = data.s;
-				player.delta = data.delta;
-				const delta = data.delta;
-				const lengthDT = Math.sqrt(
-					horizontalDT * horizontalDT + verticalDT * verticalDT,
-				);
-				if (lengthDT !== 0) {
-					horizontalDT /= lengthDT;
-					verticalDT /= lengthDT;
-				}
-				player.oldX = player.x;
-				player.oldY = player.y;
-				player.x += horizontalDT * player.speed * delta;
-				player.y += verticalDT * player.speed * delta;
-				player.angle =
-					((player.targetF + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) +
-					90;
-				if (player.spawnProtection > 0) {
-					player.spawnProtection = Math.max(0, player.spawnProtection - delta);
-					if (player.spawnProtection === 0) {
-						this.io.emit("upd", {
-							i: player.index,
-							sp: 0,
-						});
+
+				if (!player.dead) {
+					let horizontalDT = data.hdt;
+					let verticalDT = data.vdt;
+					//let currentTime = data.ts;
+					const space = data.s;
+					player.delta = data.delta;
+					const delta = data.delta;
+					const lengthDT = Math.sqrt(
+						horizontalDT * horizontalDT + verticalDT * verticalDT,
+					);
+					if (lengthDT !== 0) {
+						horizontalDT /= lengthDT;
+						verticalDT /= lengthDT;
 					}
-				}
-				//TODO
-				if (space === 1) {
-					this.io.emit("jum", player.index);
-					if (player.jumpY <= 0) {
-						player.jumpDelta = player.jumpStrength;
-						player.jumpY = player.jumpDelta;
-					}
-				}
-				if (player.jumpCountdown > 0) {
-					player.jumpCountdown -= delta;
-				}
-				if (player.jumpY > 0) {
-					player.jumpDelta -= player.gravityStrength * delta;
-					player.jumpY += player.jumpDelta * delta;
-					if (player.jumpY <= 0) {
-						player.jumpY = 0;
-						player.jumpDelta = 0;
-						player.jumpCountdown = 250;
-						if (player.classIndex === 8) {
-							const dir = roundNumber(player.targetF + Math.PI, 2);
-							this.doExplosion(
-								player,
-								player.x,
-								player.y,
-								DUCK_HIT_RADIUS,
-								DUCK_HIT_DAMAGE,
-								dir,
-								false,
-							);
-							this.handleHit(player, player, -100, dir);
+					player.oldX = player.x;
+					player.oldY = player.y;
+					player.x += horizontalDT * player.speed * delta;
+					player.y += verticalDT * player.speed * delta;
+					player.angle =
+						((player.targetF + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) +
+						90;
+					if (player.spawnProtection > 0) {
+						player.spawnProtection = Math.max(
+							0,
+							player.spawnProtection - delta,
+						);
+						if (player.spawnProtection === 0) {
+							this.io.emit("upd", {
+								i: player.index,
+								sp: 0,
+							});
 						}
 					}
-					player.jumpY = Math.round(player.jumpY);
+					//TODO
+					if (space === 1) {
+						this.io.emit("jum", player.index);
+						if (player.jumpY <= 0) {
+							player.jumpDelta = player.jumpStrength;
+							player.jumpY = player.jumpDelta;
+						}
+					}
+					if (player.jumpCountdown > 0) {
+						player.jumpCountdown -= delta;
+					}
+					if (player.jumpY > 0) {
+						player.jumpDelta -= player.gravityStrength * delta;
+						player.jumpY += player.jumpDelta * delta;
+						if (player.jumpY <= 0) {
+							player.jumpY = 0;
+							player.jumpDelta = 0;
+							player.jumpCountdown = 250;
+							if (player.classIndex === 8) {
+								const dir = roundNumber(player.targetF + Math.PI, 2);
+								this.doExplosion(
+									player,
+									player.x,
+									player.y,
+									DUCK_HIT_RADIUS,
+									DUCK_HIT_DAMAGE,
+									dir,
+									false,
+								);
+								this.handleHit(player, player, -100, dir);
+							}
+						}
+						player.jumpY = Math.round(player.jumpY);
+					}
+					wallCol(player, this.game.tiles, this.game.clutter);
+					this.checkSpecialTiles(player);
+					player.x = Math.round(player.x);
+					player.y = Math.round(player.y);
 				}
-				wallCol(player, this.game.tiles, this.game.clutter);
-				this.checkSpecialTiles(player);
-				player.x = Math.round(player.x);
-				player.y = Math.round(player.y);
+
 				socket.emit(
 					"rsd",
 					this.game.players.flatMap((pl) => [
@@ -499,15 +505,14 @@ export class Room {
 				}
 			} else if (bullet.lastHit.length > 0) {
 				for (const i of bullet.lastHit) {
-					this.handleHit(
-						player,
-						this.game.players[i],
-						-bullet.dmg,
-						dir,
-						bullet,
-					);
+					const hitPlayer = this.game.players.find((pl) => pl.index === i);
+					if (hitPlayer && !bullet.allHitPlayers.includes(hitPlayer.index)) {
+						bullet.allHitPlayers.push(hitPlayer.index);
+						this.handleHit(player, hitPlayer, -bullet.dmg, dir, bullet);
+					}
 				}
-			} else if (bullet.active) {
+			}
+			if (bullet.active) {
 				bullet.update(
 					player.delta,
 					Date.now(),
@@ -530,11 +535,10 @@ export class Room {
 		dir: number,
 		bullet?: Projectile,
 	) {
-		if (dest?.dead || bullet?.allHitPlayers.includes(dest)) return;
+		if (dest?.dead) return;
 
 		const cappedDmg = Math.max(-dest.health, dmg);
 		dest.health += cappedDmg;
-		bullet?.allHitPlayers.push(dest);
 		this.io.emit("1", {
 			dID: source.index,
 			gID: dest.index,

@@ -274,7 +274,9 @@ export class Game {
 		this.genClutter();
 		this.genPickups();
 		for (let i = 0; i < 100; i++) {
-			this.bullets.push(new Projectile());
+			const newBullet = new Projectile();
+			newBullet.serverIndex = i;
+			this.bullets.push(newBullet);
 		}
 		this.roundEnd = false;
 	}

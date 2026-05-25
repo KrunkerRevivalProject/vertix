@@ -36,7 +36,7 @@ export class Projectile {
 	owner: Player | null = null;
 	dmg = 0;
 	lastHit: number[] = [];
-	allHitPlayers: Player[] = [];
+	allHitPlayers: number[] = [];
 	serverIndex = 0;
 	skipMove = true;
 	startTime = 0;
@@ -135,11 +135,11 @@ export class Projectile {
 						this.active &&
 						(typeof window === "undefined" || this.owner!.index === st.player.index)
 					) {
-						for (const [i, pl] of players.entries()) {
+						for (const pl of players) {
 							if (
 								pl.index === this.owner!.index ||
 								this.lastHit.includes(pl.index) ||
-								this.allHitPlayers.includes(pl) ||
+								this.allHitPlayers.includes(pl.index) ||
 								pl.team === this.owner!.team ||
 								!pl.onScreen ||
 								pl.dead
@@ -159,7 +159,7 @@ export class Projectile {
 								if (this.explodeOnDeath || this.collidesWithExplosiveClutter) {
 									this.active = false;
 								} else if (this.dmg > 0) {
-									this.lastHit.push(i);
+									this.lastHit.push(pl.index);
 									if (this.spriteIndex !== 2 && typeof window !== "undefined") {
 										particleCone(
 											12,
