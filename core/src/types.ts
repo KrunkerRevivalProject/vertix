@@ -29,7 +29,7 @@ export type Player = {
 	y: number;
 	oldX: number;
 	oldY: number;
-	spawnProtection: number;
+	isSpawnProtected: boolean;
 	nameYOffset: number;
 	dead: boolean;
 	onScreen: boolean;
@@ -44,6 +44,8 @@ export type Player = {
 	totalDamage: number;
 	totalHealing: number;
 	totalGoals: number;
+	damageSources: Record<number, number>; // Player ID : dmg inflicted by player
+	killStreak: number;
 	lastModeVote?: number;
 	xSpeed?: number;
 	ySpeed?: number;

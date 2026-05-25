@@ -28,10 +28,8 @@ somewhat of a mess
       - grenade particle trails should cease on nade explosion on opponent screens, but currently keep going through the hit player
 
     - notifs/events:
-      - if GUEST1 kills GUEST2, but GUEST3 dealt some damage to GUEST2 just before that was not healed back, then GUEST1 should only get a proportional amount of points for the kill to the damage they dealt, and GUEST3 should receive the remaining points for a kill assist
-        - GUEST3 should see a big anim text when the kill occurs: main text "KILL ASSIST", subtext "+XX POINTS"
-      - "Kill", "Double Kill", ..., "Godlike" notifs are not working for consecutive kills
       - reloading and associated text notification shouldn't occur if ammo is depleted, but the player just died prior
+      - reload cooldowns should be reset and ammo replenished on respawn
 
     - misc:
       - different characters should have different jump strengths

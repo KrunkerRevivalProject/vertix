@@ -382,8 +382,8 @@ function keyDown(event: KeyboardEvent) {
 			document.getElementById("chatInput")!.focus();
 		}
 		if (
-			!!keyMap[st.keysList.leaderboardKey] &&
-			!!st.gameStart &&
+			keyMap[st.keysList.leaderboardKey] &&
+			st.gameStart &&
 			!showingScoreBoard &&
 			!st.player.dead &&
 			!st.gameOver
@@ -426,7 +426,7 @@ function keyUp(event: KeyboardEvent) {
 	}
 	if (
 		event.code === st.keysList.leaderboardKey &&
-		!!showingScoreBoard &&
+		showingScoreBoard &&
 		!st.player.dead &&
 		!st.gameOver &&
 		!st.gameOver
@@ -929,7 +929,7 @@ function setupSocket(sock: Socket) {
 				1.3,
 			);
 		} else {
-			//@ts-ignore TODO
+			//@ts-expect-error TODO
 			createSmokePuff(a.oldX, a.oldY, 5, false, 1);
 			showNotification(`${user.name} scored`);
 		}
@@ -1343,7 +1343,7 @@ function updateUserValue(data: any) {
 		updated = true;
 	}
 	if (data.sp !== undefined) {
-		tmpUser.spawnProtection = data.sp;
+		tmpUser.isSpawnProtected = data.sp;
 	}
 	if (data.wi !== undefined && data.i != st.player.index) {
 		playerEquipWeapon(tmpUser, data.wi);
@@ -2174,7 +2174,7 @@ function shootBullet(source: Player) {
 	if (
 		source.dead ||
 		!sourceWep ||
-		source.spawnProtection !== 0 ||
+		source.isSpawnProtected ||
 		sourceWep.weaponIndex < 0 ||
 		sourceWep.reloadTime > 0 ||
 		sourceWep.ammo <= 0
@@ -2989,7 +2989,7 @@ function drawPlayer(plr: Player, delta: number) {
 			}
 		}
 	}
-	if (plr.spawnProtection > 0) {
+	if (plr.isSpawnProtected) {
 		playerContext.globalCompositeOperation = "source-atop";
 		playerContext.fillStyle =
 			plr.team !== st.player.team ? "rgba(255,179,179,0.5)" : "rgba(179,231,255,0.5)";

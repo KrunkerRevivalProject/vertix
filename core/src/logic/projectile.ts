@@ -154,7 +154,7 @@ export class Projectile {
 									pl.height,
 									this.pierceCount <= 1,
 								) &&
-								pl.spawnProtection <= 0
+								!pl.isSpawnProtected
 							) {
 								if (this.explodeOnDeath || this.collidesWithExplosiveClutter) {
 									this.active = false;

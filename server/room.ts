@@ -111,7 +111,11 @@ export class Room {
 				player.x = spawn.x;
 				player.y = spawn.y;
 				player.dead = false;
-				player.spawnProtection = SPAWN_PROTECTION_DURATION;
+				player.isSpawnProtected = true;
+				setTimeout(() => {
+					player.isSpawnProtected = false;
+					this.io.emit("upd", { i: player.index, sp: false });
+				}, SPAWN_PROTECTION_DURATION);
 
 				const gameSetup = {
 					mapData: this.game.mapData,
@@ -240,18 +244,7 @@ export class Room {
 					player.angle =
 						((player.targetF + Math.PI * 2) % (Math.PI * 2)) * (180 / Math.PI) +
 						90;
-					if (player.spawnProtection > 0) {
-						player.spawnProtection = Math.max(
-							0,
-							player.spawnProtection - delta,
-						);
-						if (player.spawnProtection === 0) {
-							this.io.emit("upd", {
-								i: player.index,
-								sp: 0,
-							});
-						}
-					}
+
 					//TODO
 					if (space === 1) {
 						this.io.emit("jum", player.index);
@@ -549,6 +542,8 @@ export class Room {
 		});
 
 		source.totalDamage -= cappedDmg;
+		dest.damageSources[source.index] =
+			(dest.damageSources[source.index] ?? 0) - cappedDmg;
 		this.io.emit("upd", {
 			i: source.index,
 			dmg: source.totalDamage,
@@ -559,29 +554,91 @@ export class Room {
 		}
 	}
 
+	handleAssist(source: Player, dest: Player, assistDamage: number) {
+		const scored =
+			Math.round((100 * assistDamage) / dest.maxHealth) *
+			this.game.mode.killScoreMult;
+		this.io.emit("3", {
+			dID: source.index,
+			gID: dest.index,
+			sS: scored,
+			kB: false,
+			ast: true,
+		});
+
+		source.score += scored;
+		this.updateScore(scored, source);
+		this.io.emit("upd", {
+			i: source.index,
+			s: source.score,
+		});
+	}
+
+	updateKillStreak(player: Player) {
+		const updatedKillStreak = ++player.killStreak;
+		setTimeout(() => {
+			if (player.killStreak === updatedKillStreak) {
+				player.killStreak = 0;
+			}
+		}, 2500);
+	}
+
 	handleKill(source: Player, dest: Player) {
 		dest.dead = true;
 		dest.onScreen = false;
 		dest.deaths++;
+		for (const pl of this.game.players) {
+			pl.damageSources[dest.index] = 0;
+		}
 		this.io.emit("upd", {
 			i: dest.index,
 			dea: dest.deaths,
 		});
 
+		const isSuicide = source.index === dest.index;
 		let scored = 0;
-		if (source.index === dest.index) {
-			this.io.emit("5", `${source.name} committed suicide`);
-		} else {
+
+		if (!isSuicide) {
 			source.kills++;
-			scored = dest.isBoss ? 2000 : 100 * this.game.mode.killScoreMult;
-			this.io.emit("5", `${source.name} killed ${dest.name}`);
+			this.updateKillStreak(source);
 		}
 
+		if (dest.isBoss && !isSuicide) {
+			scored = 2000;
+		} else if (!dest.isBoss) {
+			let totalAssistDamage = 0;
+			for (const [assistSrc, assistDmg] of Object.entries(dest.damageSources)) {
+				const assistPlayer = this.game.players.find(
+					(pl) => pl.index === Number(assistSrc),
+				);
+				if (
+					assistPlayer &&
+					assistDmg > 0 &&
+					assistPlayer.index !== source.index &&
+					assistPlayer.index !== dest.index
+				) {
+					totalAssistDamage += assistDmg;
+					this.handleAssist(assistPlayer, dest, assistDmg);
+				}
+			}
+			scored =
+				Math.round(
+					(100 * (dest.maxHealth - totalAssistDamage)) / dest.maxHealth,
+				) * this.game.mode.killScoreMult;
+		}
+
+		this.io.emit(
+			"5",
+			isSuicide
+				? `${source.name} committed suicide`
+				: `${source.name} killed ${dest.name}`,
+		);
 		this.io.emit("3", {
 			dID: source.index,
 			gID: dest.index,
 			sS: scored,
 			kB: dest.isBoss,
+			kd: source.killStreak,
 		});
 
 		source.score += scored;
@@ -648,6 +705,7 @@ export class Room {
 				const healing = Math.min(100, player.maxHealth - player.health);
 
 				player.totalHealing += healing;
+				player.damageSources = {};
 				this.io.emit("upd", {
 					i: player.index,
 					hea: player.totalHealing,
