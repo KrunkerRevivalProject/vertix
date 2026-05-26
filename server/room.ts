@@ -112,6 +112,7 @@ export class Room {
 				player.y = spawn.y;
 				player.dead = false;
 				player.isSpawnProtected = true;
+				player.damageSources = {};
 				setTimeout(() => {
 					player.isSpawnProtected = false;
 					this.io.emit("upd", { i: player.index, sp: false });
@@ -555,8 +556,10 @@ export class Room {
 	}
 
 	handleAssist(source: Player, dest: Player, assistDamage: number) {
+		const maxHealthMinusSelfDamage =
+			dest.maxHealth - (dest.damageSources[dest.index] ?? 0);
 		const scored =
-			Math.round((100 * assistDamage) / dest.maxHealth) *
+			Math.round((100 * assistDamage) / maxHealthMinusSelfDamage) *
 			this.game.mode.killScoreMult;
 		this.io.emit("3", {
 			dID: source.index,
@@ -587,9 +590,6 @@ export class Room {
 		dest.dead = true;
 		dest.onScreen = false;
 		dest.deaths++;
-		for (const pl of this.game.players) {
-			pl.damageSources[dest.index] = 0;
-		}
 		this.io.emit("upd", {
 			i: dest.index,
 			dea: dest.deaths,
@@ -621,18 +621,23 @@ export class Room {
 					this.handleAssist(assistPlayer, dest, assistDmg);
 				}
 			}
+			const maxHealthMinusSelfDamage =
+				dest.maxHealth - (dest.damageSources[dest.index] ?? 0);
 			scored =
 				Math.round(
-					(100 * (dest.maxHealth - totalAssistDamage)) / dest.maxHealth,
+					(100 * (maxHealthMinusSelfDamage - totalAssistDamage)) /
+						maxHealthMinusSelfDamage,
 				) * this.game.mode.killScoreMult;
 		}
 
-		this.io.emit(
-			"5",
-			isSuicide
-				? `${source.name} committed suicide`
-				: `${source.name} killed ${dest.name}`,
-		);
+		for (const pl of this.game.players) {
+			pl.damageSources[dest.index] = 0;
+		}
+
+		const killMessage = isSuicide
+			? `${source.name} committed suicide`
+			: `${source.name} killed ${dest.name}`;
+		this.io.emit("5", killMessage);
 		this.io.emit("3", {
 			dID: source.index,
 			gID: dest.index,

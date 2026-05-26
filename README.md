@@ -22,6 +22,7 @@ somewhat of a mess
       - player y position is too high in general:
         - likely the root cause for some issues like jump clipping wall, bullet holes too high, collision bounds not matching up right
         - affects both sprite and hitbox, and seemingly can see a thin horizontal line in the character shadow of where the player should really be standing
+      - should not show up on in-game leaderboard until they have first spawned into current round
 
     - bullets:
       - should not go through barrels when standing right underneath them and shooting upwards
