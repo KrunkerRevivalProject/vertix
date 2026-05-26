@@ -739,7 +739,6 @@ function setupSocket(sock: Socket) {
 	sock.on("updHt", (_len: number, data: any) => (st.cosmetics.hats = data));
 	sock.on("updShrt", (_len: number, data: any) => (st.cosmetics.shirts = data));
 	sock.on("updCmo", (_len: number, data: any) => (st.cosmetics.camos = data));
-	// sock.on("updSprs", updateSpraysList);
 	sock.on("crtSpr", createSpray);
 	sock.on("rem", removeUser);
 	sock.on("cht", messageFromServer);

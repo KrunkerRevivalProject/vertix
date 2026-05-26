@@ -52,7 +52,7 @@ export type Player = {
 	isn?: number;
 	// Currently setting this to true if first spawn into current round, thus needs to receive game mode banner notif.
 	firstReceive?: boolean;
-	spray?: any; // todo
+	spray: Spray;
 	lastItem?: any; // todo (server-side)
 	hitFlash?: number;
 };
@@ -111,6 +111,17 @@ export type Weapon = WeaponBase &
 export type Account = Record<string, string> & {
 	hat?: (typeof hats)[number];
 	shirt?: (typeof shirts)[number];
+};
+
+export type Spray = {
+	id: number;
+	name: string;
+	src: string;
+	info: {
+		scale: number;
+		alpha: number;
+		resolution: number;
+	};
 };
 
 export type InputSendData = {

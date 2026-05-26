@@ -3,6 +3,7 @@ import { gameModes } from "core/src/gamemodes.ts";
 import { characterClasses } from "core/src/loadouts.ts";
 import type { Projectile } from "core/src/logic/projectile.ts";
 import { camos, hats, shirts } from "core/src/skins.ts";
+import { sprays } from "core/src/sprays.ts";
 import type { PickupObject, Player, ZoneEvent } from "core/src/types.ts";
 import {
 	dotInRect,
@@ -78,6 +79,15 @@ export class Room {
 			socket.on("cCamo", (data) => {
 				const wep = this.game.weapons[data.weaponID];
 				if (wep) wep.camo = data.camoID - 1;
+			});
+			socket.on("cSpray", (id) => {
+				const spray = sprays.find((s) => s.id === id);
+				if (spray) {
+					player.spray = {
+						src: `/assets/sprays/${id}.png`,
+						...spray,
+					};
+				}
 			});
 
 			socket.on("gotit", (client, init, currentTime) => {

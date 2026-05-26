@@ -4,6 +4,7 @@
 	import type { GenData } from "../../types.ts";
 	import { getItemRarityColor, loadImageData } from "../../utils.ts";
 	import CosmeticTooltip from "./CosmeticTooltip.svelte";
+	import SprayTooltip from "./SprayTooltip.svelte";
 
 	let currentScreen:
 		| "main"
@@ -34,7 +35,7 @@
 		savePref("prevShirt", st.loadout.shirt?.id.toString());
 	});
 	$effect(() => {
-		savePref("prevSpray", st.loadout.spray?.toString());
+		savePref("prevSpray", st.loadout.spray?.id.toString());
 	});
 	$effect(() => {
 		savePref("prevPrimaryCamo", st.loadout.primaryCamo?.id.toString());
@@ -66,7 +67,7 @@
 		st.socket?.emit("cShirt", st.loadout.shirt?.id ?? -1);
 	});
 	$effect(() => {
-		st.socket?.emit("cSpray", st.loadout.spray ?? 1);
+		st.socket?.emit("cSpray", st.loadout.spray?.id ?? 1);
 	});
 
 	// Reset join server message on room switch.
@@ -161,7 +162,12 @@
 	</div>
 	<div onclick={() => currentScreen = "spray"} style="margin-top:-5px;">
 		<b>Spray:</b>
-		<div class="hatSelectItem" style="display:inline-block">Strike</div>
+		<div class="hatSelectItem" style="display:inline-block">
+			{st.loadout.spray?.name ?? "Strike"}
+			{#if st.loadout.spray}
+				<SprayTooltip spray={st.loadout.spray} />
+			{/if}
+		</div>
 	</div>
 </div>
 
@@ -240,8 +246,12 @@
 <div class="cosmeticSelector" style:display={currentScreen === "spray" ? "block" : "none"}>
 	<h3 class="menuHeaderTabbed">SELECT SPRAY</h3>
 	<div>
-		<!-- tmp since we don't have spray data -->
-		<div class="hatSelectItem" onclick={() => {st.loadout.spray = 1; currentScreen = "main"}}>Strike</div>
+		{#each st.sprays as spray}
+			<div class="hatSelectItem" onclick={() => {st.loadout.spray = spray; currentScreen = "main"}}>
+				{spray.name}
+				<SprayTooltip {spray} />
+			</div>
+		{/each}
 	</div>
 </div>
 

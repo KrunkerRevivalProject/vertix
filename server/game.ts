@@ -1,6 +1,7 @@
 import { gameModes } from "core/src/gamemodes.ts";
 import { weapons } from "core/src/loadouts.ts";
 import { Projectile } from "core/src/logic/projectile.ts";
+import { sprays } from "core/src/sprays.ts";
 import type {
 	Account,
 	ClutterObject,
@@ -101,11 +102,7 @@ export class Game {
 			isBoss: false,
 			spray: {
 				src: "/assets/sprays/1.png",
-				info: {
-					scale: 64,
-					alpha: 1,
-					resolution: 30,
-				},
+				...sprays[0],
 			},
 		};
 		this.players.push(tmpPlayer);

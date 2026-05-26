@@ -1,13 +1,28 @@
 import type { Socket } from "socket.io-client";
 import { characterClasses } from "./loadouts.ts";
 import * as cosmetics from "./skins.ts";
+import { sprays } from "./sprays.ts";
 import type { MapData, Player, Sprite } from "./types.ts";
 
-function getPref<T extends { id: number }>(data: T[], key: string): T | null {
+function getCosmeticPref<T extends { id: number }>(data: T[], key: string): T | null {
 	const value = localStorage.getItem(key);
 	console.debug(`loading ${value} from ${key}`);
 	if (value && !Number.isNaN(parseInt(value)))
 		return data.find((item) => item.id === parseInt(value)) ?? null;
+	return null;
+}
+
+function getClassPref() {
+	const value = localStorage.getItem("prevClass");
+	return characterClasses.find((c) => c.folderName === value) ?? characterClasses[0];
+}
+
+function getSprayPref() {
+	const value = localStorage.getItem("prevSpray");
+	if (value && !Number.isNaN(parseInt(value))) {
+		const sprayId = parseInt(value);
+		return sprays.find((spray) => spray.id === sprayId) ?? null;
+	}
 	return null;
 }
 
@@ -27,18 +42,19 @@ export const st = $state({
 	clanData: {} as Record<string, string | number>,
 	playerName: "", // content of the player name input box
 	loadout: {
-		class: characterClasses[0] as (typeof characterClasses)[number],
-		primaryCamo: getPref(cosmetics.camos, "prevPrimaryCamo"),
-		secondaryCamo: getPref(cosmetics.camos, "prevSecondaryCamo"),
-		hat: getPref(cosmetics.hats, "prevHat"),
-		shirt: getPref(cosmetics.shirts, "prevShirt"),
-		spray: 1 as number, // we have no spray data? :(
+		class: getClassPref(),
+		primaryCamo: getCosmeticPref(cosmetics.camos, "prevPrimaryCamo"),
+		secondaryCamo: getCosmeticPref(cosmetics.camos, "prevSecondaryCamo"),
+		hat: getCosmeticPref(cosmetics.hats, "prevHat"),
+		shirt: getCosmeticPref(cosmetics.shirts, "prevShirt"),
+		spray: getSprayPref(),
 	},
 	cosmetics: {
 		hats: [] as typeof cosmetics.hats & { count: 0 }[],
 		shirts: [] as typeof cosmetics.shirts & { count: 0 }[],
 		camos: [] as (typeof cosmetics.camos)[] & { count: 0 }[][],
 	},
+	sprays,
 	characterClasses,
 	shake: {
 		x: 0,
