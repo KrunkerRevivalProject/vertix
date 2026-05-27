@@ -29,8 +29,7 @@ somewhat of a mess
       - grenade particle trails should cease on nade explosion on opponent screens, but currently keep going through the hit player
 
     - notifs/events:
-      - reloading and associated text notification shouldn't occur if ammo is depleted, but the player just died prior
-      - reload cooldowns should be reset and ammo replenished on respawn
+      - reload cooldown animation in action bar should be reset on respawn
 
     - misc:
       - different characters should have different jump strengths

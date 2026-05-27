@@ -1,4 +1,3 @@
-// TODO: fill out spray names, shrink some of the larger sprays' scales.
 export const sprays = [
 	{
 		id: 1,
@@ -200,7 +199,7 @@ export const sprays = [
 	},
 	{
 		id: 23,
-		name: "TODO",
+		name: "venezolano",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -209,7 +208,7 @@ export const sprays = [
 	},
 	{
 		id: 24,
-		name: "TODO",
+		name: "WAGHD",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -218,7 +217,7 @@ export const sprays = [
 	},
 	{
 		id: 25,
-		name: "TODO",
+		name: "MASTER GAMING",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -227,7 +226,7 @@ export const sprays = [
 	},
 	{
 		id: 26,
-		name: "TODO",
+		name: "AwkwardGuyGamer",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -236,7 +235,7 @@ export const sprays = [
 	},
 	{
 		id: 27,
-		name: "TODO",
+		name: "Pyro Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -245,7 +244,7 @@ export const sprays = [
 	},
 	{
 		id: 28,
-		name: "TODO",
+		name: "Carl Ho",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -254,7 +253,7 @@ export const sprays = [
 	},
 	{
 		id: 29,
-		name: "TODO",
+		name: "W++ Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -263,7 +262,7 @@ export const sprays = [
 	},
 	{
 		id: 30,
-		name: "TODO",
+		name: "Mr. Fruit",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -272,7 +271,7 @@ export const sprays = [
 	},
 	{
 		id: 31,
-		name: "TODO",
+		name: "DMG Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -281,7 +280,7 @@ export const sprays = [
 	},
 	{
 		id: 32,
-		name: "TODO",
+		name: "Bodil40",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -290,7 +289,7 @@ export const sprays = [
 	},
 	{
 		id: 33,
-		name: "TODO",
+		name: "Dank Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -299,7 +298,7 @@ export const sprays = [
 	},
 	{
 		id: 34,
-		name: "TODO",
+		name: "everynightxRIOT",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -308,7 +307,7 @@ export const sprays = [
 	},
 	{
 		id: 35,
-		name: "TODO",
+		name: "Piggie",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -317,7 +316,7 @@ export const sprays = [
 	},
 	{
 		id: 36,
-		name: "TODO",
+		name: "Heart",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -326,7 +325,7 @@ export const sprays = [
 	},
 	{
 		id: 37,
-		name: "TODO",
+		name: "Skullz",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -335,7 +334,7 @@ export const sprays = [
 	},
 	{
 		id: 38,
-		name: "TODO",
+		name: "MARS Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -344,7 +343,7 @@ export const sprays = [
 	},
 	{
 		id: 39,
-		name: "TODO",
+		name: "WIND Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -353,7 +352,7 @@ export const sprays = [
 	},
 	{
 		id: 40,
-		name: "TODO",
+		name: "MOTO Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -362,7 +361,7 @@ export const sprays = [
 	},
 	{
 		id: 41,
-		name: "TODO",
+		name: "Verge Radio",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -371,7 +370,7 @@ export const sprays = [
 	},
 	{
 		id: 42,
-		name: "TODO",
+		name: "TEAM Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -380,7 +379,7 @@ export const sprays = [
 	},
 	{
 		id: 43,
-		name: "TODO",
+		name: "XRAY Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -389,7 +388,7 @@ export const sprays = [
 	},
 	{
 		id: 44,
-		name: "TODO",
+		name: "Dawe",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -398,7 +397,7 @@ export const sprays = [
 	},
 	{
 		id: 45,
-		name: "TODO",
+		name: "General Mudkip",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -407,7 +406,7 @@ export const sprays = [
 	},
 	{
 		id: 46,
-		name: "TODO",
+		name: "Hush",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -416,7 +415,7 @@ export const sprays = [
 	},
 	{
 		id: 47,
-		name: "TODO",
+		name: "Fabz",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -425,7 +424,7 @@ export const sprays = [
 	},
 	{
 		id: 48,
-		name: "TODO",
+		name: "On my way",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -434,7 +433,7 @@ export const sprays = [
 	},
 	{
 		id: 49,
-		name: "TODO",
+		name: "S8N",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -443,7 +442,7 @@ export const sprays = [
 	},
 	{
 		id: 50,
-		name: "TODO",
+		name: "1337 Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -452,7 +451,7 @@ export const sprays = [
 	},
 	{
 		id: 51,
-		name: "TODO",
+		name: "Starzzz",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -461,7 +460,7 @@ export const sprays = [
 	},
 	{
 		id: 52,
-		name: "TODO",
+		name: "Fluffylion",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -470,7 +469,7 @@ export const sprays = [
 	},
 	{
 		id: 53,
-		name: "TODO",
+		name: "ANI",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -479,7 +478,7 @@ export const sprays = [
 	},
 	{
 		id: 54,
-		name: "TODO",
+		name: "ROEL",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -488,7 +487,7 @@ export const sprays = [
 	},
 	{
 		id: 55,
-		name: "TODO",
+		name: "AWSM",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -497,7 +496,7 @@ export const sprays = [
 	},
 	{
 		id: 56,
-		name: "TODO",
+		name: "HighNoon643",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -506,7 +505,7 @@ export const sprays = [
 	},
 	{
 		id: 57,
-		name: "TODO",
+		name: "Starzzz",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -515,7 +514,7 @@ export const sprays = [
 	},
 	{
 		id: 58,
-		name: "TODO",
+		name: "Master Ptato",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -524,7 +523,7 @@ export const sprays = [
 	},
 	{
 		id: 59,
-		name: "TODO",
+		name: "FlowOcTo",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -533,7 +532,7 @@ export const sprays = [
 	},
 	{
 		id: 60,
-		name: "TODO",
+		name: "The Warm",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -542,7 +541,7 @@ export const sprays = [
 	},
 	{
 		id: 61,
-		name: "TODO",
+		name: "Katniss",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -551,7 +550,7 @@ export const sprays = [
 	},
 	{
 		id: 62,
-		name: "TODO",
+		name: "Antech",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -560,7 +559,7 @@ export const sprays = [
 	},
 	{
 		id: 63,
-		name: "TODO",
+		name: "Arceus",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -569,7 +568,7 @@ export const sprays = [
 	},
 	{
 		id: 64,
-		name: "TODO",
+		name: "Hail Satan",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -578,7 +577,7 @@ export const sprays = [
 	},
 	{
 		id: 65,
-		name: "TODO",
+		name: "Dawe (new)",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -587,7 +586,7 @@ export const sprays = [
 	},
 	{
 		id: 66,
-		name: "TODO",
+		name: "Meatman",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -596,7 +595,7 @@ export const sprays = [
 	},
 	{
 		id: 67,
-		name: "TODO",
+		name: "MindfulSpoon",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -605,7 +604,7 @@ export const sprays = [
 	},
 	{
 		id: 68,
-		name: "TODO",
+		name: "Sharp",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -614,7 +613,7 @@ export const sprays = [
 	},
 	{
 		id: 69,
-		name: "TODO",
+		name: "TJ Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -623,7 +622,7 @@ export const sprays = [
 	},
 	{
 		id: 70,
-		name: "TODO",
+		name: "Awake",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -632,7 +631,7 @@ export const sprays = [
 	},
 	{
 		id: 71,
-		name: "TODO",
+		name: "WINX Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -641,7 +640,7 @@ export const sprays = [
 	},
 	{
 		id: 72,
-		name: "TODO",
+		name: "RCX Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -650,7 +649,7 @@ export const sprays = [
 	},
 	{
 		id: 73,
-		name: "TODO",
+		name: "TACOS FOR YOU",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -659,7 +658,7 @@ export const sprays = [
 	},
 	{
 		id: 74,
-		name: "TODO",
+		name: "StormStripe",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -668,7 +667,7 @@ export const sprays = [
 	},
 	{
 		id: 75,
-		name: "TODO",
+		name: "Not a Troll",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -677,7 +676,7 @@ export const sprays = [
 	},
 	{
 		id: 76,
-		name: "TODO",
+		name: "S8N New",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -686,7 +685,7 @@ export const sprays = [
 	},
 	{
 		id: 77,
-		name: "TODO",
+		name: "Haramey",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -695,7 +694,7 @@ export const sprays = [
 	},
 	{
 		id: 78,
-		name: "TODO",
+		name: "BOT! Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -704,7 +703,7 @@ export const sprays = [
 	},
 	{
 		id: 79,
-		name: "TODO",
+		name: "Awake (new)",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -713,7 +712,7 @@ export const sprays = [
 	},
 	{
 		id: 80,
-		name: "TODO",
+		name: "jbernz18",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -722,7 +721,7 @@ export const sprays = [
 	},
 	{
 		id: 81,
-		name: "TODO",
+		name: "Mau Clan Spray",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -731,7 +730,7 @@ export const sprays = [
 	},
 	{
 		id: 82,
-		name: "TODO",
+		name: "CustomVan",
 		info: {
 			scale: 64,
 			alpha: 1,
@@ -740,7 +739,7 @@ export const sprays = [
 	},
 	{
 		id: 83,
-		name: "TODO",
+		name: "Italia",
 		info: {
 			scale: 64,
 			alpha: 1,
