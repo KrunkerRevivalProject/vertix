@@ -2,8 +2,11 @@ packages:
   - core
   - server
 
+allowBuilds:
+  sharp: true
+
 onlyBuiltDependencies:
   - sharp
 
 publicHoistPattern:
- - svelte
+  - svelte
