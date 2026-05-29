@@ -16,8 +16,6 @@ somewhat of a mess
 
   - gameplay:
 
-    - [some reference images](https://docs.google.com/document/d/1MVG3LtUC43gxpqoxGqKq_0YmhUDt0kAWT85CMT4Ojk0/edit?usp=sharing)
-
     - player mechanics:
       - player y position is too high in general:
         - likely the root cause for some issues like jump clipping wall, bullet holes too high, collision bounds not matching up right
@@ -26,16 +24,13 @@ somewhat of a mess
 
     - bullets:
       - should not go through barrels when standing right underneath them and shooting upwards
-      - grenade particle trails should cease on nade explosion on opponent screens, but currently keep going through the hit player
 
     - notifs/events:
+      - hardpoint score updates should probably occur on the server, independent of client socket emits
       - reload cooldown animation in action bar should be reset on respawn
 
     - misc:
       - different characters should have different jump strengths
-      - points in notifications should accumulate when player in hardpoint ("+10", "+20", "+30")
-        - actual point increment is still +10 per second, points stack just in the notification
-        - if kills made while in hardpoint, those should add to to the notification's displayed increment ("+10", "+110")
       - nices/likes are broken
       - room player limit of 8 should be enforced
 

@@ -104,6 +104,8 @@ export class Game {
 				src: "/assets/sprays/1.png",
 				...sprays[0],
 			},
+			isInHardpoint: false,
+			hardpointScore: 0,
 		};
 		this.players.push(tmpPlayer);
 		return tmpPlayer;

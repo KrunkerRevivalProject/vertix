@@ -411,6 +411,13 @@ export class Room {
 	}
 
 	updateScore(scored: number, source: Player) {
+		source.score += scored;
+		if (source.isInHardpoint) {
+			source.hardpointScore += scored;
+			if (source.socketId) {
+				this.io.to(source.socketId).emit("5", `+${source.hardpointScore}`);
+			}
+		}
 		this.io.emit(
 			"lb",
 			this.game.players
@@ -482,6 +489,7 @@ export class Room {
 						bullet.dmg,
 						dir,
 						bullet.selfDamage,
+						bullet,
 					);
 				}
 				if (bullet.collidesWithExplosiveClutter && bullet.lastHit.length > 0) {
@@ -579,7 +587,6 @@ export class Room {
 			ast: true,
 		});
 
-		source.score += scored;
 		this.updateScore(scored, source);
 		this.io.emit("upd", {
 			i: source.index,
@@ -633,11 +640,13 @@ export class Room {
 			}
 			const maxHealthMinusSelfDamage =
 				dest.maxHealth - (dest.damageSources[dest.index] ?? 0);
-			scored =
-				Math.round(
-					(100 * (maxHealthMinusSelfDamage - totalAssistDamage)) /
-						maxHealthMinusSelfDamage,
-				) * this.game.mode.killScoreMult;
+			if (maxHealthMinusSelfDamage > 0) {
+				scored =
+					Math.round(
+						(100 * (maxHealthMinusSelfDamage - totalAssistDamage)) /
+							maxHealthMinusSelfDamage,
+					) * this.game.mode.killScoreMult;
+			}
 		}
 
 		for (const pl of this.game.players) {
@@ -656,7 +665,6 @@ export class Room {
 			kd: source.killStreak,
 		});
 
-		source.score += scored;
 		this.updateScore(scored, source);
 		this.io.emit("upd", {
 			i: source.index,
@@ -677,6 +685,7 @@ export class Room {
 		maxDmg: number,
 		dir: number,
 		selfDamage: boolean,
+		bullet?: Projectile,
 	) {
 		this.io.emit("ex", x, y, 3);
 		for (const pl of this.game.players) {
@@ -692,7 +701,7 @@ export class Room {
 				const dmg = Math.round(
 					-maxDmg * Math.min(1, (1.15 * (radius - dist)) / radius),
 				);
-				this.handleHit(source, pl, dmg, dir);
+				this.handleHit(source, pl, dmg, dir, bullet);
 			}
 		}
 	}
@@ -738,13 +747,12 @@ export class Room {
 					this.io.emit("4", pkup, i, 0);
 				}, 15000);
 			} else if (pkup.type === "lootcrate" && this.game.mode.code === "lc") {
-				player.score += LOOTCRATE_POINTS;
+				this.updateScore(LOOTCRATE_POINTS, player);
 				this.io.emit("upd", {
 					i: player.index,
 					s: player.score,
 				});
 
-				this.updateScore(LOOTCRATE_POINTS, player);
 				if (player.socketId) {
 					this.io
 						.to(player.socketId)
@@ -759,30 +767,31 @@ export class Room {
 		}
 
 		if (this.game.mode.code === "hp") {
-			for (const tl of this.game.scoreTiles) {
-				if (
-					!dotInRect(player.x, player.y, tl.x, tl.y, tl.scale, tl.scale) ||
-					tl.objTeam === player.team ||
-					player.scoreCountdown > 0
-				)
-					continue;
+			if (player.scoreCountdown > 0) {
+				player.scoreCountdown -= player.delta;
+			} else {
+				player.isInHardpoint = false;
 
-				player.scoreCountdown = 1000;
-				if (player.socketId) {
-					this.io.to(player.socketId).emit("5", `+${HARDPOINT_POINTS}`);
+				for (const tl of this.game.scoreTiles) {
+					if (
+						!dotInRect(player.x, player.y, tl.x, tl.y, tl.scale, tl.scale) ||
+						tl.objTeam === player.team
+					)
+						continue;
+
+					player.scoreCountdown = 1000;
+					player.isInHardpoint = true;
+					this.updateScore(HARDPOINT_POINTS, player);
+					this.io.emit("upd", {
+						i: player.index,
+						s: player.score,
+						goa: player.totalGoals,
+					});
 				}
 
-				player.score += HARDPOINT_POINTS;
-				this.io.emit("upd", {
-					i: player.index,
-					s: player.score,
-					goa: player.totalGoals,
-				});
-				this.updateScore(HARDPOINT_POINTS, player);
-			}
-
-			if (player.scoreCountdown >= 0) {
-				player.scoreCountdown -= player.delta;
+				if (!player.isInHardpoint) {
+					player.hardpointScore = 0;
+				}
 			}
 		}
 		if (this.game.mode.code === "zmtch") {
@@ -800,13 +809,12 @@ export class Room {
 				player.totalGoals += 1;
 				this.io.emit("tprt", tprt);
 
-				player.score += ZONE_WAR_POINTS;
+				this.updateScore(ZONE_WAR_POINTS, player);
 				this.io.emit("upd", {
 					i: player.index,
 					s: player.score,
 					goa: player.totalGoals,
 				});
-				this.updateScore(ZONE_WAR_POINTS, player);
 			}
 		}
 	}

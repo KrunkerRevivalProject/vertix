@@ -55,6 +55,8 @@ export type Player = {
 	spray: Spray;
 	lastItem?: any; // todo (server-side)
 	hitFlash?: number;
+	isInHardpoint: boolean;
+	hardpointScore: number;
 };
 
 type WeaponBase = {
