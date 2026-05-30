@@ -1,4 +1,4 @@
-import type { hats, shirts } from "./skins.ts";
+import type { camos, hats, shirts } from "./skins.ts";
 
 export type Player = {
 	id: number;
@@ -109,10 +109,27 @@ export type Weapon = WeaponBase &
 		| { explodeOnDeath: false; blastRadius?: undefined }
 	);
 
-// todo
-export type Account = Record<string, string> & {
-	hat?: (typeof hats)[number];
-	shirt?: (typeof shirts)[number];
+export type Hat = (typeof hats)[number] & { count?: number };
+export type Shirt = (typeof shirts)[number] & { count?: number };
+export type Camo = (typeof camos)[number] & { count?: number }[];
+
+export type Account = {
+	// TODO: maybe these can be refactored into a property of type PlayerProfile?
+	username?: string;
+	clan?: string;
+	rank: number; // note: even guests have a rank for a given session
+	rankPercent?: number;
+	worldRank?: number;
+	likes?: number;
+	kills?: number;
+	deaths?: number;
+	kd?: number;
+
+	isClanOwner?: boolean;
+	channel?: string;
+
+	hat?: Hat;
+	shirt?: Shirt;
 };
 
 export type Spray = {

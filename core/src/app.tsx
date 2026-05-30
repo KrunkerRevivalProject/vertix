@@ -8,11 +8,14 @@ import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.t
 import { st } from "./state.svelte.ts";
 import type {
 	Account,
+	Camo,
 	ClutterObject,
 	FlagObject,
 	GameMode,
+	Hat,
 	InputSendData,
 	Player,
+	Shirt,
 	ShootEvent,
 	Sprite,
 	SpriteCanvas,
@@ -220,10 +223,12 @@ var editProfileMessage = document.getElementById("editProfileMessage")!;
 function updateAccountPage(a: Account) {
 	st.player.account = a;
 	document.getElementById("profileButton")!.onclick = () => {
-		showUserStatPage(st.player.account.user_name);
+		if (st.player.account.username) {
+			showUserStatPage(st.player.account.username);
+		}
 	};
-	newUsernameInput.value = st.player.account.user_name;
-	youtubeChannelInput.value = st.player.account.channel;
+	newUsernameInput.value = st.player.account.username ?? "";
+	youtubeChannelInput.value = st.player.account.channel ?? "";
 	document.getElementById("saveAccountData")!.onclick = () => {
 		socket.emit("dbEditUser", {
 			userName: newUsernameInput.value,
@@ -239,7 +244,7 @@ function updateAccountPage(a: Account) {
 		leaveClanButton.style.display = "inline-block";
 		leaveClanButton.textContent = "LEAVE CLAN";
 		clanHeader.textContent = `[${a.clan}] CLAN:`;
-		if (a.clan_owner === "1") {
+		if (a.isClanOwner) {
 			clanAdminPanel.style.display = "block";
 			leaveClanButton.textContent = "DELETE CLAN";
 		}
@@ -342,11 +347,7 @@ var showingScoreBoard = false;
 
 window.addEventListener("keydown", keyDown, false);
 function keyDown(event: KeyboardEvent) {
-	if (event.repeat) {
-		event.preventDefault();
-		return;
-	}
-	if (mainCanvas === document.activeElement) {
+	if (!event.repeat && document.activeElement === mainCanvas) {
 		event.preventDefault();
 		keyMap[event.code] = event.type === "keydown";
 		if (event.code === "Escape" && st.gameStart) {
@@ -665,7 +666,7 @@ function setupSocket(sock: Socket) {
 	sock.on("dbChangeUserR", (a, d) => {
 		if (d) {
 			localStorage.setItem("userName", a);
-			st.player.account.user_name = a;
+			st.player.account.username = a;
 			editProfileMessage.textContent = "Success. Account Updated.";
 		} else {
 			editProfileMessage.textContent = a;
@@ -736,9 +737,9 @@ function setupSocket(sock: Socket) {
 	sock.on("upd", updateUserValue);
 	sock.on("vt", updateVoteStats);
 	sock.on("add", addUser);
-	sock.on("updHt", (_len: number, data: any) => (st.cosmetics.hats = data));
-	sock.on("updShrt", (_len: number, data: any) => (st.cosmetics.shirts = data));
-	sock.on("updCmo", (_len: number, data: any) => (st.cosmetics.camos = data));
+	sock.on("updHt", (_len: number, data: Hat[]) => (st.cosmetics.hats = data));
+	sock.on("updShrt", (_len: number, data: Shirt[]) => (st.cosmetics.shirts = data));
+	sock.on("updCmo", (_len: number, data: Camo[]) => (st.cosmetics.camos = data));
 	sock.on("crtSpr", createSpray);
 	sock.on("rem", removeUser);
 	sock.on("cht", messageFromServer);
@@ -1344,7 +1345,7 @@ function updateUserValue(data: any) {
 	if (data.sp !== undefined) {
 		tmpUser.isSpawnProtected = data.sp;
 	}
-	if (data.wi !== undefined && data.i != st.player.index) {
+	if (data.wi !== undefined && data.i !== st.player.index) {
 		playerEquipWeapon(tmpUser, data.wi);
 	}
 	if (data.l !== undefined) {
@@ -2004,6 +2005,7 @@ function drawMiniMap() {
 	mapContext.globalAlpha = 1;
 	for (const plr of players) {
 		if (
+			!plr.dead &&
 			plr.onScreen &&
 			(plr.index === st.player.index || plr.team === st.player.team || plr.isBoss)
 		) {
@@ -2962,13 +2964,13 @@ function drawPlayer(plr: Player, delta: number) {
 			);
 			playerContext.translate(0, -currentWeapon.holdDist + 10);
 			if (armSprite != null) {
-				if (snappedAngle == 270) {
+				if (snappedAngle === 270) {
 					playerContext.restore();
 					playerContext.save();
 					playerContext.translate(-4, -currentWeapon.yOffset + 8);
 					playerContext.rotate(weaponAngle);
 					drawSprite(playerContext, armSprite, 0, 0, 8, 32, 0, false, 0, 0, 0);
-				} else if (snappedAngle == 90) {
+				} else if (snappedAngle === 90) {
 					playerContext.restore();
 					playerContext.save();
 					playerContext.translate(0, -currentWeapon.yOffset);
@@ -3000,7 +3002,7 @@ function drawPlayer(plr: Player, delta: number) {
 		);
 		playerContext.globalCompositeOperation = "source-over";
 	}
-	if (plr.hitFlash != undefined && plr.hitFlash > 0) {
+	if (plr.hitFlash !== undefined && plr.hitFlash > 0) {
 		playerContext.globalCompositeOperation = "source-atop";
 		playerContext.fillStyle = `rgba(255, 255, 255, ${plr.hitFlash})`;
 		playerContext.fillRect(
@@ -3042,7 +3044,7 @@ function drawFlag(flg: FlagObject) {
 	}
 	drawSprite(
 		graph,
-		flagSprites[flg.ai + (flg.team == st.player.team ? 0 : 3)],
+		flagSprites[flg.ai + (flg.team === st.player.team ? 0 : 3)],
 		flg.x - flg.w / 2 - st.startX,
 		flg.y - flg.h - st.startY,
 		flg.w,
@@ -3123,7 +3125,7 @@ function drawPlayerNames() {
 			shapeY -= plr.account.hat.nameY;
 		}
 		let playerName = plr.name;
-		let rankText = plr.loggedIn ? plr.account.rank : "";
+		let rankText = plr.loggedIn ? plr.account.rank.toString() : "";
 		// h = graph.measureText(playerName);
 		let nameColor = plr.team !== st.player.team ? TeamColors.Red : TeamColors.Blue;
 		if (st.settings.showNames) {

@@ -1,11 +1,11 @@
 <script lang="ts">
-	import type { camos, hats, shirts } from "../../skins.ts";
+	import type { Camo, Hat, Shirt } from "../../types.ts";
 	import { getItemRarityColor } from "../../utils.ts";
 
 	type Props = (
-		| { type: "hat"; item: (typeof hats)[number] }
-		| { type: "shirt"; item: (typeof shirts)[number] }
-		| { type: "camo"; item: (typeof camos)[number]; weaponName?: string }
+		| { type: "hat"; item: Hat }
+		| { type: "shirt"; item: Shirt }
+		| { type: "camo"; item: Camo; weaponName?: string }
 	) & { duplicate?: boolean };
 
 	const props: Props = $props();

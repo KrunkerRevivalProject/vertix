@@ -3,7 +3,6 @@ import { weapons } from "core/src/loadouts.ts";
 import { Projectile } from "core/src/logic/projectile.ts";
 import { sprays } from "core/src/sprays.ts";
 import type {
-	Account,
 	ClutterObject,
 	GameMode,
 	GenData,
@@ -60,7 +59,7 @@ export class Game {
 			room: this.roomName,
 			index: sid,
 			name: "UNKNOWN",
-			account: { clan: "DEV" } as Account,
+			account: { clan: "DEV", rank: 0 },
 			classIndex: 0,
 			currentWeapon: 0,
 			weapons: [this.weapons[0]],

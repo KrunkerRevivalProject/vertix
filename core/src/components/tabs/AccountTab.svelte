@@ -182,7 +182,7 @@
 		type="button"
 		class="smallMenuButton"
 		style="margin-top:10px; margin-bottom:0px; margin-left:5px;"
-		onclick={() => window.open(`/profile.html?${st.player.account.user_name}`, "_blank")}
+		onclick={() => window.open(`/profile.html?${st.player.account.username}`, "_blank")}
 	>
 		PROFILE
 	</button>

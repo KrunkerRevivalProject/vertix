@@ -2,7 +2,7 @@ import type { Socket } from "socket.io-client";
 import { characterClasses } from "./loadouts.ts";
 import * as cosmetics from "./skins.ts";
 import { sprays } from "./sprays.ts";
-import type { MapData, Player, Sprite } from "./types.ts";
+import type { Camo, Hat, MapData, Player, Shirt, Sprite } from "./types.ts";
 
 function getCosmeticPref<T extends { id: number }>(data: T[], key: string): T | null {
 	const value = localStorage.getItem(key);
@@ -50,9 +50,9 @@ export const st = $state({
 		spray: getSprayPref(),
 	},
 	cosmetics: {
-		hats: [] as typeof cosmetics.hats & { count: 0 }[],
-		shirts: [] as typeof cosmetics.shirts & { count: 0 }[],
-		camos: [] as (typeof cosmetics.camos)[] & { count: 0 }[][],
+		hats: [] as Hat[],
+		shirts: [] as Shirt[],
+		camos: [] as Camo[],
 	},
 	sprays,
 	characterClasses,
