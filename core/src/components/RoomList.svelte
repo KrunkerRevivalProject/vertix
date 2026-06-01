@@ -8,7 +8,7 @@
 		refreshTick;
 		st.room;
 
-		const r = await fetch("http://localhost:1118/getRooms");
+		const r = await fetch("/getRooms");
 		return await r.json();
 	});
 </script>

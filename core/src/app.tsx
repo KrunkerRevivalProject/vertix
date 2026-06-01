@@ -156,10 +156,10 @@ window.onload = async () => {
 	});
 
 	const roomName = location.search.substring(1) || "";
-	const resp = await fetch(`http://localhost:1118/getIP?room=${roomName}`);
+	const resp = await fetch(`/getIP?room=${roomName}`);
 	const { ip, port, room } = await resp.json();
 	if (!socket) {
-		socket = io(`http://${ip}:${port}/${room}`, {
+		socket = io(`/${room}`, {
 			reconnection: true,
 			transports: ["websocket"],
 			forceNew: false,
@@ -2321,14 +2321,14 @@ async function joinRoom(roomName: string) {
 	// history.pushState(room, "", `${location.origin}/?${room}`);
 	st.changingLobby = true;
 
-	const resp = await fetch(`http://localhost:1118/getIP?room=${roomName}`);
+	const resp = await fetch(`/getIP?room=${roomName}`);
 	const { ip, port, room } = await resp.json();
 	if (room === st.player.room || room !== roomName) {
 		st.changingLobby = false;
 		return false;
 	}
 
-	const s = io(`http://${ip}:${port}/${room}`, {
+	const s = io(`/${room}`, {
 		reconnection: true,
 		forceNew: true,
 	});
