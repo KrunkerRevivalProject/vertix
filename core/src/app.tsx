@@ -1,6 +1,7 @@
 import * as zip from "@zip.js/zip.js";
 import { io, type Socket } from "socket.io-client";
 import { flushSync, mount } from "svelte";
+import { resetCooldownAnimations } from "./components/ActionBar.svelte";
 import App from "./components/App.svelte";
 import { specialClasses, weaponNames } from "./loadouts.ts";
 import { Projectile } from "./logic/projectile.ts";
@@ -118,6 +119,7 @@ function enterGame() {
 	animateOverlay = true;
 	if (st.player.dead) {
 		socket.emit("respawn");
+		resetCooldownAnimations();
 		updateGameLoop();
 	} else {
 		inMainMenu = false;

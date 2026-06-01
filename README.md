@@ -27,7 +27,6 @@ somewhat of a mess
 
     - notifs/events:
       - hardpoint score updates should probably occur on the server, independent of client socket emits
-      - reload cooldown animation in action bar should be reset on respawn
 
     - misc:
       - different characters should have different jump strengths

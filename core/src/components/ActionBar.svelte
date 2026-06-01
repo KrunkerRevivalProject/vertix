@@ -17,6 +17,13 @@
 			tmpDiv.style.height = "0%";
 		}
 	}
+	export function resetCooldownAnimations() {
+		Object.values(cooldownMap)
+			.flatMap((elem) => elem.getAnimations())
+			.forEach((anim) => {
+				anim.cancel();
+			});
+	}
 </script>
 {#if st.sprites.weapons[0] && st.player.weapons}
 	{#each st.player.weapons as weapon, idx}
