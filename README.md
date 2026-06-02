@@ -30,15 +30,20 @@ somewhat of a mess
       - explosion damage origin in wrong spot, should be nearer feet
       - arsonist bullets are off
         - probably messed this one up earlier with attempted pierce fixes, but this is likely because bullets should do damage multiple times to same player
+      - if switch weapons too quickly, it looks like the gun fires twice (?)
 
     - notifs/events:
       - game over stats menu sometimes shows first place in second row instead of first
       - hardpoint score updates should probably occur on the server, independent of client socket emits
+      - barrels should not respawn once destroyed in a round for remainder of that round
 
     - misc:
       - different characters should have different jump strengths
       - nices/likes are broken
       - room player limit of 8 should be enforced
+      - fix wall glitch into corners, able to get out of bounds this way
+      - disable right click
+      - make it harder for player to accidentally click out of a game right after dying by clicking on a room in the room browser (maybe have a dedicated "join" button?)
 
 </details>
 
