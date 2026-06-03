@@ -3,7 +3,7 @@ import { io, type Socket } from "socket.io-client";
 import { flushSync, mount } from "svelte";
 import { resetCooldownAnimations } from "./components/ActionBar.svelte";
 import App from "./components/App.svelte";
-import { specialClasses, weaponNames } from "./loadouts.ts";
+import { weaponNames } from "./loadouts.ts";
 import { Projectile } from "./logic/projectile.ts";
 import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.ts";
 import { st } from "./state.svelte.ts";
@@ -2359,12 +2359,11 @@ var classSpriteSheets: {
 function loadPlayerSprites(base: string) {
 	classSpriteSheets = [];
 	loadPlayerSpriteArray(base, st.characterClasses);
-	loadPlayerSpriteArray(base, specialClasses);
 	resize();
 }
 function loadPlayerSpriteArray(
 	base: string,
-	classes: typeof st.characterClasses | typeof specialClasses,
+	classes: typeof st.characterClasses,
 ) {
 	for (const { folderName, hasDown } of classes) {
 		let upSprites: Sprite[] = [];

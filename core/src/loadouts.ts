@@ -156,19 +156,17 @@ export const characterClasses = [
 		weaponIndexes: [11, 12],
 		hasDown: false,
 	},
-];
-
-export const specialClasses = [
-	{
-		pWeapon: "???",
-		sWeapon: "???",
-		folderName: "boss1",
-		hasDown: false,
-	},
 	{
 		pWeapon: "???",
 		sWeapon: "???",
 		folderName: "boss2",
+		maxHealth: 0,
+		height: 0,
+		width: 0,
+		speed: 0,
+		jumpStrength: 0,
+		gravityStrength: 0,
+		weaponIndexes: [0],
 		hasDown: false,
 	},
 ];
