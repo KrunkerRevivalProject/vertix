@@ -113,6 +113,8 @@ export class Room {
 				player.height = currentClass.height;
 				player.width = currentClass.width;
 				player.speed = currentClass.speed * this.game.mults.speed;
+				player.jumpStrength = currentClass.jumpStrength;
+				player.gravityStrength = currentClass.gravityStrength;
 				if (init) return;
 
 				player.onScreen = true;
