@@ -100,16 +100,13 @@
 		<li>
 			<a
 				target="_blank"
-				href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/comments/43ol5a/texture_mods_please_post_all_texture_mods_here/"
+				href="https://www.reddit.com/r/VertixOnline/comments/43ol5a/texture_mods_please_post_all_texture_mods_here/"
 			>
 				FIND A MOD
 			</a>
 		</li>
 		<li>
-			<a
-				target="_blank"
-				href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/comments/444pzc/guide_how_to_make_a_mod/"
-			>
+			<a target="_blank" href="https://www.reddit.com/r/VertixOnline/comments/444pzc/guide_how_to_make_a_mod/">
 				MAKE A MOD
 			</a>
 		</li>
@@ -124,12 +121,7 @@
 	|
 	<DropUpLink title="OTHER">
 		<li>
-			<a
-				target="_blank"
-				href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/wiki/index"
-			>
-				WIKI
-			</a>
+			<a target="_blank" href="https://www.reddit.com/r/VertixOnline/wiki/index"> WIKI </a>
 		</li>
 		<li><a target="_blank" href="./terms.txt">TERMS OF USE</a></li>
 		<li><a target="_blank" href="./privacy.txt">PRIVACY POLICY</a></li>

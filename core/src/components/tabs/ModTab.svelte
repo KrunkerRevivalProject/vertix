@@ -39,7 +39,7 @@
 <b>
 	<a
 		target="_blank"
-		href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/comments/4vypx9/texture_mods_please_post_all_texture_mods_here/"
+		href="https://www.reddit.com/r/VertixOnline/comments/4vypx9/texture_mods_please_post_all_texture_mods_here/"
 	>
 		Get more mods here
 	</a>

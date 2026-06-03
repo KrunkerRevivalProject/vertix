@@ -111,7 +111,7 @@
 	</div>
 	<br>
 	Check the
-	<a href="https://web.archive.org/web/20230531015720/https://www.reddit.com/r/VertixOnline/wiki/index"> Wiki </a>
+	<a href="https://www.reddit.com/r/VertixOnline/wiki/index"> Wiki </a>
 	for more info.
 </div>
 
