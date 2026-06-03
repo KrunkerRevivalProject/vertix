@@ -37,7 +37,7 @@ for (let i = 0; i < 9; i++) {
 
 io.listen(1119);
 
-const app = new Hono().basePath('/api');
+const app = new Hono().basePath("/api");
 
 app.use(
 	cors({
