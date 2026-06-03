@@ -293,7 +293,7 @@ mainCanvas.width = window.innerWidth;
 mainCanvas.height = window.innerHeight;
 mainCanvas.addEventListener("mousemove", gameInput, false);
 mainCanvas.addEventListener("mousedown", mouseDown, false);
-mainCanvas.addEventListener("contextmenu", (event) => event?.preventDefault());
+mainCanvas.addEventListener("contextmenu", (event) => event.preventDefault());
 mainCanvas.addEventListener("drag", mouseDown, false);
 mainCanvas.addEventListener("click", focusGame, false);
 mainCanvas.addEventListener("mouseup", mouseUp, false);
