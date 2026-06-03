@@ -51,7 +51,7 @@
 	}
 
 	onMount(async () => {
-		const res = await fetch("/getLbs");
+		const res = await fetch("/api/getLbs");
 		const leaderboardData: LeaderboardData = await res.json();
 
 		leaderboardUIData.rank = leaderboardData.rank.map((player) => ({

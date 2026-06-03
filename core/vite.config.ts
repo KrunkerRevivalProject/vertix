@@ -12,8 +12,7 @@ export default {
 	server: {
 		allowedHosts: [".trycloudflare.com"],
 		proxy: {
-			"/getRooms": "http://localhost:1118",
-			"/getIP": "http://localhost:1118",
+			"/api": "http://localhost:1118",
 			"/socket.io": {
 				target: "http://localhost:1119",
 				ws: true,

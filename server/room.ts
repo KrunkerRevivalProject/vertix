@@ -17,9 +17,9 @@ import {
 import { Game } from "./game.ts";
 
 const EXPLOSIVE_CLUTTER_HIT_DAMAGE = 50;
-const EXPLOSIVE_CLUTTER_BLAST_RADIUS = 160;
-const DUCK_HIT_DAMAGE = 150; // ?
-const DUCK_HIT_RADIUS = 160; // ?
+const EXPLOSIVE_CLUTTER_BLAST_RADIUS = 200;
+const DUCK_HIT_DAMAGE = 330; // ?
+const DUCK_HIT_RADIUS = 240; // ?
 
 const SPAWN_PROTECTION_DURATION = 2000;
 
@@ -122,6 +122,7 @@ export class Room {
 				player.y = spawn.y;
 				player.dead = false;
 				player.isSpawnProtected = true;
+				player.isInHardpoint = false;
 				player.damageSources = {};
 				setTimeout(() => {
 					player.isSpawnProtected = false;
@@ -195,9 +196,10 @@ export class Room {
 			});
 			socket.on("r", () => {
 				const currentWeapon = getCurrentWeapon(player);
-				const swappedWeapon = player.currentWeapon;
+				currentWeapon.spreadIndex = 0;
+				const currentWeaponIndex = player.currentWeapon;
 				setTimeout(() => {
-					socket.emit("r", swappedWeapon);
+					socket.emit("r", currentWeaponIndex);
 				}, currentWeapon.reloadSpeed ?? 0);
 			});
 			socket.on("0", (targetF) => {
@@ -509,10 +511,6 @@ export class Room {
 						);
 						clt.active = false;
 						this.io.emit("4", clt, i, 1);
-						setTimeout(() => {
-							clt.active = true;
-							this.io.emit("4", clt, i, 1);
-						}, 15000);
 					}
 				}
 			} else if (bullet.lastHit.length > 0) {
@@ -687,7 +685,7 @@ export class Room {
 		selfDamage: boolean,
 		bullet?: Projectile,
 	) {
-		this.io.emit("ex", x, y, 3);
+		this.io.emit("ex", x, y, Math.round(radius / 50));
 		for (const pl of this.game.players) {
 			if (
 				(!selfDamage && pl.index === source.index) ||
@@ -699,7 +697,7 @@ export class Room {
 			const dist = getDistance(x, y, pl.x, pl.y - pl.jumpY);
 			if (radius > dist) {
 				const dmg = Math.round(
-					-maxDmg * Math.min(1, (1.15 * (radius - dist)) / radius),
+					-maxDmg * Math.min(1, (1.05 * (radius - dist)) / radius),
 				);
 				this.handleHit(source, pl, dmg, dir, bullet);
 			}

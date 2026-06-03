@@ -206,7 +206,7 @@ export class Projectile {
 					this.dustTimer = 20;
 				}
 			}
-		} else if (!this.active && this.trailAlpha > 0) {
+		} else if (this.trailAlpha > 0) {
 			this.trailAlpha -= delta * 0.001;
 			if (this.trailAlpha <= 0) {
 				this.trailAlpha = 0;

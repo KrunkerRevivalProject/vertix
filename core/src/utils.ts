@@ -37,7 +37,7 @@ export function shootNextBullet(
 		let rand = randomFloat(randScale[0], randScale[1]);
 		bullet.width *= rand;
 		bullet.height *= rand;
-		//bullet.speed *= 1 + weapon.spread[weapon.spreadIndex];
+		bullet.speed *= 1 + weapon.spread[weapon.spreadIndex];
 	}
 	bullet.trailWidth = bullet.width * 0.7;
 	bullet.trailMaxLength = Math.round(bullet.height * 5);

@@ -158,7 +158,7 @@ window.onload = async () => {
 	});
 
 	const roomName = location.search.substring(1) || "";
-	const resp = await fetch(`/getIP?room=${roomName}`);
+	const resp = await fetch(`/api/getIP?room=${roomName}`);
 	const { ip, port, room } = await resp.json();
 	if (!socket) {
 		socket = io(`/${room}`, {
@@ -529,6 +529,7 @@ function setupSocket(sock: Socket) {
 		st.player.classIndex = b.classIndex = st.characterClasses.findIndex(
 			(c) => c.folderName === st.loadout.class.folderName,
 		);
+		st.player.isInHardpoint = false;
 		b.name = st.player.name;
 		sock.emit("gotit", b, d, Date.now(), false);
 		st.player.dead = true;
@@ -2323,7 +2324,7 @@ async function joinRoom(roomName: string) {
 	// history.pushState(room, "", `${location.origin}/?${room}`);
 	st.changingLobby = true;
 
-	const resp = await fetch(`/getIP?room=${roomName}`);
+	const resp = await fetch(`/api/getIP?room=${roomName}`);
 	const { ip, port, room } = await resp.json();
 	if (room === st.player.room || room !== roomName) {
 		st.changingLobby = false;

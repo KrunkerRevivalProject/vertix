@@ -26,8 +26,6 @@ somewhat of a mess
     - bullets:
       - the bullets seem to overshoot for a frame before dissappearing (when shooting the corner of a wall) {expected behavior is for them to disappear same frame upon hitting the wall}
       - should not go through barrels when standing right underneath them and shooting upwards
-      - explosion aoe too small
-      - explosion damage origin in wrong spot, should be nearer feet
       - arsonist bullets are off
         - probably messed this one up earlier with attempted pierce fixes, but this is likely because bullets should do damage multiple times to same player
       - if switch weapons too quickly, it looks like the gun fires twice (?)
@@ -35,7 +33,6 @@ somewhat of a mess
     - notifs/events:
       - game over stats menu sometimes shows first place in second row instead of first
       - hardpoint score updates should probably occur on the server, independent of client socket emits
-      - barrels should not respawn once destroyed in a round for remainder of that round
 
     - misc:
       - different characters should have different jump strengths

@@ -23,7 +23,7 @@
 			throw new Error("No profile Found.");
 		}
 
-		const resp = await fetch("/getIP");
+		const resp = await fetch("/api/getIP");
 		const { ip, port } = await resp.json();
 		if (socket) return;
 
