@@ -158,65 +158,7 @@ window.onload = async () => {
 	});
 
 	const roomName = location.search.substring(1) || "";
-	const resp = await fetch(`/api/getIP?room=${roomName}`);
-	const { ip, port, room } = await resp.json();
-	if (!socket) {
-		socket = io(`/${room}`, {
-			reconnection: true,
-			transports: ["websocket"],
-			forceNew: false,
-		});
-		st.socket = socket;
-		setupSocket(socket);
-	}
-	socket.once("connect", () => {
-		let logKey = localStorage.getItem("logKey");
-		let userName = localStorage.getItem("userName");
-		if (logKey && userName) {
-			socket.emit("dbLogin", {
-				lgKey: logKey,
-				userName: userName,
-				userPass: false,
-			});
-			loginMessage.style.display = "block";
-			loginMessage.textContent = "Logging in...";
-		}
-		document.getElementById("createClanButton")!.onclick = () => {
-			socket.emit("dbClanCreate", {
-				clanName: (document.getElementById("clanNameInput")! as HTMLInputElement).value,
-			});
-			clanDBMessage.style.display = "block";
-			clanDBMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("joinClanButton")!.onclick = () => {
-			socket.emit("dbClanJoin", {
-				clanKey: (document.getElementById("clanKeyInput")! as HTMLInputElement).value,
-			});
-			clanDBMessage.style.display = "block";
-			clanDBMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("inviteClanButton")!.onclick = () => {
-			socket.emit("dbClanInvite", {
-				userName: clanInviteInput.value,
-			});
-			clanInvMessage.style.display = "block";
-			clanInvMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("kickClanButton")!.onclick = () => {
-			socket.emit("dbClanKick", {
-				userName: clanInviteInput.value,
-			});
-			clanInvMessage.style.display = "block";
-			clanInvMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("setChatClanButton")!.onclick = () => {
-			socket.emit("dbClanChatURL", {
-				chUrl: (document.getElementById("clanChatInput")! as HTMLInputElement).value,
-			});
-			clanChtMessage.style.display = "inline-block";
-			clanChtMessage.textContent = "Please Wait...";
-		};
-	});
+	joinRoom(roomName);
 };
 
 var newUsernameInput = document.getElementById("newUsernameInput")! as HTMLInputElement;
@@ -965,6 +907,58 @@ function setupSocket(sock: Socket) {
 		document.getElementById("nextGameTimer")!.textContent = `${timeLeft}: UNTIL NEXT ROUND`;
 	});
 }
+
+function setupInitialSocket(sock: Socket) {
+	sock.once("connect", () => {
+		let logKey = localStorage.getItem("logKey");
+		let userName = localStorage.getItem("userName");
+		if (logKey && userName) {
+			sock.emit("dbLogin", {
+				lgKey: logKey,
+				userName: userName,
+				userPass: false,
+			});
+			loginMessage.style.display = "block";
+			loginMessage.textContent = "Logging in...";
+		}
+		document.getElementById("createClanButton")!.onclick = () => {
+			sock.emit("dbClanCreate", {
+				clanName: (document.getElementById("clanNameInput")! as HTMLInputElement).value,
+			});
+			clanDBMessage.style.display = "block";
+			clanDBMessage.textContent = "Please Wait...";
+		};
+		document.getElementById("joinClanButton")!.onclick = () => {
+			sock.emit("dbClanJoin", {
+				clanKey: (document.getElementById("clanKeyInput")! as HTMLInputElement).value,
+			});
+			clanDBMessage.style.display = "block";
+			clanDBMessage.textContent = "Please Wait...";
+		};
+		document.getElementById("inviteClanButton")!.onclick = () => {
+			sock.emit("dbClanInvite", {
+				userName: clanInviteInput.value,
+			});
+			clanInvMessage.style.display = "block";
+			clanInvMessage.textContent = "Please Wait...";
+		};
+		document.getElementById("kickClanButton")!.onclick = () => {
+			sock.emit("dbClanKick", {
+				userName: clanInviteInput.value,
+			});
+			clanInvMessage.style.display = "block";
+			clanInvMessage.textContent = "Please Wait...";
+		};
+		document.getElementById("setChatClanButton")!.onclick = () => {
+			sock.emit("dbClanChatURL", {
+				chUrl: (document.getElementById("clanChatInput")! as HTMLInputElement).value,
+			});
+			clanChtMessage.style.display = "inline-block";
+			clanChtMessage.textContent = "Please Wait...";
+		};
+	});
+}
+
 function updateVoteStats(a: any) {
 	document.getElementById(`votesText${a.i}`)!.textContent = `${a.n}: ${a.v}`;
 }
@@ -2327,27 +2321,26 @@ async function joinRoom(roomName: string) {
 
 	const resp = await fetch(`/api/getIP?room=${roomName}`);
 	const { ip, port, room } = await resp.json();
-	if (room === st.player.room || room !== roomName) {
+	if (room === st.player.room) {
 		st.changingLobby = false;
 		return false;
 	}
 
-	const s = io(`/${room}`, {
-		reconnection: true,
-		forceNew: true,
-	});
+	if (!socket) {
+		socket = io(`/${room}`);
+		st.socket = socket;
+		setupSocket(socket);
+		setupInitialSocket(socket);
+	} else {
+		socket.close();
+		socket = io(`/${room}`);
+		st.socket = socket;
+		setupSocket(socket);
+	}
 	inMainMenu = true;
 	hideUI(true);
 	document.getElementById("linkBoxLeft")!.style.display = "block";
 	document.getElementById("linkBoxRight")!.style.display = "block";
-	socket.removeListener("disconnect");
-	socket.once("disconnect", () => {
-		socket.close();
-		socket = s;
-		st.socket = socket;
-		setupSocket(socket);
-	});
-	socket.disconnect();
 	st.chatLines = [];
 
 	return true;
