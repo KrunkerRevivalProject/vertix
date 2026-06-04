@@ -645,7 +645,7 @@ export const weapons: Weapon[] = [
 		bulletsPerShot: 4,
 		pierce: 0,
 		pierceCount: 0,
-		blastRadius: 240,
+		blastRadius: 200,
 		bounce: false,
 		distBased: true,
 		explodeOnDeath: true,

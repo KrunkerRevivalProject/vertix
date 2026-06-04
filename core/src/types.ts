@@ -40,7 +40,7 @@ export type Player = {
 	isBoss: boolean;
 	loggedIn?: boolean;
 	socketId?: string;
-	likes?: number;
+	likedBy: number[];
 	totalDamage: number;
 	totalHealing: number;
 	totalGoals: number;
@@ -302,4 +302,28 @@ export type ClanProfile = {
 	kdr: number;
 	owner: string;
 	numMembers: number;
+};
+
+export type StatTableRow = {
+	player: Player;
+	cells: StatTableCell[];
+};
+
+export type StatTableCell = {
+	className: string;
+	text: string | number;
+	color: string;
+	canClick?: boolean;
+	hoverInfo?: StatTableCellHoverInfo;
+};
+
+export type StatTableCellHoverInfo = {
+	id: string;
+	type: "hat" | "shirt" | "camo";
+	name: string;
+	chance: number;
+	isDuplicate: boolean;
+	desc?: string;
+	weaponName?: string;
+	creator?: string;
 };

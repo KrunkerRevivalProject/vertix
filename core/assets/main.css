@@ -122,46 +122,6 @@ div {
 	color: #ffd100;
 }
 
-.rewardText {
-	cursor:
-		url("./cursor_aim.png") 17 17,
-		default;
-	pointer-events: all;
-	position: relative;
-	font-size: 15px;
-}
-
-.hatDisplayImage {
-	float: left;
-	margin-top: 10px;
-	margin-right: 10px;
-	width: 62px;
-	height: 62px;
-	background: url("./hats/display.png");
-	background-size: 62px 62px;
-	background-repeat: no-repeat;
-}
-
-.shirtDisplayImage {
-	float: left;
-	margin-top: 10px;
-	margin-right: 10px;
-	width: 62px;
-	height: 62px;
-	background: url("./shirts/display.png");
-	background-size: 62px 62px;
-	background-repeat: no-repeat;
-}
-
-.camoDisplayImage {
-	float: left;
-	margin-top: 10px;
-	margin-right: 10px;
-	width: 62px;
-	height: 62px;
-	object-fit: cover;
-}
-
 .sprayDisplayImage {
 	width: 100%;
 	height: 100%;
@@ -522,6 +482,52 @@ div {
 	padding: 10px;
 	font-size: 14px;
 	color: rgba(0, 0, 0, 0.5);
+}
+
+.modeVoteButton {
+	cursor: pointer;
+	pointer-events: auto;
+	background: rgba(0, 0, 0, 0.15);
+	color: white;
+	margin: 8px;
+	font-size: 14px;
+	width: 28%;
+	display: inline-block;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 36px;
+	border: 0;
+}
+
+.modeVoteButton:active {
+	background-color: rgba(255, 255, 255, 0.2);
+}
+
+.modeVoteButton:hover {
+	background-color: rgba(255, 255, 255, 0.1);
+}
+
+.modeVoteButtonA {
+	cursor: pointer;
+	pointer-events: auto;
+	background: rgba(255, 255, 255, 0.2);
+	color: white;
+	margin: 8px;
+	font-size: 14px;
+	width: 28%;
+	display: inline-block;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 36px;
+	border: 0;
+}
+
+.modeVoteButtonA:active {
+	background-color: rgba(255, 255, 255, 0.25);
+}
+
+.modeVoteButtonA:hover {
+	background-color: rgba(255, 255, 255, 0.1);
 }
 
 #loadingWrapper {

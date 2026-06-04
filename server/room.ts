@@ -353,6 +353,20 @@ export class Room {
 					v: vote.votes,
 				});
 			});
+			socket.on("like", (sourceIndex: number, destIndex: number) => {
+				const likedPlayer = this.game.players.find(
+					(pl) => pl.index === destIndex,
+				);
+				if (likedPlayer) {
+					const likedByIndex = likedPlayer.likedBy.indexOf(sourceIndex);
+					if (likedByIndex > -1) {
+						likedPlayer.likedBy.splice(likedByIndex, 1);
+					} else {
+						likedPlayer.likedBy.push(sourceIndex);
+					}
+					this.io.emit("upd", { i: destIndex, l: likedPlayer.likedBy });
+				}
+			});
 			socket.on("ping1", () => {
 				socket.emit("pong1");
 			});

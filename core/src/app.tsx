@@ -661,6 +661,7 @@ function setupSocket(sock: Socket) {
 		st.maxScreenWidth = a.maxScreenWidth * a.viewMult;
 		st.viewMult = a.viewMult;
 		st.player = a.you;
+		st.currentLiked = null;
 		e = findUserByIndex(a.you.index);
 		if (e != null) {
 			st.players[st.players.indexOf(e)] = st.player;
@@ -682,7 +683,7 @@ function setupSocket(sock: Socket) {
 	sock.on("add", addUser);
 	sock.on("updHt", (_len: number, data: Hat[]) => (st.cosmetics.hats = data));
 	sock.on("updShrt", (_len: number, data: Shirt[]) => (st.cosmetics.shirts = data));
-	sock.on("updCmo", (_len: number, data: Camo[]) => (st.cosmetics.camos = data));
+	sock.on("updCmo", (_len: number, data: Camo[][]) => (st.cosmetics.camos = data));
 	sock.on("crtSpr", createSpray);
 	sock.on("rem", removeUser);
 	sock.on("cht", messageFromServer);
@@ -1076,7 +1077,6 @@ function removeUser(userIndex: number) {
 	}
 }
 function updateUserValue(data: any) {
-	var updated = false;
 	const tmpUser = findUserByIndex(data.i);
 	if (!tmpUser) {
 		fetchUserWithIndex(data.i);
@@ -1084,7 +1084,6 @@ function updateUserValue(data: any) {
 	}
 	if (data.s !== undefined) {
 		tmpUser.score = data.s;
-		updated = true;
 	}
 	if (data.sp !== undefined) {
 		tmpUser.isSpawnProtected = data.sp;
@@ -1093,34 +1092,25 @@ function updateUserValue(data: any) {
 		playerEquipWeapon(tmpUser, data.wi);
 	}
 	if (data.l !== undefined) {
-		tmpUser.likes = data.l;
-		updated = true;
+		tmpUser.likedBy = data.l;
 	}
 	if (data.dea !== undefined) {
 		tmpUser.deaths = data.dea;
-		updated = true;
 	}
 	if (data.kil !== undefined) {
 		tmpUser.kills = data.kil;
-		updated = true;
 	}
 	if (data.dmg !== undefined) {
 		tmpUser.totalDamage = data.dmg;
-		updated = true;
 	}
 	if (data.hea !== undefined) {
 		tmpUser.totalHealing = data.hea;
-		updated = true;
 	}
 	if (data.goa !== undefined) {
 		tmpUser.totalGoals = data.goa;
-		updated = true;
 	}
 	if (tmpUser.index === st.player.index) {
 		updatePlayerInfo(tmpUser);
-	}
-	if (updated && st.gameOver && data.l !== undefined) {
-		document.getElementById(`likeStat${tmpUser.index}`)!.replaceChildren(tmpUser.likes!.toString());
 	}
 }
 function fetchUserWithIndex(index: number) {

@@ -105,6 +105,7 @@ export class Game {
 			},
 			isInHardpoint: false,
 			hardpointScore: 0,
+			likedBy: [],
 		};
 		this.players.push(tmpPlayer);
 		return tmpPlayer;
@@ -270,6 +271,7 @@ export class Game {
 			pl.lastModeVote = undefined; //TODO
 			pl.team = "";
 			pl.team = this.getTeam(pl.index);
+			pl.likedBy = [];
 		}
 		this.genClutter();
 		this.genPickups();

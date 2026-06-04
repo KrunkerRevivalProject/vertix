@@ -35,7 +35,6 @@ somewhat of a mess
 
     - misc:
       - different characters should have different jump strengths
-      - nices/likes are broken
       - room player limit of 8 should be enforced
       - fix wall glitch into corners, able to get out of bounds this way
       - make it harder for player to accidentally click out of a game right after dying by clicking on a room in the room browser (maybe have a dedicated "join" button?)

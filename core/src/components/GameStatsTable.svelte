@@ -1,41 +1,21 @@
 <script lang="ts">
 	import { st } from "../state.svelte";
-	import type { Player } from "../types";
+	import type { Player, StatTableCell, StatTableRow } from "../types";
 	import { getItemRarityColor, TeamColors } from "../utils";
-
-	type StatTableRow = {
-		player: Player;
-		cells: StatTableCell[];
-	};
-
-	type StatTableCell = {
-		className: string;
-		text: string | number;
-		color: string;
-		canClick?: boolean;
-		hoverInfo?: StatTableCellHoverInfo;
-		pos?: number;
-	};
-
-	type StatTableCellHoverInfo = {
-		id: string;
-		type: "hat" | "shirt" | "camo";
-		name: string;
-		chance: number;
-		duplicate: boolean;
-		desc?: string;
-		weaponName?: string;
-		creator?: string;
-	};
 
 	const isZoneWar = $derived(st.gameMap?.gameMode.code === "zmtch");
 
-	const data = $derived.by(() => {
+	const tableRows = $derived.by(() => {
 		const rows: StatTableRow[] = [];
 
 		const sortedPlayers = st.players.toSorted(sortPlayersByScore);
 		for (const player of sortedPlayers) {
 			if (!player.team) continue;
+
+			let playerColor = "#fff";
+			if (player.index !== st.player.index) {
+				playerColor = player.team !== st.player.team ? TeamColors.Red : TeamColors.Blue;
+			}
 
 			rows.push({
 				player,
@@ -44,12 +24,7 @@
 						text: player.name,
 						className: "contL",
 						canClick: player.loggedIn,
-						color:
-							player.index === st.player.index
-								? "#fff"
-								: player.team !== st.player.team
-									? TeamColors.Red
-									: TeamColors.Blue,
+						color: playerColor,
 					},
 					{
 						text: player.score || 0,
@@ -82,12 +57,6 @@
 						color: player.lastItem ? getItemRarityColor(player.lastItem.chance) : "#fff",
 						hoverInfo: player.lastItem,
 					},
-					{
-						text: player.likes || 0,
-						className: "contC",
-						color: "#fff",
-						pos: player.index,
-					},
 				],
 			});
 		}
@@ -108,10 +77,17 @@
 		}
 	}
 
-	function onNice(playerId: number) {
+	function onClickNice(destIndex: number) {
 		document.getElementById("cvs")!.focus();
-		st.socket?.emit("like", playerId);
-		st.currentLiked = st.currentLiked === playerId ? null : playerId;
+		st.socket?.emit("like", st.player.index, destIndex);
+		if (st.currentLiked === destIndex) {
+			st.currentLiked = null;
+		} else {
+			if (st.currentLiked !== null) {
+				st.socket?.emit("like", st.player.index, st.currentLiked);
+			}
+			st.currentLiked = destIndex;
+		}
 	}
 </script>
 
@@ -119,7 +95,7 @@
 	<p id="nextGameTimer"></p>
 	<div id="gameStatsContainer">
 		<p id="winningTeamText"></p>
-		<table id="gameStatBoard" style:width="100%">
+		<table id="gameStatBoard">
 			<thead>
 				<tr>
 					<th class="headerL">NAME</th>
@@ -132,7 +108,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each data as row}
+				{#each tableRows as row}
 					<tr>
 						{#each row.cells as cell}
 							<td class={cell.className} style:color={cell.color} onclick={() => onClickCell(cell)}>
@@ -145,8 +121,8 @@
 												{cell.hoverInfo.name}
 											</div>
 											<div class="rewardDropRate">droprate {cell.hoverInfo.chance}%</div>
-											<div class="rewardSubText" style:color={cell.hoverInfo.duplicate ? "#e04141" : "#d8d8d8"}>
-												<i>{cell.hoverInfo.duplicate ? "Duplicate" : "Wearable"}</i>
+											<div class="rewardSubText" style:color={cell.hoverInfo.isDuplicate ? "#e04141" : "#d8d8d8"}>
+												<i>{cell.hoverInfo.isDuplicate ? "Duplicate" : "Wearable"}</i>
 											</div>
 											<div class="rewardDescription">{cell.hoverInfo.desc}</div>
 											{#if cell.hoverInfo.creator !== "EatMyApples"}
@@ -160,8 +136,8 @@
 												{cell.hoverInfo.name}
 											</div>
 											<div class="rewardDropRate">droprate {cell.hoverInfo.chance}%</div>
-											<div class="rewardSubText" style:color={cell.hoverInfo.duplicate ? "#e04141" : "#d8d8d8"}>
-												<i>{cell.hoverInfo.duplicate ? "Duplicate" : "Wearable"}</i>
+											<div class="rewardSubText" style:color={cell.hoverInfo.isDuplicate ? "#e04141" : "#d8d8d8"}>
+												<i>{cell.hoverInfo.isDuplicate ? "Duplicate" : "Wearable"}</i>
 											</div>
 											<div class="rewardDescription">{cell.hoverInfo.desc}</div>
 										{:else}
@@ -170,8 +146,8 @@
 												{cell.hoverInfo.name}
 											</div>
 											<div class="rewardDropRate">droprate {cell.hoverInfo.chance}%</div>
-											<div class="rewardSubText" style:color={cell.hoverInfo.duplicate ? "#e04141" : "#d8d8d8"}>
-												<i>{cell.hoverInfo.duplicate ? "Duplicate" : "weapon camo"}</i>
+											<div class="rewardSubText" style:color={cell.hoverInfo.isDuplicate ? "#e04141" : "#d8d8d8"}>
+												<i>{cell.hoverInfo.isDuplicate ? "Duplicate" : "weapon camo"}</i>
 											</div>
 											<div class="rewardDescription">{cell.hoverInfo.weaponName}</div>
 										{/if}
@@ -179,20 +155,20 @@
 								{/if}
 							</td>
 						{/each}
-						{#if row.player.id !== st.player.id}
+						{#if row.player.index !== st.player.index}
 							<td>
 								<button
 									type="button"
-									class={row.player.id === st.currentLiked ? "gameStatLikeButtonA" : "gameStatLikeButton"}
-									onclick={() => onNice(row.player.id)}
+									class={row.player.index === st.currentLiked ? "gameStatLikeButtonA" : "gameStatLikeButton"}
+									onclick={() => onClickNice(row.player.index)}
 								>
 									NICE
 								</button>
 							</td>
-							<td>
-								<span class="likeStat">{st.player.likes ?? 0}</span>
-							</td>
 						{/if}
+						<td>
+							<span class="likeStat">{row.player.likedBy.length}</span>
+						</td>
 					</tr>
 				{/each}
 			</tbody>
@@ -218,52 +194,6 @@
 		pointer-events: none;
 		width: 100%;
 		margin-bottom: 8px;
-	}
-
-	.modeVoteButton {
-		cursor: pointer;
-		pointer-events: auto;
-		background: rgba(0, 0, 0, 0.15);
-		color: white;
-		margin: 8px;
-		font-size: 14px;
-		width: 28%;
-		display: inline-block;
-		text-align: center;
-		vertical-align: middle;
-		line-height: 36px;
-		border: 0;
-	}
-
-	.modeVoteButton:active {
-		background-color: rgba(255, 255, 255, 0.2);
-	}
-
-	.modeVoteButton:hover {
-		background-color: rgba(255, 255, 255, 0.1);
-	}
-
-	.modeVoteButtonA {
-		cursor: pointer;
-		pointer-events: auto;
-		background: rgba(255, 255, 255, 0.2);
-		color: white;
-		margin: 8px;
-		font-size: 14px;
-		width: 28%;
-		display: inline-block;
-		text-align: center;
-		vertical-align: middle;
-		line-height: 36px;
-		border: 0;
-	}
-
-	.modeVoteButtonA:active {
-		background-color: rgba(255, 255, 255, 0.25);
-	}
-
-	.modeVoteButtonA:hover {
-		background-color: rgba(255, 255, 255, 0.1);
 	}
 
 	#winningTeamText {
@@ -292,6 +222,7 @@
 		text-align: center;
 		border-collapse: separate;
 		border-spacing: 22px 5px;
+		width: 100%;
 	}
 
 	#gameStatBoard .headerL {
@@ -344,6 +275,37 @@
 		color: #232323;
 		background-color: #a2a2a2;
 		pointer-events: auto;
+	}
+
+	.hatDisplayImage, .shirtDisplayImage, .camoDisplayImage {
+		float: left;
+		margin-top: 10px;
+		margin-right: 10px;
+		width: 62px;
+		height: 62px;
+	}
+
+	.hatDisplayImage {
+		background: url("./hats/display.png");
+		background-size: 62px 62px;
+		background-repeat: no-repeat;
+	}
+
+	.shirtDisplayImage {
+		background: url("./shirts/display.png");
+		background-size: 62px 62px;
+		background-repeat: no-repeat;
+	}
+
+	.camoDisplayImage {
+		object-fit: cover;
+	}
+
+	.rewardText {
+		cursor: url("./cursor_aim.png") 17 17, default;
+		pointer-events: all;
+		position: relative;
+		font-size: 15px;
 	}
 
 	.rewardName {
