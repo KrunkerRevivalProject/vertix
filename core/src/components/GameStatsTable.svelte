@@ -277,7 +277,9 @@
 		pointer-events: auto;
 	}
 
-	.hatDisplayImage, .shirtDisplayImage, .camoDisplayImage {
+	.hatDisplayImage,
+	.shirtDisplayImage,
+	.camoDisplayImage {
 		float: left;
 		margin-top: 10px;
 		margin-right: 10px;
@@ -302,7 +304,9 @@
 	}
 
 	.rewardText {
-		cursor: url("./cursor_aim.png") 17 17, default;
+		cursor:
+			url("./cursor_aim.png") 17 17,
+			default;
 		pointer-events: all;
 		position: relative;
 		font-size: 15px;

@@ -200,7 +200,8 @@
 				onclick={() => {st.loadout[currentScreen as "primaryCamo" | "secondaryCamo"] = camo; currentScreen = "main"}}
 			>
 				{camo.name}
-				x{camo.count + 1}
+				<!-- TODO: count from account -->
+				x{1}
 				<!-- tooltip? -->
 			</div>
 		{/each}
@@ -218,7 +219,8 @@
 				onclick={() => {st.loadout.hat = hat; currentScreen = "main"}}
 			>
 				{hat.name}
-				x{hat.count + 1}
+				<!-- TODO: count from account -->
+				x{1}
 				<CosmeticTooltip type="hat" item={hat} />
 			</div>
 		{/each}
@@ -236,7 +238,8 @@
 				onclick={() => {st.loadout.shirt = shirt; currentScreen = "main"}}
 			>
 				{shirt.name}
-				x{shirt.count + 1}
+				<!-- TODO: count from account -->
+				x{1}
 				<CosmeticTooltip type="shirt" item={shirt} />
 			</div>
 		{/each}

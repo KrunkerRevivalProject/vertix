@@ -52,7 +52,7 @@ export const st = $state({
 	cosmetics: {
 		hats: [] as Hat[],
 		shirts: [] as Shirt[],
-		camos: [] as Camo[],
+		camos: [] as Camo[][],
 	},
 	sprays,
 	characterClasses,
