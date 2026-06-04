@@ -4,6 +4,7 @@
 	import ActionBar from "./ActionBar.svelte";
 	import Chatbox from "./Chatbox.svelte";
 	import DropUpLink from "./DropUpLink.svelte";
+	import GameStatsTable from "./GameStatsTable.svelte";
 	import RightMenu from "./RightMenu.svelte";
 	import RoomList from "./RoomList.svelte";
 	import StartMenu from "./StartMenu.svelte";
@@ -67,14 +68,7 @@
 	<canvas id="cvs" tabindex="1" class="noRightClick" oncontextmenu={() => false}></canvas>
 </div>
 
-<div id="gameStatWrapper">
-	<p id="nextGameTimer"></p>
-	<div id="gameStatsContainer">
-		<p id="winningTeamText"></p>
-		<table id="gameStatBoard" style="width: 100%"></table>
-	</div>
-	<div id="voteModeContainer"></div>
-</div>
+<GameStatsTable />
 
 <div id="loadingWrapper">
 	<div id="loadSpinner" class="cs-loader-inner">

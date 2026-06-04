@@ -31,7 +31,6 @@ somewhat of a mess
       - if switch weapons too quickly, it looks like the gun fires twice (?)
 
     - notifs/events:
-      - game over stats menu sometimes shows first place in second row instead of first
       - hardpoint score updates should probably occur on the server, independent of client socket emits
 
     - misc:
@@ -40,6 +39,7 @@ somewhat of a mess
       - room player limit of 8 should be enforced
       - fix wall glitch into corners, able to get out of bounds this way
       - make it harder for player to accidentally click out of a game right after dying by clicking on a room in the room browser (maybe have a dedicated "join" button?)
+      - players should not be rendered inside walls of new map after game countdown finishes and new round starts
 
 </details>
 

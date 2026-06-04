@@ -54,7 +54,6 @@ const {
 	isWeaponFacingFront,
 	randomInt,
 	canSee,
-	getItemRarityColor,
 	TeamColors,
 } = utils;
 
@@ -66,7 +65,6 @@ flushSync();
 var socket: Socket = null!; // O_O
 var reason: string | undefined;
 var fillCounter = 0;
-var currentLikeButton: number | null = null;
 var delta = 0;
 var currentTime = Date.now();
 var oldTime = Date.now();
@@ -215,7 +213,6 @@ var target = {
 	d: 0,
 	dOffset: 0,
 };
-let players: Player[] = [];
 let clutter: ClutterObject[] = [];
 let flags: FlagObject[] = [];
 let bullets: Projectile[] = [];
@@ -335,7 +332,7 @@ function keyDown(event: KeyboardEvent) {
 			!st.gameOver
 		) {
 			showingScoreBoard = true;
-			showStatTable(getUsersList(), null, null, true, true, true);
+			showStatTable(null, null, true, true);
 		}
 	}
 }
@@ -634,14 +631,14 @@ function setupSocket(sock: Socket) {
 			gameWidth = st.gameMap.width;
 			gameHeight = st.gameMap.height;
 			mapTileScale = a.tileScale;
-			players = a.usersInRoom;
+			st.players = a.usersInRoom;
 			gameMode = st.gameMap.gameMode;
 			if (a.you.team === "blue") {
 				document.getElementById("gameModeText")!.textContent = gameMode.desc2;
 			} else {
 				document.getElementById("gameModeText")!.textContent = gameMode.desc1;
 			}
-			currentLikeButton = null;
+			st.currentLiked = null;
 			for (const clt of st.gameMap.clutter) {
 				clutter.push(clt);
 			}
@@ -666,9 +663,9 @@ function setupSocket(sock: Socket) {
 		st.player = a.you;
 		e = findUserByIndex(a.you.index);
 		if (e != null) {
-			players[players.indexOf(e)] = st.player;
+			st.players[st.players.indexOf(e)] = st.player;
 		} else {
-			players.push(st.player);
+			st.players.push(st.player);
 		}
 		if (inMainMenu) {
 			loadingWrapper.style.display = "none";
@@ -897,10 +894,10 @@ function setupSocket(sock: Socket) {
 			);
 		}
 	});
-	sock.on("7", (winner: string, userList: Player[], modeVoteData, isFading: boolean) => {
+	sock.on("7", (winner: string, modeVoteData, isFading: boolean) => {
 		st.gameOver = true;
 		document.getElementById("startMenuWrapper")!.style.display = "none";
-		showStatTable(userList, modeVoteData, winner, false, isFading, true);
+		showStatTable(modeVoteData, winner, false, isFading);
 		startSoundTrack(1);
 	});
 	sock.on("8", (timeLeft: number) => {
@@ -970,193 +967,83 @@ function showESCMenu() {
 	document.getElementById("startMenuWrapper")!.style.display = "block";
 	document.getElementById("gameStatWrapper")!.style.display = "none";
 }
-var buttonCount = 0;
+
 function showStatTable(
-	userList: Player[],
 	modeVoteData: any,
 	winner: string | number | null,
 	reset: boolean,
 	isFading: boolean,
-	isEnd: boolean,
 ) {
-	buttonCount = 0;
-	if (isEnd) {
-		hideUI(false);
-		if (reset) {
-			document.getElementById("nextGameTimer")!.textContent = "GAME STATS";
-			document.getElementById("winningTeamText")!.textContent = "";
+	hideUI(false);
+
+	if (reset) {
+		document.getElementById("nextGameTimer")!.textContent = "GAME STATS";
+		document.getElementById("winningTeamText")!.textContent = "";
+		document.getElementById("voteModeContainer")!.textContent = "";
+	} else {
+		let isWinner = st.player.team === winner || st.player.id === winner;
+		if (!isFading) {
+			if (isWinner) {
+				startBigAnimText(
+					"Victory",
+					"Well Played!",
+					2500,
+					true,
+					TeamColors.Blue,
+					"#ffffff",
+					false,
+					2,
+				);
+				document.getElementById("winningTeamText")!.textContent = "VICTORY";
+				document.getElementById("winningTeamText")!.style.color = TeamColors.Blue;
+			} else if (st.player.team.length) {
+				startBigAnimText("Defeat", "Bad Luck!", 2500, true, TeamColors.Red, "#ffffff", false, 2);
+				document.getElementById("winningTeamText")!.textContent = "DEFEAT";
+				document.getElementById("winningTeamText")!.style.color = TeamColors.Red;
+			}
+		}
+		if (modeVoteData != null) {
 			document.getElementById("voteModeContainer")!.textContent = "";
-		} else {
-			let isWinner = st.player.team === winner || st.player.id === winner;
-			if (!isFading) {
-				if (isWinner) {
-					startBigAnimText(
-						"Victory",
-						"Well Played!",
-						2500,
-						true,
-						TeamColors.Blue,
-						"#ffffff",
-						false,
-						2,
-					);
-					document.getElementById("winningTeamText")!.textContent = "VICTORY";
-					document.getElementById("winningTeamText")!.style.color = TeamColors.Blue;
-				} else if (st.player.team.length) {
-					startBigAnimText("Defeat", "Bad Luck!", 2500, true, TeamColors.Red, "#ffffff", false, 2);
-					document.getElementById("winningTeamText")!.textContent = "DEFEAT";
-					document.getElementById("winningTeamText")!.style.color = TeamColors.Red;
-				}
-			}
-			if (modeVoteData != null) {
-				document.getElementById("voteModeContainer")!.textContent = "";
-				for (let i = 0; i < modeVoteData.length; ++i) {
-					let modeVoteBtn = document.createElement("button");
-					modeVoteBtn.className = "modeVoteButton";
-					modeVoteBtn.setAttribute("id", `votesText${i}`);
-					modeVoteBtn.textContent = `${modeVoteData[i].name}: ${modeVoteData[i].votes}`;
-					document.getElementById("voteModeContainer")!.appendChild(modeVoteBtn);
-					modeVoteBtn.onclick = () => {
-						mainCanvas.focus();
-						socket.emit("modeVote", i);
-						for (let j = 0; j < modeVoteData.length; ++j) {
-							if (
-								i === j &&
-								document.getElementById(`votesText${j}`)!.className === "modeVoteButton"
-							) {
-								document.getElementById(`votesText${j}`)!.className = "modeVoteButtonA";
-							} else {
-								document.getElementById(`votesText${j}`)!.className = "modeVoteButton";
-							}
+			for (let i = 0; i < modeVoteData.length; ++i) {
+				let modeVoteBtn = document.createElement("button");
+				modeVoteBtn.className = "modeVoteButton";
+				modeVoteBtn.setAttribute("id", `votesText${i}`);
+				modeVoteBtn.textContent = `${modeVoteData[i].name}: ${modeVoteData[i].votes}`;
+				document.getElementById("voteModeContainer")!.appendChild(modeVoteBtn);
+				modeVoteBtn.onclick = () => {
+					mainCanvas.focus();
+					socket.emit("modeVote", i);
+					for (let j = 0; j < modeVoteData.length; ++j) {
+						if (
+							i === j &&
+							document.getElementById(`votesText${j}`)!.className === "modeVoteButton"
+						) {
+							document.getElementById(`votesText${j}`)!.className = "modeVoteButtonA";
+						} else {
+							document.getElementById(`votesText${j}`)!.className = "modeVoteButton";
 						}
-					};
-				}
+					}
+				};
 			}
 		}
 	}
-	document.getElementById("gameStatBoard")!.textContent = "";
-	addRowToStatTable(
-		[
-			{
-				text: "NAME",
-				className: "headerL",
-				color: "#fff",
-			},
-			{
-				text: "SCORE",
-				className: "headerC",
-				color: "#fff",
-			},
-			{
-				text: "KILLS",
-				className: "headerC",
-				color: "#fff",
-			},
-			{
-				text: "DEATHS",
-				className: "headerC",
-				color: "#fff",
-			},
-			{
-				text: "DAMAGE",
-				className: "headerC",
-				color: "#fff",
-			},
-			{
-				text: gameMode?.code === "zmtch" ? "GOALS" : "HEALING",
-				className: "headerC",
-				color: "#fff",
-			},
-			{
-				text: "REWARD",
-				className: "headerC",
-				color: "#fff",
-			},
-			{
-				text: "",
-				className: "headerC",
-				color: "#fff",
-			},
-		],
-		true,
-	);
-	for (const user of userList) {
-		if (!user.team) continue;
-		addRowToStatTable(
-			[
-				{
-					text: user.name,
-					className: "contL",
-					canClick: user.loggedIn,
-					color:
-						user.index === st.player.index
-							? "#fff"
-							: user.team !== st.player.team
-								? TeamColors.Red
-								: TeamColors.Blue,
-					userInfo: findUserByIndex(user.index),
-				},
-				{
-					text: user.score || 0,
-					className: "contC",
-					color: "#fff",
-				},
-				{
-					text: user.kills || 0,
-					className: "contC",
-					color: "#fff",
-				},
-				{
-					text: user.deaths || 0,
-					className: "contC",
-					color: "#fff",
-				},
-				{
-					text: user.totalDamage || 0,
-					className: "contC",
-					color: "#fff",
-				},
-				{
-					text: gameMode?.code === "zmtch" ? user.totalGoals || 0 : user.totalHealing || 0,
-					className: "contC",
-					color: "#fff",
-				},
-				{
-					text: user.lastItem != null ? user.lastItem.name : "No Reward",
-					className: "rewardText",
-					color: user.lastItem != null ? getItemRarityColor(user.lastItem.chance) : "#fff",
-					hoverInfo: user.lastItem,
-				},
-				{
-					text: user.likes || 0,
-					className: "contC",
-					color: "#fff",
-					pos: user.index,
-					id: `likeStat${user.index}`,
-					uID: user.id,
-				},
-			],
-			false,
-		);
-	}
-	if (isEnd) {
-		if (isFading) {
-			overlayAlpha = overlayMaxAlpha;
-			animateOverlay = false;
+
+	if (isFading) {
+		overlayAlpha = overlayMaxAlpha;
+		animateOverlay = false;
+		gameOverFade = true;
+		deactiveAllAnimTexts();
+		document.getElementById("gameStatWrapper")!.style.display = "block";
+	} else {
+		hideStatTable();
+		hideUI(false);
+		animateOverlay = true;
+		window.setTimeout(() => {
 			gameOverFade = true;
-			deactiveAllAnimTexts();
+		}, 2500);
+		window.setTimeout(() => {
 			document.getElementById("gameStatWrapper")!.style.display = "block";
-		} else {
-			hideStatTable();
-			hideUI(false);
-			animateOverlay = true;
-			window.setTimeout(() => {
-				gameOverFade = true;
-			}, 2500);
-			window.setTimeout(() => {
-				document.getElementById("gameStatWrapper")!.style.display = "block";
-			}, 4500);
-		}
+		}, 4500);
 	}
 }
 function hideStatTable() {
@@ -1168,156 +1055,15 @@ function hideStatTable() {
 	document.getElementById("gameStatWrapper")!.style.display = "none";
 	document.getElementById("linkBoxRight")!.style.display = "none";
 }
-type StatTableRow = {
-	text: string | number;
-	className: string;
-	canClick?: boolean;
-	color: string;
-	id?: string;
-	uID?: number;
-	hoverInfo?: any;
-	pos?: number;
-	userInfo?: Player;
-};
-function addRowToStatTable(data: StatTableRow[], b: boolean) {
-	let trow = document.createElement("tr");
-	for (let i = 0; i < data.length; ++i) {
-		let tcell = document.createElement("td");
-		if (b || i !== data.length - 1) {
-			tcell.appendChild(document.createTextNode(data[i].text.toString()));
-			tcell.className = data[i].className;
-			tcell.style.color = data[i].color;
-			if (data[i].hoverInfo) {
-				const info = data[i].hoverInfo;
-				const tooltip = (
-					<div className="hoverTooltip">
-						{info.type === "hat" ? (
-							<>
-								<img className="hatDisplayImage" src={`/images/hats/${info.id}/d.png`} />
-								<div style={{ color: data[i].color, fontSize: "16px", marginTop: "5px" }}>
-									{info.name}
-								</div>
-								<div style={{ color: "#ffd100", fontSize: "12px", marginTop: "0px" }}>
-									droprate {info.chance}%
-								</div>
-								{info.duplicate ? (
-									<div style={{ fontSize: "8px", color: "#e04141", marginTop: "1px" }}>
-										<i>Duplicate</i>
-									</div>
-								) : (
-									<div style={{ fontSize: "8px", color: "#d8d8d8", marginTop: "1px" }}>
-										<i>wearable</i>
-									</div>
-								)}
-								<div style={{ fontSize: "12px", marginTop: "5px" }}>{info.desc}</div>
-								{info.creator !== "EatMyApples" && (
-									<div style={{ fontSize: "8px", color: "#d8d8d8", marginTop: "5px" }}>
-										<i>Artist: {info.creator}</i>
-									</div>
-								)}
-							</>
-						) : info.type === "shirt" ? (
-							<>
-								<img className="shirtDisplayImage" src={`/images/shirts/${info.id}/d.png`} />
-								<div style={{ color: data[i].color, fontSize: "16px", marginTop: "5px" }}>
-									{info.name}
-								</div>
-								<div style={{ color: "#ffd100", fontSize: "12px", marginTop: "0px" }}>
-									droprate {info.chance}%
-								</div>
-								{info.duplicate ? (
-									<div style={{ fontSize: "8px", color: "#e04141", marginTop: "1px" }}>
-										<i>Duplicate</i>
-									</div>
-								) : (
-									<div style={{ fontSize: "8px", color: "#d8d8d8", marginTop: "1px" }}>
-										<i>shirt</i>
-									</div>
-								)}
-								<div style={{ fontSize: "12px", marginTop: "5px" }}>{info.desc}</div>
-							</>
-						) : (
-							<>
-								<img className="camoDisplayImage" src={`/images/camos/${info.id + 1}.png`} />
-								<div style={{ color: data[i].color, fontSize: "16px", marginTop: "5px" }}>
-									{info.name}
-								</div>
-								<div style={{ color: "#ffd100", fontSize: "12px", marginTop: "0px" }}>
-									droprate {info.chance}%
-								</div>
-								{info.duplicate ? (
-									<div style={{ fontSize: "8px", color: "#e04141", marginTop: "1px" }}>
-										<i>Duplicate</i>
-									</div>
-								) : (
-									<div style={{ fontSize: "8px", color: "#d8d8d8", marginTop: "1px" }}>
-										<i>weapon camo</i>
-									</div>
-								)}
-								<div style={{ fontSize: "12px", marginTop: "5px" }}>{info.weaponName}</div>
-							</>
-						)}
-					</div>
-				);
-				tcell.appendChild(tooltip);
-			}
-			if (tcell.className === "contL" && data[i].canClick) {
-				tcell.addEventListener("click", () => {
-					showUserStatPage(data[i].text.toString());
-				});
-			}
-		} else {
-			let btn = document.createElement("button");
-			let btnText = document.createTextNode(" NICE");
-			btn.appendChild(btnText);
-			btn.setAttribute("type", "button");
-			let row = data[i];
-			btn.onclick = () => {
-				mainCanvas.focus();
-				socket.emit("like", row.pos);
-				for (let i = 0; i < buttonCount; ++i) {
-					document
-						.getElementById(`gameStatLikeButton${i}`)!
-						.setAttribute("class", "gameStatLikeButton");
-				}
-				if (currentLikeButton !== row.uID) {
-					currentLikeButton = row.uID ?? null;
-					btn.setAttribute("class", "gameStatLikeButtonA");
-				} else {
-					currentLikeButton = null;
-				}
-			};
-			btn.setAttribute("id", `gameStatLikeButton${buttonCount}`);
-			buttonCount++;
-			if (row.uID === currentLikeButton) {
-				btn.setAttribute("class", "gameStatLikeButtonA");
-			} else {
-				btn.setAttribute("class", "gameStatLikeButton");
-			}
-			btn.style.display = row.pos === st.player.index ? "none" : "block";
-			trow.appendChild(btn);
-			let tmpDiv = document.createElement("div");
-			tmpDiv.textContent = data[i].text.toString();
-			const tmpId = data[i].id;
-			if (tmpId) {
-				tmpDiv.setAttribute("id", tmpId);
-			}
-			tcell.appendChild(btn);
-			tcell.className = data[i].className;
-			tcell.style.color = data[i].color;
-		}
-		trow.appendChild(tcell);
-	}
-	document.getElementById("gameStatBoard")!.appendChild(trow);
-}
+
 function addUser(userString: string) {
 	let parsed = JSON.parse(userString);
 	if (parsed.index !== st.player.index) {
 		const existingUser = findUserByIndex(parsed.index);
 		if (existingUser == null) {
-			players.push(parsed);
+			st.players.push(parsed);
 		} else {
-			players[players.indexOf(existingUser)] = parsed;
+			st.players[st.players.indexOf(existingUser)] = parsed;
 		}
 	}
 }
@@ -1325,7 +1071,7 @@ function removeUser(userIndex: number) {
 	if (userIndex !== st.player.index) {
 		let tmpUser = findUserByIndex(userIndex);
 		if (tmpUser != null) {
-			players.splice(players.indexOf(tmpUser), 1);
+			st.players.splice(st.players.indexOf(tmpUser), 1);
 		}
 	}
 }
@@ -1373,16 +1119,8 @@ function updateUserValue(data: any) {
 	if (tmpUser.index === st.player.index) {
 		updatePlayerInfo(tmpUser);
 	}
-	if (updated) {
-		if (st.gameOver) {
-			if (data.l !== undefined) {
-				document
-					.getElementById(`likeStat${tmpUser.index}`)!
-					.replaceChildren(tmpUser.likes!.toString());
-			}
-		} else {
-			showStatTable(getUsersList(), null, null, true, true, false);
-		}
+	if (updated && st.gameOver && data.l !== undefined) {
+		document.getElementById(`likeStat${tmpUser.index}`)!.replaceChildren(tmpUser.likes!.toString());
 	}
 }
 function fetchUserWithIndex(index: number) {
@@ -1390,7 +1128,7 @@ function fetchUserWithIndex(index: number) {
 }
 function receiveServerData(data: number[]) {
 	if (!st.gameOver) {
-		players.forEach((obj) => {
+		st.players.forEach((obj) => {
 			obj.onScreen = false;
 		});
 		for (let cursor = 0; cursor < data.length; ) {
@@ -1437,7 +1175,7 @@ function receiveServerData(data: number[]) {
 			cursor += packetLength;
 		}
 	}
-	for (const plr of players) {
+	for (const plr of st.players) {
 		if (plr.index !== st.player.index) continue;
 		if (plr.dead || st.gameOver || thisInput.length > 80) {
 			thisInput = [];
@@ -1482,27 +1220,7 @@ function updatePlayerInfo(data: Partial<Player>) {
 	st.player.health = data.health!;
 }
 function findUserByIndex(index: number): Player {
-	return players.find((obj) => obj.index === index) ?? null!;
-}
-function getUsersList(): Player[] {
-	return players.sort(sortUsersByScore);
-}
-function sortUsersByScore(a: Player, b: Player) {
-	if (b.score === a.score) {
-		if (a.id < b.id) {
-			return -1;
-		} else if (a.id > b.id) {
-			return 1;
-		} else {
-			return 0;
-		}
-	} else if (a.score > b.score) {
-		return -1;
-	} else if (a.score < b.score) {
-		return 1;
-	} else {
-		return 0;
-	}
+	return st.players.find((obj) => obj.index === index) ?? null!;
 }
 
 function sortUsersByPosition(a: Player, b: Player) {
@@ -1658,7 +1376,7 @@ function updateGameLoop() {
 	}
 	const clientPrediction = true;
 	if (clientPrediction) {
-		for (const plr of players) {
+		for (const plr of st.players) {
 			if (plr.index === st.player.index) {
 				plr.oldX = plr.x;
 				plr.oldY = plr.y;
@@ -1750,7 +1468,7 @@ function updateGameLoop() {
 			}
 		}
 	}
-	players.sort(sortUsersByPosition);
+	st.players.sort(sortUsersByPosition);
 	if (!st.kicked) {
 		if (st.gameOver) {
 			doGame(delta);
@@ -2001,7 +1719,7 @@ function drawMiniMap() {
 		mapContext.drawImage(cachedMiniMap, 0, 0, mapScale, mapScale);
 	}
 	mapContext.globalAlpha = 1;
-	for (const plr of players) {
+	for (const plr of st.players) {
 		if (
 			!plr.dead &&
 			plr.onScreen &&
@@ -2241,7 +1959,7 @@ function someoneShot(evt: ShootEvent) {
 function updateBullets(delta: number) {
 	graph.globalAlpha = 1;
 	for (const bullet of bullets) {
-		bullet.update(delta, currentTime, clutter, st.gameMap.tiles, players);
+		bullet.update(delta, currentTime, clutter, st.gameMap.tiles, st.players);
 		if (bullet.active) {
 			const screenX = bullet.x - st.startX;
 			const screenY = bullet.y - st.startY;
@@ -2361,10 +2079,7 @@ function loadPlayerSprites(base: string) {
 	loadPlayerSpriteArray(base, st.characterClasses);
 	resize();
 }
-function loadPlayerSpriteArray(
-	base: string,
-	classes: typeof st.characterClasses,
-) {
+function loadPlayerSpriteArray(base: string, classes: typeof st.characterClasses) {
 	for (const { folderName, hasDown } of classes) {
 		let upSprites: Sprite[] = [];
 		let downSprites: Sprite[] = [];
@@ -3073,7 +2788,7 @@ function drawClutter(clt: ClutterObject) {
 
 function getGameObjectRenderData() {
 	return [
-		...players.map((player) => ({ data: player, type: "player" as const })),
+		...st.players.map((player) => ({ data: player, type: "player" as const })),
 		...clutter.map((clutter) => ({ data: clutter, type: "clutter" as const })),
 		...flags.map((flag) => ({ data: flag, type: "flag" as const })),
 	].toSorted((a, b) => a.data.y - b.data.y);
@@ -3110,7 +2825,7 @@ function drawPlayerNames() {
 	graph.miterLimit = 1;
 	graph.lineJoin = "round";
 	graph.globalAlpha = 1;
-	for (const plr of players) {
+	for (const plr of st.players) {
 		if (plr.dead || (plr.index !== st.player.index && !plr.onScreen)) continue;
 
 		const nameTextSize = plr.height / 3.2;

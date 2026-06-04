@@ -16,7 +16,7 @@ import {
 } from "core/src/utils.ts";
 import { Game } from "./game.ts";
 
-const EXPLOSIVE_CLUTTER_HIT_DAMAGE = 50;
+const EXPLOSIVE_CLUTTER_HIT_DAMAGE = 100;
 const EXPLOSIVE_CLUTTER_BLAST_RADIUS = 200;
 const DUCK_HIT_DAMAGE = 330; // ?
 const DUCK_HIT_RADIUS = 240; // ?
@@ -164,13 +164,7 @@ export class Room {
 					]),
 				);
 				if (this.game.roundEnd) {
-					socket.emit(
-						"7",
-						player.team,
-						this.game.players,
-						this.game.modeVotes,
-						false,
-					);
+					socket.emit("7", player.team, this.game.modeVotes, false);
 				} else {
 					this.updateScore(0, player);
 				}
@@ -443,13 +437,7 @@ export class Room {
 		this.game.score.lb = roundNumber(leading, 0);
 		if (lbScore + 1e-7 >= 100 && !this.game.roundEnd) {
 			this.game.roundEnd = true;
-			this.io.emit(
-				"7",
-				source.team,
-				this.game.players,
-				this.game.modeVotes,
-				false,
-			);
+			this.io.emit("7", source.team, this.game.modeVotes, false);
 			let timeLeft = 15;
 			let timer = setInterval(() => {
 				if (timeLeft >= 0) {

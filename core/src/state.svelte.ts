@@ -79,6 +79,7 @@ export const st = $state({
 	changingLobby: false,
 	gameStart: false,
 	gameOver: false,
+	currentLiked: null as number | null,
 	mobile: false,
 	socket: null as Socket | null,
 	room: null as string | null,
@@ -121,6 +122,7 @@ export const st = $state({
 		source: "system" | "notif" | "me" | "blue" | "red";
 		author: string;
 	}[],
+	players: [] as Player[],
 });
 
 declare global {
