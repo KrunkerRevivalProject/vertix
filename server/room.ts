@@ -498,16 +498,17 @@ export class Room {
 						bullet,
 					);
 				}
-				if (bullet.collidesWithExplosiveClutter && bullet.lastHit.length > 0) {
-					const i = bullet.lastHit[0];
+				if (
+					bullet.collidesWithExplosiveClutter &&
+					bullet.hitClutter.length > 0
+				) {
+					const i = bullet.hitClutter[0];
 					const clt = this.game.clutter[i];
 					if (clt.active) {
-						const clutterStartY = clt.y - clt.h / 2;
-						const clutterOriginY = clutterStartY + (clt.h - bullet.yOffset) / 2;
 						this.doExplosion(
 							player,
 							clt.x + clt.w / 2,
-							clutterOriginY,
+							clt.y - clt.h / 2,
 							EXPLOSIVE_CLUTTER_BLAST_RADIUS,
 							EXPLOSIVE_CLUTTER_HIT_DAMAGE,
 							dir,
@@ -517,11 +518,12 @@ export class Room {
 						this.io.emit("4", clt, i, 1);
 					}
 				}
-			} else if (bullet.lastHit.length > 0) {
-				for (const i of bullet.lastHit) {
-					const hitPlayer = this.game.players.find((pl) => pl.index === i);
-					if (hitPlayer && !bullet.allHitPlayers.includes(hitPlayer.index)) {
-						bullet.allHitPlayers.push(hitPlayer.index);
+			} else if (bullet.hitPlayers.length > 0) {
+				for (const i of bullet.hitPlayers) {
+					const hitPlayer = this.game.players.find(
+						(pl) => pl.index === Number(i),
+					);
+					if (hitPlayer) {
 						this.handleHit(player, hitPlayer, -bullet.dmg, dir, bullet);
 					}
 				}

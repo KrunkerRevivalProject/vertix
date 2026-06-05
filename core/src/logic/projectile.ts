@@ -6,6 +6,7 @@ import { createLiquid, particleCone, stillDustParticle } from "../visual/particl
 
 const EXPLOSIVE_CLUTTER_INDEX = 2;
 const BOUNCE_SPEED_RETENTION = 0.65;
+const BULLET_IMMUNITY_MS = 250;
 const LINE_INTERSECTION_EPSILON = 1e-7;
 const COLLISION_ADJUST_ATTEMPTS = 100;
 const COLLISION_ADJUST_STEP = 2;
@@ -35,8 +36,9 @@ export class Projectile {
 	trailAlpha = 0;
 	owner: Player | null = null;
 	dmg = 0;
-	lastHit: number[] = [];
-	allHitPlayers: number[] = [];
+	hitClutter: number[] = [];
+	hitPlayers: number[] = [];
+	playerImmunity: Record<number, number> = {};
 	serverIndex = 0;
 	skipMove = true;
 	startTime = 0;
@@ -61,8 +63,18 @@ export class Projectile {
 				this.startTime = currentTime;
 			}
 
+			this.hitClutter = [];
+			this.hitPlayers = [];
+
 			for (let updateStep = 0; updateStep < this.updateAccuracy; ++updateStep) {
 				let vel = this.speed * delta;
+
+				for (const playerIndex in this.playerImmunity) {
+					this.playerImmunity[playerIndex] -= delta / 3;
+					if (this.playerImmunity[playerIndex] < 0) {
+						delete this.playerImmunity[playerIndex];
+					}
+				}
 
 				if (this.active) {
 					let changeX = (vel * Math.cos(this.dir)) / this.updateAccuracy;
@@ -87,12 +99,10 @@ export class Projectile {
 							clt.hc &&
 							this.canSeeObject(clt, clt.h) &&
 							clt.h * clt.tp >= this.yOffset &&
-							this.lineInRect(clt.x, clt.y - clt.h / 2, clt.w, clt.h - this.yOffset, true)
+							this.lineInRect(clt.x, clt.y - clt.h, clt.w, clt.h * 0.7, true)
 						) {
 							if (this.bounce) {
-								this.bounceDir(
-									this.cEndY <= clt.y - clt.h / 2 || this.cEndY >= clt.y - this.yOffset,
-								);
+								this.bounceDir(this.cEndY <= clt.y - clt.h || this.cEndY >= clt.y - clt.h * 0.3);
 							} else {
 								this.handleClutterHit(clt, i);
 							}
@@ -138,8 +148,8 @@ export class Projectile {
 						for (const pl of players) {
 							if (
 								pl.index === this.owner!.index ||
-								this.lastHit.includes(pl.index) ||
-								this.allHitPlayers.includes(pl.index) ||
+								this.hitPlayers.includes(pl.index) ||
+								Object.hasOwn(this.playerImmunity, pl.index) ||
 								pl.team === this.owner!.team ||
 								!pl.onScreen ||
 								pl.dead
@@ -159,7 +169,8 @@ export class Projectile {
 								if (this.explodeOnDeath || this.collidesWithExplosiveClutter) {
 									this.active = false;
 								} else if (this.dmg > 0) {
-									this.lastHit.push(pl.index);
+									this.hitPlayers.push(pl.index);
+									this.playerImmunity[pl.index] = BULLET_IMMUNITY_MS;
 									if (this.spriteIndex !== 2 && typeof window !== "undefined") {
 										particleCone(
 											12,
@@ -216,7 +227,9 @@ export class Projectile {
 	}
 	activate() {
 		this.skipMove = true;
-		this.lastHit = [];
+		this.hitClutter = [];
+		this.hitPlayers = [];
+		this.playerImmunity = {};
 		this.active = true;
 		if (typeof window !== "undefined") playSound(`shot${this.weaponIndex}`, this.x, this.y);
 	}
@@ -329,17 +342,23 @@ export class Projectile {
 		this.y = this.cEndY;
 	}
 	isInExplosionRange(clt: ClutterObject) {
-		const clutterStartY = clt.y - clt.h / 2;
-		const clutterOriginY = clutterStartY + (clt.h - this.yOffset) / 2;
-		const distToClutter = getDistance(this.x + clt.w / 2, this.y, clt.x, clutterOriginY);
+		const distToClutter = getDistance(
+			this.x + clt.w / 2,
+			this.y,
+			clt.x + clt.w / 2,
+			clt.y - clt.h / 2,
+		);
 		return distToClutter <= this.blastRadius!;
 	}
 	handleClutterHit(clt: ClutterObject, i: number) {
 		this.active = false;
 		if (clt.i === EXPLOSIVE_CLUTTER_INDEX) {
 			this.collidesWithExplosiveClutter = true;
-			this.lastHit.push(i);
+			this.hitClutter.push(i);
 		}
-		this.hitSomething(false, 2);
+		this.hitSomething(
+			this.cEndX > clt.x && this.cEndX < clt.x + clt.w && this.cEndY > clt.y - clt.h,
+			2,
+		);
 	}
 }

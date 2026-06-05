@@ -70,7 +70,6 @@ export class Game {
 			speed: 0.5,
 			jumpY: 0,
 			jumpDelta: 0,
-			// TODO: different characters should have different jump strengths, this is roughly good for triggerman.
 			jumpStrength: 0,
 			gravityStrength: 0,
 			jumpCountdown: 0,

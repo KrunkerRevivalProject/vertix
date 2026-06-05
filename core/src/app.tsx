@@ -1566,8 +1566,8 @@ function doGame(delta: number) {
 	drawMap(0);
 	drawMap(1);
 	drawSprays();
-	updateParticles(delta, 0);
 	drawGameObjects(delta);
+	updateParticles(delta, 0);
 	updateBullets(delta);
 	updateParticles(delta, 1);
 	drawMap(2);

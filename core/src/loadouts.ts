@@ -4,7 +4,7 @@ export const characterClasses = [
 	{
 		classN: "Triggerman",
 		maxHealth: 100,
-		height: 100,
+		height: 94,
 		width: 50,
 		speed: 0.57,
 		jumpStrength: 0.72,
@@ -18,7 +18,7 @@ export const characterClasses = [
 	{
 		classN: "Detective",
 		maxHealth: 100,
-		height: 100,
+		height: 94,
 		width: 50,
 		speed: 0.57,
 		jumpStrength: 0.72,
@@ -32,7 +32,7 @@ export const characterClasses = [
 	{
 		classN: "Hunter",
 		maxHealth: 50,
-		height: 100,
+		height: 94,
 		width: 50,
 		speed: 0.57,
 		jumpStrength: 0.72,
@@ -46,7 +46,7 @@ export const characterClasses = [
 	{
 		classN: "Run 'N Gun",
 		maxHealth: 100,
-		height: 100,
+		height: 94,
 		width: 50,
 		speed: 0.684,
 		jumpStrength: 0.72,
@@ -60,7 +60,7 @@ export const characterClasses = [
 	{
 		classN: "Vince",
 		maxHealth: 100,
-		height: 100,
+		height: 94,
 		width: 50,
 		speed: 0.5985,
 		jumpStrength: 0.72,
@@ -74,7 +74,7 @@ export const characterClasses = [
 	{
 		classN: "Rocketeer",
 		maxHealth: 120,
-		height: 100,
+		height: 94,
 		width: 50,
 		speed: 0.513,
 		jumpStrength: 0.72,
@@ -89,7 +89,7 @@ export const characterClasses = [
 	{
 		classN: "Spray N' Pray",
 		maxHealth: 200,
-		height: 100,
+		height: 94,
 		width: 50,
 		speed: 0.3876,
 		jumpStrength: 0.72,
@@ -103,7 +103,7 @@ export const characterClasses = [
 	{
 		classN: "Arsonist",
 		maxHealth: 100,
-		height: 100,
+		height: 94,
 		width: 50,
 		speed: 0.57,
 		jumpStrength: 0.72,
@@ -117,7 +117,7 @@ export const characterClasses = [
 	{
 		classN: "Duck",
 		maxHealth: 800,
-		height: 100,
+		height: 94,
 		width: 50,
 		speed: 0.456,
 		jumpStrength: 0.72,
@@ -131,7 +131,7 @@ export const characterClasses = [
 	{
 		classN: "Nademan",
 		maxHealth: 110,
-		height: 100,
+		height: 94,
 		width: 50,
 		speed: 0.57,
 		jumpStrength: 0.72,
@@ -148,7 +148,7 @@ export const characterClasses = [
 		sWeapon: "???",
 		folderName: "boss1",
 		maxHealth: 2000,
-		height: 100,
+		height: 94,
 		width: 50,
 		speed: 0.456,
 		jumpStrength: 0.72,

@@ -17,17 +17,11 @@ somewhat of a mess
   - gameplay:
 
     - player mechanics:
-      - player y position is too high in general:
-        - likely the root cause for some issues like jump clipping wall, bullet holes too high, collision bounds not matching up right
-        - affects both sprite and hitbox, and seemingly can see a thin horizontal line in the character shadow of where the player should really be standing
       - should not show up on in-game leaderboard until they have first spawned into current round
       - respawn algo is a little off
       
     - bullets:
-      - the bullets seem to overshoot for a frame before dissappearing (when shooting the corner of a wall) {expected behavior is for them to disappear same frame upon hitting the wall}
-      - should not go through barrels when standing right underneath them and shooting upwards
-      - arsonist bullets are off
-        - probably messed this one up earlier with attempted pierce fixes, but this is likely because bullets should do damage multiple times to same player
+      - the bullets seem to overshoot for a frame before dissappearing (when shooting the corner of a wall, sometimes when shooting clutter) {expected behavior is for them to disappear same frame upon hitting the wall}
       - if switch weapons too quickly, it looks like the gun fires twice (?)
 
     - notifs/events:
@@ -35,6 +29,7 @@ somewhat of a mess
 
     - misc:
       - different characters should have different jump strengths
+      - fix head clipping through wall when jumping against bottom of wall (though this happened in original too)
       - room player limit of 8 should be enforced
       - fix wall glitch into corners, able to get out of bounds this way
       - make it harder for player to accidentally click out of a game right after dying by clicking on a room in the room browser (maybe have a dedicated "join" button?)
