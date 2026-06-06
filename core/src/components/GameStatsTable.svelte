@@ -277,32 +277,6 @@
 		pointer-events: auto;
 	}
 
-	.hatDisplayImage,
-	.shirtDisplayImage,
-	.camoDisplayImage {
-		float: left;
-		margin-top: 10px;
-		margin-right: 10px;
-		width: 62px;
-		height: 62px;
-	}
-
-	.hatDisplayImage {
-		background: url("./hats/display.png");
-		background-size: 62px 62px;
-		background-repeat: no-repeat;
-	}
-
-	.shirtDisplayImage {
-		background: url("./shirts/display.png");
-		background-size: 62px 62px;
-		background-repeat: no-repeat;
-	}
-
-	.camoDisplayImage {
-		object-fit: cover;
-	}
-
 	.rewardText {
 		cursor:
 			url("./cursor_aim.png") 17 17,

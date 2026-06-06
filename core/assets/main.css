@@ -122,6 +122,32 @@ div {
 	color: #ffd100;
 }
 
+.hatDisplayImage,
+.shirtDisplayImage,
+.camoDisplayImage {
+	float: left;
+	margin-top: 10px;
+	margin-right: 10px;
+	width: 62px;
+	height: 62px;
+}
+
+.hatDisplayImage {
+	background: url("./hats/display.png");
+	background-size: 62px 62px;
+	background-repeat: no-repeat;
+}
+
+.shirtDisplayImage {
+	background: url("./shirts/display.png");
+	background-size: 62px 62px;
+	background-repeat: no-repeat;
+}
+
+.camoDisplayImage {
+	object-fit: cover;
+}
+
 .sprayDisplayImage {
 	width: 100%;
 	height: 100%;
@@ -134,13 +160,17 @@ div {
 	display: none;
 	position: absolute;
 	padding: 15px;
-	margin-left: 20px; /* todo: why is it not over everything else despite the z-index? */
+	margin-left: 20px;
 	font-size: 12px;
 	text-align: left;
 	top: 0px;
 	left: 100%;
 	color: var(--white);
 	background-color: rgba(0, 0, 0, 0.7);
+	/* TODO: this cannot work for the select hat/shirt/spray lists because the absolute
+	 * positioned element is hidden by the container with hidden overflow-x.
+	 * It shows if the hoverTooltip is taken out of the hatSelectItem element,
+	 * at the cost of the tooltip position not being relative to said element anymore... */
 	z-index: 100;
 }
 
@@ -670,7 +700,6 @@ div {
 }
 
 #rightMenu {
-	overflow: show;
 	width: 32%;
 	float: right;
 	margin-left: 10px;

@@ -261,63 +261,86 @@ function canPlaceFlag(tile: Tile | undefined, ignoreWalls: boolean) {
 		return tile && !tile.hardPoint;
 	}
 }
+
+function touchesTile(x: number, y: number, width: number, tile: Tile) {
+	return (
+		x + width / 2 >= tile.x &&
+		x - width / 2 <= tile.x + tile.scale &&
+		y >= tile.y &&
+		y <= tile.y + tile.scale
+	);
+}
+
+function touchesClutter(x: number, y: number, width: number, clt: ClutterObject) {
+	return (
+		//canSee(clt.x - st.startX, clt.y - st.startY, clt.w, clt.h) &&
+		x + width / 2 >= clt.x &&
+		x - width / 2 <= clt.x + clt.w &&
+		y >= clt.y - (clt.h / 2) * clt.tp &&
+		y <= clt.y + (clt.h / 2) * clt.tp
+	);
+}
+
 export function wallCol(player: Player, tiles: Tile[], clutter: ClutterObject[]) {
 	if (player.dead) return;
-	player.nameYOffset = 0;
-	for (const tmpTile of tiles) {
-		if (!tmpTile.wall || !tmpTile.hasCollision) continue;
-		if (
-			player.x + player.width / 2 >= tmpTile.x &&
-			player.x - player.width / 2 <= tmpTile.x + tmpTile.scale &&
-			player.y >= tmpTile.y &&
-			player.y <= tmpTile.y + tmpTile.scale
-		) {
-			if (player.oldX <= tmpTile.x) {
-				player.x = tmpTile.x - player.width / 2 - 2;
-			} else if (player.oldX - player.width / 2 >= tmpTile.x + tmpTile.scale) {
-				player.x = tmpTile.x + tmpTile.scale + player.width / 2 + 2;
+
+	const wallCollisionTiles = tiles.filter((tile) => tile.wall && tile.hasCollision);
+	const activeCollisionClutter = clutter.filter((clt) => clt.active && clt.hc);
+
+	for (const tile of wallCollisionTiles) {
+		if (touchesTile(player.x, player.oldY, player.width, tile)) {
+			if (player.oldX + player.width / 2 <= tile.x) {
+				player.x = tile.x - player.width / 2 - 2;
+			} else if (player.oldX - player.width / 2 >= tile.x + tile.scale) {
+				player.x = tile.x + tile.scale + player.width / 2 + 2;
 			}
-			if (player.oldY <= tmpTile.y) {
-				player.y = tmpTile.y - 2;
-			} else if (player.oldY >= tmpTile.y + tmpTile.scale) {
-				player.y = tmpTile.y + tmpTile.scale + 2;
-			}
-		}
-		if (
-			!tmpTile.hardPoint &&
-			player.x > tmpTile.x &&
-			player.x < tmpTile.x + tmpTile.scale &&
-			player.y - player.jumpY - player.height * 0.85 > tmpTile.y - tmpTile.scale / 2 &&
-			player.y - player.jumpY - player.height * 0.85 <= tmpTile.y
-		) {
-			player.nameYOffset = Math.round(
-				player.y - player.jumpY - player.height * 0.85 - (tmpTile.y - tmpTile.scale / 2),
-			);
 		}
 	}
-	for (const tmpObj of clutter) {
-		if (!tmpObj.active) continue;
+	for (const clt of activeCollisionClutter) {
+		if (touchesClutter(player.x, player.oldY, player.width, clt)) {
+			if (player.oldX + player.width / 2 <= clt.x) {
+				player.x = clt.x - player.width / 2 - 1;
+			} else if (player.oldX - player.width / 2 >= clt.x + clt.w) {
+				player.x = clt.x + clt.w + player.width / 2 + 1;
+			}
+		}
+	}
+
+	for (const tile of wallCollisionTiles) {
+		if (touchesTile(player.x, player.y, player.width, tile)) {
+			if (player.oldY <= tile.y) {
+				player.y = tile.y - 2;
+			} else if (player.oldY >= tile.y + tile.scale) {
+				player.y = tile.y + tile.scale + 2;
+			}
+		}
+	}
+	for (const clt of activeCollisionClutter) {
+		if (touchesClutter(player.x, player.y, player.width, clt)) {
+			if (player.oldY >= clt.y + (clt.h / 2) * clt.tp) {
+				player.y = clt.y + (clt.h / 2) * clt.tp + 1;
+			} else if (player.oldY <= clt.y - (clt.h / 2) * clt.tp) {
+				player.y = clt.y - (clt.h / 2) * clt.tp - 1;
+			}
+		}
+	}
+
+	player.nameYOffset = 0;
+	const playerHeadY = player.y - player.jumpY - player.height * 0.85;
+
+	for (const tile of wallCollisionTiles) {
 		if (
-			tmpObj.hc &&
-			//canSee(tmpObj.x - st.startX, tmpObj.y - st.startY, tmpObj.w, tmpObj.h) &&
-			player.x + player.width / 2 >= tmpObj.x &&
-			player.x - player.width / 2 <= tmpObj.x + tmpObj.w &&
-			player.y >= tmpObj.y - (tmpObj.h / 2) * tmpObj.tp &&
-			player.y <= tmpObj.y + (tmpObj.h / 2) * tmpObj.tp
+			!tile.hardPoint &&
+			player.x > tile.x &&
+			player.x < tile.x + tile.scale &&
+			playerHeadY > tile.y - tile.scale / 2 &&
+			playerHeadY <= tile.y
 		) {
-			if (player.oldX + player.width / 2 <= tmpObj.x) {
-				player.x = tmpObj.x - player.width / 2 - 1;
-			} else if (player.oldX - player.width / 2 >= tmpObj.x + tmpObj.w) {
-				player.x = tmpObj.x + tmpObj.w + player.width / 2 + 1;
-			}
-			if (player.oldY >= tmpObj.y + (tmpObj.h / 2) * tmpObj.tp) {
-				player.y = tmpObj.y + (tmpObj.h / 2) * tmpObj.tp + 1;
-			} else if (player.oldY <= tmpObj.y - (tmpObj.h / 2) * tmpObj.tp) {
-				player.y = tmpObj.y - (tmpObj.h / 2) * tmpObj.tp - 1;
-			}
+			player.nameYOffset = Math.round(playerHeadY - tile.y + tile.scale / 2);
 		}
 	}
 }
+
 export function getCurrentWeapon(player: Player) {
 	return player.weapons?.[player.currentWeapon] ?? null;
 }

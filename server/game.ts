@@ -175,14 +175,14 @@ export class Game {
 
 		for (const tl of spawnTiles) {
 			const spawnPosition = { x: tl.x + tileMid, y: tl.y + tileMid };
-			const totalDistance = activeEnemies.reduce(
-				(dist, plr) =>
-					dist + getDistance(plr.x, plr.y, spawnPosition.x, spawnPosition.y),
-				0,
+			const closestEnemyDistance = Math.min(
+				...activeEnemies.map((plr) =>
+					getDistance(plr.x, plr.y, spawnPosition.x, spawnPosition.y),
+				),
 			);
-			if (totalDistance > bestSpawnDistance) {
+			if (closestEnemyDistance > bestSpawnDistance) {
 				bestSpawnPosition = spawnPosition;
-				bestSpawnDistance = totalDistance;
+				bestSpawnDistance = closestEnemyDistance;
 			}
 		}
 

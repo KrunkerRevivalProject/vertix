@@ -18,7 +18,6 @@ somewhat of a mess
 
     - player mechanics:
       - should not show up on in-game leaderboard until they have first spawned into current round
-      - respawn algo is a little off
       
     - bullets:
       - the bullets seem to overshoot for a frame before dissappearing (when shooting the corner of a wall, sometimes when shooting clutter) {expected behavior is for them to disappear same frame upon hitting the wall}
@@ -31,9 +30,10 @@ somewhat of a mess
       - different characters should have different jump strengths
       - fix head clipping through wall when jumping against bottom of wall (though this happened in original too)
       - room player limit of 8 should be enforced
-      - fix wall glitch into corners, able to get out of bounds this way
       - make it harder for player to accidentally click out of a game right after dying by clicking on a room in the room browser (maybe have a dedicated "join" button?)
       - players should not be rendered inside walls of new map after game countdown finishes and new round starts
+      - (check) should there be bullet holes in non-explosive barrels? need to render them after game objects in that case
+        - the walk dust particles in same layer currently should stay behind barrels though
 
 </details>
 
