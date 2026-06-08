@@ -462,7 +462,6 @@ export class Room {
 					);
 					this.game.newRound(sorted[0].indx);
 					for (const pl of this.game.players) {
-						pl.firstReceive = true;
 						this.io.emit(
 							"welcome",
 							{

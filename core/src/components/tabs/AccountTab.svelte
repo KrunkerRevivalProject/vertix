@@ -5,8 +5,15 @@
 	let email = $state("");
 	let password = $state("");
 
+	let clanCreateName = $state("");
+	let clanJoinName = $state("");
+	let clanInviteUsername = $state("");
+	let clanChatUrl = $state("");
+
 	let loginMessage: HTMLElement;
 	let clanDBMessage: HTMLElement;
+	let clanInvMessage: HTMLElement;
+	let clanChtMessage: HTMLElement;
 
 	function startLogin() {
 		if (!st.socket) return;
@@ -41,6 +48,46 @@
 		localStorage.setItem("logKey", "");
 		localStorage.setItem("userName", "");
 		st.socket?.emit("dbLogout");
+	}
+
+	function startCreateClan() {
+		if (!clanCreateName) return;
+		st.socket?.emit("dbClanCreate", {
+			clanName: clanCreateName,
+		});
+		clanDBMessage.style.display = "block";
+		clanDBMessage.textContent = "Please Wait...";
+	}
+	function startJoinClan() {
+		if (!clanJoinName) return;
+		st.socket?.emit("dbClanJoin", {
+			clanKey: clanJoinName,
+		});
+		clanDBMessage.style.display = "block";
+		clanDBMessage.textContent = "Please Wait...";
+	}
+	function startInviteClan() {
+		if (!clanInviteUsername) return;
+		st.socket?.emit("dbClanInvite", {
+			userName: clanInviteUsername,
+		});
+		clanInvMessage.style.display = "block";
+		clanInvMessage.textContent = "Please Wait...";
+	}
+	function startKickFromClan() {
+		if (!clanInviteUsername) return;
+		st.socket?.emit("dbClanKick", {
+			userName: clanInviteUsername,
+		});
+		clanInvMessage.style.display = "block";
+		clanInvMessage.textContent = "Please Wait...";
+	}
+	function startSetClanChat() {
+		st.socket?.emit("dbClanChatURL", {
+			chUrl: clanChatUrl,
+		});
+		clanChtMessage.style.display = "inline-block";
+		clanChtMessage.textContent = "Please Wait...";
 	}
 </script>
 <!-- NOT LOGGED IN -->
@@ -105,14 +152,44 @@
 		<div><b>Deaths: </b>{st.player.account?.deaths ?? "..."}</div>
 		<div><b>KD: </b>{st.player.account?.kd ?? "..."}</div>
 		<h3 id="clanHeader">CLANS</h3>
-		<div id="clanSignUp" style="display:none;">
-			<input class="menuTextInput" placeholder="Clan Name" id="clanNameInput" maxlength="4" style="width:70%;">
-			<button type="button" id="createClanButton" class="smallMenuButton" style="margin-left:5px;">CREATE</button>
-			<input class="menuTextInput" placeholder="Clan Name" id="clanKeyInput" maxlength="4" style="width:78%;">
-			<button type="button" id="joinClanButton" class="smallMenuButton" style="margin-left:5px;">JOIN</button>
+		<div id="clanSignUp" style:display="none">
+			<input
+				bind:value={clanCreateName}
+				class="menuTextInput"
+				placeholder="Clan Name"
+				id="clanNameInput"
+				maxlength="4"
+				style="width:70%;"
+			>
+			<button
+				type="button"
+				id="createClanButton"
+				class="smallMenuButton"
+				style="margin-left:5px;"
+				onclick={startCreateClan}
+			>
+				CREATE
+			</button>
+			<input
+				bind:value={clanJoinName}
+				class="menuTextInput"
+				placeholder="Clan Name"
+				id="clanKeyInput"
+				maxlength="4"
+				style="width:78%;"
+			>
+			<button
+				type="button"
+				id="joinClanButton"
+				class="smallMenuButton"
+				style="margin-left:5px;"
+				onclick={startJoinClan}
+			>
+				JOIN
+			</button>
 			<div id="clanDBMessage" bind:this={clanDBMessage} class="serverRespMsg">Join or Create a Clan.</div>
 		</div>
-		<div id="clanStats" style="display:none;">
+		<div id="clanStats" style:display="none">
 			<div id="clanStatFounder"><b>Founder: </b>{st.clanData.founder ?? "..."}</div>
 			<div id="clanStatRank"><b>Rank: </b>{st.clanData.rank ?? "..."}</div>
 			<div id="clanStatKD"><b>Avg KD: </b>{st.clanData.kd ?? "..."}</div>
@@ -128,17 +205,58 @@
 				{/if}
 			</div>
 			<div id="clanAdminPanel" style="display:none;margin-top:10px;">
-				<input class="menuTextInput" placeholder="Clan Chat URL" id="clanChatInput" maxlength="50" style="width:95%;">
-				<button type="button" id="setChatClanButton" class="smallMenuButton" style="margin-top:10px;">UPDATE</button>
-				<div id="clanChtMessage" class="serverRespMsg" style="display:inline-block;margin-left:5px;">
+				<input
+					bind:value={clanChatUrl}
+					class="menuTextInput"
+					placeholder="Clan Chat URL"
+					id="clanChatInput"
+					maxlength="50"
+					style="width:95%;"
+				>
+				<button
+					type="button"
+					id="setChatClanButton"
+					class="smallMenuButton"
+					style="margin-top:10px;"
+					onclick={startSetClanChat}
+				>
+					UPDATE
+				</button>
+				<div
+					id="clanChtMessage"
+					bind:this={clanChtMessage}
+					class="serverRespMsg"
+					style="display:inline-block;margin-left:5px;"
+				>
 					(eg. Discord URL)
 				</div>
-				<input class="menuTextInput" placeholder="Username" id="clanInviteInput" maxlength="15" style="width:95%;">
-				<button type="button" id="inviteClanButton" class="smallMenuButton" style="margin-top:10px;">INVITE</button>
-				<button type="button" id="kickClanButton" class="smallMenuButton" style="margin-left:5px;margin-top:10px;">
+				<input
+					bind:value={clanInviteUsername}
+					class="menuTextInput"
+					placeholder="Username"
+					id="clanInviteInput"
+					maxlength="15"
+					style="width:95%;"
+				>
+				<button
+					type="button"
+					id="inviteClanButton"
+					class="smallMenuButton"
+					style="margin-top:10px;"
+					onclick={startInviteClan}
+				>
+					INVITE
+				</button>
+				<button
+					type="button"
+					id="kickClanButton"
+					class="smallMenuButton"
+					style="margin-left:5px;margin-top:10px;"
+					onclick={startKickFromClan}
+				>
 					KICK
 				</button>
-				<div id="clanInvMessage" class="serverRespMsg">Invite or Kick Members.</div>
+				<div id="clanInvMessage" bind:this={clanInvMessage} class="serverRespMsg">Invite or Kick Members.</div>
 			</div>
 		</div>
 		<div id="editAccount">

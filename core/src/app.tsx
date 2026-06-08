@@ -134,7 +134,6 @@ var clanStats = document.getElementById("clanStats")!;
 var clanSignUp = document.getElementById("clanSignUp")!;
 var clanHeader = document.getElementById("clanHeader")!;
 var clanAdminPanel = document.getElementById("clanAdminPanel")!;
-var clanInviteInput = document.getElementById("clanInviteInput")! as HTMLInputElement;
 var leaveClanButton = document.getElementById("leaveClanButton")!;
 var clanInvMessage = document.getElementById("clanInvMessage")!;
 var clanChtMessage = document.getElementById("clanChtMessage")!;
@@ -453,27 +452,27 @@ function setupSocket(sock: Socket) {
 	sock.on("connect_failed", () => {
 		kickPlayer("Connection failed. Please check your internet connection.");
 	});
-	sock.on("disconnect", (a) => {
+	sock.on("disconnect", (reason) => {
 		kickPlayer("Disconnected. Your connection timed out.");
-		console.log(a);
+		console.log(reason);
 	});
 	sock.on("error", (errorMsg) => {
 		console.log("PLEASE NOTIFY THE DEVELOPER OF THE FOLLOWING ERROR");
 		console.error(`ERROR: ${errorMsg}`);
 	});
-	sock.on("welcome", (b, d) => {
-		st.player.id = b.id;
-		st.player.room = b.room;
+	sock.on("welcome", (player: Player, init: boolean) => {
+		st.player.id = player.id;
+		st.player.room = player.room;
 		st.room = st.player.room;
 		st.player.name = st.playerName;
-		st.player.classIndex = b.classIndex = st.characterClasses.findIndex(
+		st.player.classIndex = player.classIndex = st.characterClasses.findIndex(
 			(c) => c.folderName === st.loadout.class.folderName,
 		);
 		st.player.isInHardpoint = false;
-		b.name = st.player.name;
-		sock.emit("gotit", b, d, Date.now(), false);
+		player.name = st.player.name;
+		sock.emit("gotit", player, init, Date.now(), false);
 		st.player.dead = true;
-		if (d) {
+		if (init) {
 			deactiveAllAnimTexts();
 			st.gameStart = false;
 			hideUI(false);
@@ -618,63 +617,67 @@ function setupSocket(sock: Socket) {
 	sock.on("dbClanStats", (clanData) => {
 		st.clanData = clanData;
 	});
-	sock.on("updAccStat", (a) => {
-		updateAccountPage(a);
+	sock.on("updAccStat", (account: Account) => {
+		updateAccountPage(account);
 	});
-	sock.on("gameSetup", (a, d, e) => {
-		a = JSON.parse(a);
-		if (d) {
-			st.gameMap = a.mapData;
-			st.gameMap.tiles = [];
-			clutter = [];
-			flags = [];
-			gameWidth = st.gameMap.width;
-			gameHeight = st.gameMap.height;
-			mapTileScale = a.tileScale;
-			st.players = a.usersInRoom;
-			gameMode = st.gameMap.gameMode;
-			if (a.you.team === "blue") {
-				document.getElementById("gameModeText")!.textContent = gameMode.desc2;
-			} else {
-				document.getElementById("gameModeText")!.textContent = gameMode.desc1;
+	sock.on(
+		"gameSetup",
+		(setupJson: string, shouldSetupGameMap: boolean, shouldStartGame: boolean) => {
+			const setupData = JSON.parse(setupJson);
+
+			if (shouldSetupGameMap) {
+				st.gameMap = setupData.mapData;
+				st.gameMap.tiles = [];
+				clutter = [];
+				flags = [];
+				gameWidth = st.gameMap.width;
+				gameHeight = st.gameMap.height;
+				mapTileScale = setupData.tileScale;
+				st.players = setupData.usersInRoom;
+				gameMode = st.gameMap.gameMode;
+				document.getElementById("gameModeText")!.textContent =
+					setupData.you.team === "blue" ? gameMode.desc2 : gameMode.desc1;
+				st.currentLiked = null;
+				clutter.push(...st.gameMap.clutter);
+				setupMap(st.gameMap, mapTileScale, flags);
+				cachedMiniMap = null;
+				deactivateSprays();
+				for (let i = 0; i < 100; i++) {
+					const newBullet = new Projectile();
+					newBullet.serverIndex = i;
+					bullets.push(newBullet);
+				}
 			}
+
+			if (shouldStartGame) {
+				st.gameStart = true;
+				showUI();
+				document.getElementById("cvs")!.focus();
+			}
+
+			keys.lm = false;
+			st.maxScreenHeight = setupData.maxScreenHeight * setupData.viewMult;
+			st.maxScreenWidth = setupData.maxScreenWidth * setupData.viewMult;
+			st.viewMult = setupData.viewMult;
+			st.player = setupData.you;
 			st.currentLiked = null;
-			for (const clt of st.gameMap.clutter) {
-				clutter.push(clt);
+
+			const existingPlayer = findUserByIndex(setupData.you.index);
+			if (existingPlayer) {
+				st.players[st.players.indexOf(existingPlayer)] = st.player;
+			} else {
+				st.players.push(st.player);
 			}
-			setupMap(st.gameMap, mapTileScale, flags);
-			cachedMiniMap = null;
-			deactivateSprays();
-			for (let i = 0; i < 100; i++) {
-				const newBullet = new Projectile();
-				newBullet.serverIndex = i;
-				bullets.push(newBullet);
+
+			if (inMainMenu) {
+				loadingWrapper.style.display = "none";
+				inMainMenu = false;
 			}
-		}
-		if (e) {
-			st.gameStart = true;
-			showUI();
-			document.getElementById("cvs")!.focus();
-		}
-		keys.lm = false;
-		st.maxScreenHeight = a.maxScreenHeight * a.viewMult;
-		st.maxScreenWidth = a.maxScreenWidth * a.viewMult;
-		st.viewMult = a.viewMult;
-		st.player = a.you;
-		st.currentLiked = null;
-		e = findUserByIndex(a.you.index);
-		if (e != null) {
-			st.players[st.players.indexOf(e)] = st.player;
-		} else {
-			st.players.push(st.player);
-		}
-		if (inMainMenu) {
-			loadingWrapper.style.display = "none";
-			inMainMenu = false;
-		}
-		st.startingGame = false;
-		resize();
-	});
+
+			st.startingGame = false;
+			resize();
+		},
+	);
 	sock.on("lb", updateLeaderboard);
 	sock.on("ts", updateTeamScores);
 	sock.on("rsd", receiveServerData);
@@ -687,8 +690,8 @@ function setupSocket(sock: Socket) {
 	sock.on("crtSpr", createSpray);
 	sock.on("rem", removeUser);
 	sock.on("cht", messageFromServer);
-	sock.on("kick", (a) => {
-		kickPlayer(a);
+	sock.on("kick", (reason: string) => {
+		kickPlayer(reason);
 	});
 	sock.on("1", (healthUpdate) => {
 		const player = findUserByIndex(healthUpdate.gID);
@@ -853,18 +856,18 @@ function setupSocket(sock: Socket) {
 			}
 		}
 	});
-	sock.on("tprt", (a: ZoneEvent) => {
-		var user = findUserByIndex(a.indx);
+	sock.on("tprt", (zoneEvent: ZoneEvent) => {
+		const user = findUserByIndex(zoneEvent.indx);
 		if (!user) return;
-		user.x = a.newX!;
-		user.y = a.newY!;
+		user.x = zoneEvent.newX!;
+		user.y = zoneEvent.newY!;
 		createSmokePuff(user.x, user.y, 5, false, 1);
-		if (a.indx === st.player.index) {
-			st.player.x = a.newX!;
-			st.player.y = a.newY!;
+		if (zoneEvent.indx === st.player.index) {
+			st.player.x = zoneEvent.newX!;
+			st.player.y = zoneEvent.newY!;
 			startBigAnimText(
 				"ZONE ENTERED",
-				`+${a.score} POINTS`,
+				`+${zoneEvent.score} POINTS`,
 				2000,
 				true,
 				"#ffffff",
@@ -874,7 +877,7 @@ function setupSocket(sock: Socket) {
 			);
 		} else {
 			//@ts-expect-error TODO
-			createSmokePuff(a.oldX, a.oldY, 5, false, 1);
+			createSmokePuff(zoneEvent.oldX, zoneEvent.oldY, 5, false, 1);
 			showNotification(`${user.name} scored`);
 		}
 	});
@@ -919,41 +922,6 @@ function setupInitialSocket(sock: Socket) {
 			loginMessage.style.display = "block";
 			loginMessage.textContent = "Logging in...";
 		}
-		document.getElementById("createClanButton")!.onclick = () => {
-			sock.emit("dbClanCreate", {
-				clanName: (document.getElementById("clanNameInput")! as HTMLInputElement).value,
-			});
-			clanDBMessage.style.display = "block";
-			clanDBMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("joinClanButton")!.onclick = () => {
-			sock.emit("dbClanJoin", {
-				clanKey: (document.getElementById("clanKeyInput")! as HTMLInputElement).value,
-			});
-			clanDBMessage.style.display = "block";
-			clanDBMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("inviteClanButton")!.onclick = () => {
-			sock.emit("dbClanInvite", {
-				userName: clanInviteInput.value,
-			});
-			clanInvMessage.style.display = "block";
-			clanInvMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("kickClanButton")!.onclick = () => {
-			sock.emit("dbClanKick", {
-				userName: clanInviteInput.value,
-			});
-			clanInvMessage.style.display = "block";
-			clanInvMessage.textContent = "Please Wait...";
-		};
-		document.getElementById("setChatClanButton")!.onclick = () => {
-			sock.emit("dbClanChatURL", {
-				chUrl: (document.getElementById("clanChatInput")! as HTMLInputElement).value,
-			});
-			clanChtMessage.style.display = "inline-block";
-			clanChtMessage.textContent = "Please Wait...";
-		};
 	});
 }
 

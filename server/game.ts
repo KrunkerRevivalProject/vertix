@@ -268,8 +268,8 @@ export class Game {
 			pl.onScreen = false;
 			pl.dead = true;
 			pl.lastModeVote = undefined; //TODO
-			pl.team = "";
 			pl.team = this.getTeam(pl.index);
+			pl.firstReceive = true;
 			pl.likedBy = [];
 		}
 		this.genClutter();
