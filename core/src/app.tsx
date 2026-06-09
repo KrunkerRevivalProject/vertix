@@ -9,6 +9,7 @@ import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.t
 import { st } from "./state.svelte.ts";
 import type {
 	Account,
+	CachedSpriteData,
 	Camo,
 	ClutterObject,
 	FlagObject,
@@ -68,7 +69,6 @@ var fillCounter = 0;
 var delta = 0;
 var currentTime = Date.now();
 var oldTime = Date.now();
-var count = -1;
 var inputNumber = 0;
 var thisInput: InputSendData[] = [];
 
@@ -288,31 +288,27 @@ var showingScoreBoard = false;
 
 window.addEventListener("keydown", keyDown, false);
 function keyDown(event: KeyboardEvent) {
-	if (!event.repeat && document.activeElement === mainCanvas) {
+	if (document.activeElement === mainCanvas) {
 		event.preventDefault();
 		keyMap[event.code] = event.type === "keydown";
 		if (event.code === "Escape" && st.gameStart) {
 			showESCMenu();
 		}
-		if (keyMap[st.keysList.upKey] && !keys.u) {
-			keys.u = true;
+		if (event.code === st.keysList.upKey && !keys.u) {
+			keys.u = !keyMap[st.keysList.downKey];
 			keys.d = false;
-			keyMap[st.keysList.downKey] = false;
 		}
-		if (keyMap[st.keysList.downKey] && !keys.d) {
-			keys.d = true;
+		if (event.code === st.keysList.downKey && !keys.d) {
 			keys.u = false;
-			keyMap[st.keysList.upKey] = false;
+			keys.d = !keyMap[st.keysList.upKey];
 		}
-		if (keyMap[st.keysList.leftKey] && !keys.l) {
-			keys.l = true;
+		if (event.code === st.keysList.leftKey && !keys.l) {
+			keys.l = !keyMap[st.keysList.rightKey];
 			keys.r = false;
-			keyMap[st.keysList.rightKey] = false;
 		}
-		if (keyMap[st.keysList.rightKey] && !keys.r) {
-			keys.r = true;
+		if (event.code === st.keysList.rightKey && !keys.r) {
 			keys.l = false;
-			keyMap[st.keysList.leftKey] = false;
+			keys.r = !keyMap[st.keysList.leftKey];
 		}
 		if (keyMap[st.keysList.jumpKey] && !keys.s) {
 			keys.s = true;
@@ -341,14 +337,18 @@ function keyUp(event: KeyboardEvent) {
 	keyMap[event.code] = event.type === "keydown";
 	if (event.code === st.keysList.upKey) {
 		keys.u = false;
+		keys.d = keyMap[st.keysList.downKey];
 	}
 	if (event.code === st.keysList.downKey) {
+		keys.u = keyMap[st.keysList.upKey];
 		keys.d = false;
 	}
 	if (event.code === st.keysList.leftKey) {
 		keys.l = false;
+		keys.r = keyMap[st.keysList.rightKey];
 	}
 	if (event.code === st.keysList.rightKey) {
+		keys.l = keyMap[st.keysList.leftKey];
 		keys.r = false;
 	}
 	if (event.code === st.keysList.jumpKey) {
@@ -370,7 +370,6 @@ function keyUp(event: KeyboardEvent) {
 		event.code === st.keysList.leaderboardKey &&
 		showingScoreBoard &&
 		!st.player.dead &&
-		!st.gameOver &&
 		!st.gameOver
 	) {
 		hideStatTable();
@@ -1308,7 +1307,6 @@ function updateGameLoop() {
 	oldTime = currentTime;
 	let horizontalDT = 0;
 	let verticalDT = 0;
-	count++;
 	var doJump = 0;
 	if (keys.u) {
 		verticalDT = -1;
@@ -2278,14 +2276,14 @@ function getPlayerSprite(classIdx: number, angle: number, animIdx: number) {
 	}
 	return tmpSprite;
 }
-var cachedHats: any[] = [];
+const cachedHats: CachedSpriteData[] = [];
 function getHatSprite(playerObj: Player, dir: number) {
-	let tmpAcc = playerObj.account;
+	const tmpAcc = playerObj.account;
 	if (!tmpAcc) return null;
-	if (tmpAcc.hat != null) {
-		let tmpSprite = cachedHats[tmpAcc.hat.id];
+	if (tmpAcc.hat) {
+		const tmpSprite = cachedHats[tmpAcc.hat.id];
 		if (!tmpSprite) {
-			let hat = {
+			const hat = {
 				lS: new Image() as Sprite,
 				uS: new Image() as Sprite,
 				rS: new Image() as Sprite,
@@ -2347,7 +2345,7 @@ function getHatSprite(playerObj: Player, dir: number) {
 		}
 	} else {
 		let tmpSprite: Sprite;
-		let tmpSpriteCollection = classSpriteSheets[playerObj.classIndex];
+		const tmpSpriteCollection = classSpriteSheets[playerObj.classIndex];
 		if (!tmpSpriteCollection) {
 			return null;
 		}
@@ -2366,13 +2364,13 @@ function getHatSprite(playerObj: Player, dir: number) {
 		return tmpSprite;
 	}
 }
-var cachedShirts: any[] = [];
+const cachedShirts: CachedSpriteData[] = [];
 function getShirtSprite(playerObj: Player, dir: number) {
-	let tmpAcc = playerObj.account;
+	const tmpAcc = playerObj.account;
 	if (!tmpAcc?.shirt || playerObj.classIndex === 8) return null;
-	let tmpSprite = cachedShirts[tmpAcc.shirt.id];
+	const tmpSprite = cachedShirts[tmpAcc.shirt.id];
 	if (!tmpSprite) {
-		let d = {
+		const d = {
 			lS: new Image() as Sprite,
 			uS: new Image() as Sprite,
 			rS: new Image() as Sprite,

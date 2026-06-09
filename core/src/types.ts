@@ -166,6 +166,14 @@ export interface Sprite extends HTMLImageElement {
 	resolution?: number;
 }
 
+export type CachedSpriteData = {
+	lS: Sprite;
+	uS: Sprite;
+	rS: Sprite;
+	dS: Sprite;
+	imgToLoad: number;
+};
+
 export interface SpriteCanvas extends HTMLCanvasElement {
 	index?: number;
 	flipped?: boolean;
