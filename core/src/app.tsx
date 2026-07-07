@@ -1224,6 +1224,8 @@ function updateTeamScores(scoreRed: number, scoreBlue: number) {
 	var blueProgress = document.getElementById("blueProgress")!;
 	var redProgCont = document.getElementById("redProgCont")!;
 	if (!gameMode) return;
+	scoreRed /= gameMode.score / 100;
+	scoreBlue /= gameMode.score / 100;
 	if (gameMode.teams) {
 		blueText.textContent = "A";
 		redProgCont.style.display = "";
@@ -1239,10 +1241,9 @@ function updateTeamScores(scoreRed: number, scoreBlue: number) {
 			blueProgress.style.width = `${scoreBlue}%`;
 		}
 	} else {
-		//scoreBlue = Math.round((st.player.score / scoreRed) * 100);
-		scoreBlue = (st.player.score / gameMode.score) * 100;
-		blueProgress.setAttribute("style", `display:block;width:${scoreBlue}%`);
-		blueProgress.style.width = `${scoreBlue}%`;
+		const scorePlayer = (st.player.score / gameMode.score) * 100;
+		blueProgress.setAttribute("style", `display:block;width:${scorePlayer}%`);
+		blueProgress.style.width = `${scorePlayer}%`;
 		blueText.textContent = "YOU";
 		redProgCont.style.display = "none";
 	}

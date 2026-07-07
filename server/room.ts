@@ -430,26 +430,44 @@ export class Room {
 				this.io.to(source.socketId).emit("5", `+${source.hardpointScore}`);
 			}
 		}
+
 		this.io.emit(
 			"lb",
 			this.game.players
 				.toSorted((a, b) => b.score - a.score)
 				.flatMap((pl) => [pl.index]),
 		);
-		let lbScore = scored / (this.game.mode.score / 100);
+		this.io.emit("upd", {
+			i: source.index,
+			s: source.score,
+		});
+
 		if (source.team === "red") {
-			lbScore = this.game.score.red += lbScore;
+			this.game.score.red += scored;
 			this.io.emit("ts", this.game.score.red, this.game.score.blue);
 		} else if (source.team === "blue") {
-			lbScore = this.game.score.blue += lbScore;
+			this.game.score.blue += scored;
 			this.io.emit("ts", this.game.score.red, this.game.score.blue);
 		} else {
-			lbScore = source.score / (this.game.mode.score / 100);
 			this.io.emit("ts");
 		}
-		const leading = Math.max(lbScore, this.game.score.lb);
-		this.game.score.lb = roundNumber(leading, 0);
-		if (lbScore + 1e-7 >= 100 && !this.game.roundEnd) {
+
+		let leadingScorePercent = 0;
+		if (this.game.mode.teams) {
+			leadingScorePercent = Math.max(
+				(this.game.score.red * 100) / this.game.mode.score,
+				(this.game.score.blue * 100) / this.game.mode.score,
+			);
+		} else if (this.game.players.length) {
+			leadingScorePercent = Math.max(
+				...this.game.players.map(
+					(player) => (player.score * 100) / this.game.mode.score,
+				),
+			);
+		}
+		this.game.score.lb = roundNumber(Math.min(leadingScorePercent, 100), 0);
+
+		if (leadingScorePercent >= 100 && !this.game.roundEnd) {
 			this.game.roundEnd = true;
 			this.io.emit("7", source.team, this.game.modeVotes, false);
 			let timeLeft = 15;
@@ -589,12 +607,7 @@ export class Room {
 			kB: false,
 			ast: true,
 		});
-
 		this.updateScore(scored, source);
-		this.io.emit("upd", {
-			i: source.index,
-			s: source.score,
-		});
 	}
 
 	updateKillStreak(player: Player) {
@@ -671,7 +684,6 @@ export class Room {
 		this.updateScore(scored, source);
 		this.io.emit("upd", {
 			i: source.index,
-			s: source.score,
 			kil: source.kills,
 		});
 	}
@@ -751,11 +763,6 @@ export class Room {
 				}, 15000);
 			} else if (pkup.type === "lootcrate" && this.game.mode.code === "lc") {
 				this.updateScore(LOOTCRATE_POINTS, player);
-				this.io.emit("upd", {
-					i: player.index,
-					s: player.score,
-				});
-
 				if (player.socketId) {
 					this.io
 						.to(player.socketId)
@@ -787,7 +794,6 @@ export class Room {
 					this.updateScore(HARDPOINT_POINTS, player);
 					this.io.emit("upd", {
 						i: player.index,
-						s: player.score,
 						goa: player.totalGoals,
 					});
 				}
@@ -815,7 +821,6 @@ export class Room {
 				this.updateScore(ZONE_WAR_POINTS, player);
 				this.io.emit("upd", {
 					i: player.index,
-					s: player.score,
 					goa: player.totalGoals,
 				});
 			}
