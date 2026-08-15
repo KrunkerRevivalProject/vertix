@@ -12,9 +12,9 @@
 	export function setCooldownAnimation(weaponIdx: number, time: number, play: boolean) {
 		const tmpDiv = cooldownMap[weaponIdx];
 		if (play) {
-			tmpDiv.animate({ height: ["100%", "0%"] }, time);
+			tmpDiv.animate({ transform: ["scaleY(1)", "scaleY(0)"] }, time);
 		} else {
-			tmpDiv.style.height = "0%";
+			tmpDiv.style.transform = "scaleY(0)";
 		}
 	}
 	export function resetCooldownAnimations() {
@@ -68,8 +68,9 @@
 		background: rgba(255, 255, 255, 0.2);
 		position: absolute;
 		bottom: 0;
-		height: 0%;
+		height: 100%;
 		width: 100%;
-		overflow: hidden;
+		transform: scaleY(0); /* hint */
+		transform-origin: bottom;
 	}
 </style>
