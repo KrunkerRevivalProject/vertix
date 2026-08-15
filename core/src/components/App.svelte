@@ -64,7 +64,6 @@
 			</div>
 		</div>
 	</div>
-	<!-- biome-ignore lint/a11y/noPositiveTabindex: removing this breaks focus? -->
 	<canvas id="cvs" tabindex="1" class="noRightClick" oncontextmenu={() => false}></canvas>
 </div>
 

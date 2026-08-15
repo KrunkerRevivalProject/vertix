@@ -3,6 +3,6 @@
 		"dev": "pnpm run --parallel --reporter-hide-prefix --color --recursive dev"
 	},
 	"dependencies": {
-		"@biomejs/biome": "^2.4.15"
+		"@biomejs/biome": "^2.5.8"
 	}
 }

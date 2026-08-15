@@ -76,7 +76,7 @@
 	<section id="left">
 		<div class="contentCard">
 			<div class="leaderboardsTitle"><b>Leaderboards</b></div>
-			{#each Object.entries(LB_TYPES_FRIENDLY_NAMES) as [ type, friendlyName ]}
+			{#each Object.entries(LB_TYPES_FRIENDLY_NAMES) as [type, friendlyName]}
 				<div
 					onclick={() => selectedLeaderboardType = type as LeaderboardType}
 					class:activeButton={selectedLeaderboardType === type}
