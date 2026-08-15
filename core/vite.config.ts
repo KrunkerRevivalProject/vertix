@@ -5,7 +5,21 @@ import type { UserConfig } from "vite";
 // https://vite.dev/guide/build#multi-page-app
 export default {
 	appType: "mpa",
-	plugins: [svelte()],
+	plugins: [
+		svelte({
+			compilerOptions: {
+				experimental: {
+					async: true,
+				},
+				runes: true,
+				hmr: true,
+				preserveComments: true,
+				// not ideal
+				warningFilter: (w) => !w.code.includes("a11y"),
+			},
+			inspector: true,
+		}),
+	],
 	build: {
 		target: "esnext",
 	},
