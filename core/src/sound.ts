@@ -1,19 +1,24 @@
-import { Howl } from "howler";
 import { st } from "./state.svelte.ts";
 import { getDistance } from "./utils.ts";
 
 // todo logic cleanup
 
+let ctx: AudioContext | undefined;
 let soundList: Record<
 	string,
 	{
 		loc: string;
 		id: string;
-		sound: Howl;
+		buffer: AudioBuffer;
 		loop: boolean;
 		onload?: () => void;
 	}
 > = {};
+// active one-shot sources, so stopAllSounds can cut them off
+const activeSources = new Set<AudioBufferSourceNode>();
+// persistent sources for the looping music tracks
+const trackSources: Record<string, AudioBufferSourceNode | undefined> = {};
+const trackGains: Record<string, GainNode | undefined> = {};
 const soundMeta = [
 	{
 		loc: "weapons/smg",
@@ -101,7 +106,7 @@ const soundMeta = [
 		loop: true,
 		onload: () => {
 			if (st.player.dead && !st.startingGame) {
-				soundList.track1.sound.play();
+				playTrack("track1");
 				currentTrack = 1;
 			}
 		},
@@ -112,7 +117,7 @@ const soundMeta = [
 		loop: true,
 		onload: () => {
 			if (!st.player.dead && st.gameStart && !st.gameOver) {
-				soundList.track2.sound.play();
+				playTrack("track2");
 				currentTrack = 2;
 			}
 		},
@@ -130,21 +135,78 @@ export function loadSounds(base: string) {
 			console.error(`sound info for ${meta.id} ${meta.loc} is missing from localstorage`);
 			continue;
 		}
-		loadSound(tmpSound, meta, tmpFormat);
+		loadSound(tmpSound, meta);
 	}
 }
-function loadSound(src: string, sound: (typeof soundMeta)[number], format: string) {
-	soundList[sound.id]?.sound?.stop();
-
-	soundList[sound.id] = {
-		...sound,
-		sound: new Howl({
-			src,
-			format,
-			loop: sound.loop,
-			onload: sound.onload || (() => {}),
-		}),
-	};
+async function loadSound(src: string, sound: (typeof soundMeta)[number]) {
+	try {
+		stopTrack(sound.id);
+		const res = await fetch(src);
+		const data = await res.arrayBuffer();
+		ctx ??= new AudioContext();
+		const buffer = await ctx.decodeAudioData(data);
+		soundList[sound.id] = {
+			...sound,
+			buffer,
+		};
+		sound.onload?.();
+	} catch (e) {
+		console.error(`failed to load sound ${sound.id} ${sound.loc}`, e);
+	}
+}
+function getCtx() {
+	ctx ??= new AudioContext();
+	// autoplay policy: context starts suspended until a user gesture
+	if (ctx.state === "suspended") {
+		ctx.resume().catch(() => {});
+	}
+	return ctx;
+}
+function playBuffer(buffer: AudioBuffer, loop: boolean, volume: number, gainNode?: GainNode) {
+	const audioCtx = getCtx();
+	const source = audioCtx.createBufferSource();
+	source.buffer = buffer;
+	source.loop = loop;
+	const gain = gainNode ?? audioCtx.createGain();
+	gain.gain.value = volume;
+	source.connect(gain);
+	gain.connect(audioCtx.destination);
+	source.onended = () => activeSources.delete(source);
+	source.start();
+	activeSources.add(source);
+	return source;
+}
+function playTrack(id: string) {
+	const entry = soundList[id];
+	if (!entry || !ctx) {
+		return;
+	}
+	stopTrack(id);
+	const gain = ctx.createGain();
+	trackGains[id] = gain;
+	trackSources[id] = playBuffer(entry.buffer, entry.loop, 0, gain);
+	fadeGain(gain, 0, 1, 1000);
+}
+function stopTrack(id: string) {
+	const source = trackSources[id];
+	if (source) {
+		try {
+			source.stop();
+		} catch {
+			// already stopped
+		}
+		source.disconnect();
+		trackSources[id] = undefined;
+		trackGains[id]?.disconnect();
+		trackGains[id] = undefined;
+	}
+}
+function fadeGain(gain: GainNode, from: number, to: number, durationMs: number) {
+	const audioCtx = getCtx();
+	const now = audioCtx.currentTime;
+	gain.gain.cancelScheduledValues(now);
+	gain.gain.setValueAtTime(from, now);
+	gain.gain.linearRampToValueAtTime(to, now + durationMs / 1000);
 }
 var currentTrack = 0;
 export function startSoundTrack(id: number) {
@@ -155,17 +217,15 @@ export function startSoundTrack(id: number) {
 		if (id === 1) {
 			if (currentTrack !== id) {
 				currentTrack = id;
-				soundList.track1.sound.play();
-				soundList.track1.sound.fade(0, 1, 1000);
+				playTrack("track1");
 			}
-			soundList.track2.sound.stop();
+			stopTrack("track2");
 		} else {
 			if (currentTrack !== id) {
 				currentTrack = id;
-				soundList.track2.sound.play();
-				soundList.track2.sound.fade(0, 1, 1000);
+				playTrack("track2");
 			}
-			soundList.track1.sound.stop();
+			stopTrack("track1");
 		}
 	} catch (b) {
 		console.log(b);
@@ -179,9 +239,11 @@ export function playSound(soundId: string, x: number, y: number) {
 			if (dist <= maxHearDist) {
 				const soundEntry = soundList[soundId];
 				if (soundEntry !== undefined) {
-					const { sound } = soundEntry;
-					sound.volume(Math.round((1 - dist / maxHearDist) * 10) / 10);
-					sound.play();
+					playBuffer(
+						soundEntry.buffer,
+						soundEntry.loop,
+						Math.round((1 - dist / maxHearDist) * 10) / 10,
+					);
 				}
 			}
 		} catch (e) {
@@ -194,6 +256,14 @@ export function stopAllSounds() {
 		return false;
 	}
 	for (const meta of soundMeta) {
-		soundList[meta.id].sound.stop();
+		stopTrack(meta.id);
 	}
+	for (const source of activeSources) {
+		try {
+			source.stop();
+		} catch {
+			// already stopped
+		}
+	}
+	activeSources.clear();
 }
