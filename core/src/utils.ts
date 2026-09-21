@@ -20,7 +20,7 @@ export function shootNextBullet(
 	let weapon = getCurrentWeapon(source);
 	if (!bullet) {
 		console.error("invalid bullet passed to shootNextBullet?");
-		return;
+		return -1;
 	}
 	bullet.serverIndex = init.si;
 	bullet.x = init.x - 1;
@@ -61,6 +61,8 @@ export function shootNextBullet(
 	bullet.blastRadius = weapon.blastRadius;
 	bullet.selfDamage = !!weapon.selfDamage;
 	bullet.activate();
+	bullet.shotToken++;
+	return bullet.shotToken;
 }
 export function snapAngleToCardinal(angle: number) {
 	return Math.round((angle % 360) / 90) * 90;

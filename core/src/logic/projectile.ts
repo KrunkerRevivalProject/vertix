@@ -40,6 +40,7 @@ export class Projectile {
 	hitPlayers: number[] = [];
 	playerImmunity: Record<number, number> = {};
 	serverIndex = 0;
+	shotToken = 0;
 	skipMove = true;
 	startTime = 0;
 	maxLifeTime: number | null = 0;

@@ -225,8 +225,14 @@ export class Room {
 						si: bullet.serverIndex,
 					};
 					this.io.emit("2", bulletData);
-					shootNextBullet(bulletData, player, targetD, currentTime, bullet);
-					this.updateBullet(bullet, player, dir);
+					const shotToken = shootNextBullet(
+						bulletData,
+						player,
+						targetD,
+						currentTime,
+						bullet,
+					);
+					this.updateBullet(bullet, player, dir, shotToken);
 				}
 			});
 			socket.on("4", (data) => {
@@ -307,7 +313,7 @@ export class Room {
 				);
 			});
 			socket.on("cht", (msg, type) => {
-				if (msg.includes("!sync")) {
+				if (msg.startsWith("!sync")) {
 					this.io.emit(
 						"rsd",
 						this.game.players.flatMap((pl) => [
@@ -497,8 +503,12 @@ export class Room {
 		}
 	}
 
-	updateBullet(bullet: Projectile, player: Player, dir: number) {
+	updateBullet(bullet: Projectile, player: Player, dir: number, shotToken: number) {
 		const tick = () => {
+			if (bullet.shotToken !== shotToken) {
+				// bullet pool entry was reassigned to a newer shot
+				return;
+			}
 			if (
 				!bullet.active &&
 				(bullet.explodeOnDeath || bullet.collidesWithExplosiveClutter)
