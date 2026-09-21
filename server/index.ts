@@ -28,7 +28,7 @@ for (let i = 0; i < 9; i++) {
 			if (msg.includes("!close 12345")) {
 				room.io.disconnectSockets(true);
 				room.io.removeAllListeners();
-				io._nsps.delete(room.name);
+        io.of(room.name).disconnectSockets();
 				rooms.splice(rooms.indexOf(room), 1);
 			}
 		});
