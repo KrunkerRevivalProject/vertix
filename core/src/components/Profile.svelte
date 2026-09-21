@@ -44,16 +44,16 @@
 				} else {
 					tmpClan = `[${stats.clan.toUpperCase()}]`;
 				}
-				userName.innerHTML = stats.name;
-				userClanName.innerHTML = tmpClan;
-				userRank.innerHTML = stats.rank;
-				userWorldRank.innerHTML = `#${stats.world}`;
-				userKDR.innerHTML = (Math.max(1, stats.kills) / Math.max(1, stats.deaths)).toFixed(2);
-				userScore.innerHTML = abbreviateNumber(stats.score);
-				userLikes.innerHTML = abbreviateNumber(stats.likes);
-				userKills.innerHTML = abbreviateNumber(stats.kills);
-				userHats.innerHTML = stats.hatsTotal;
-				userDeaths.innerHTML = abbreviateNumber(stats.deaths);
+				userName.textContent = stats.name;
+				userClanName.textContent = tmpClan;
+				userRank.textContent = stats.rank;
+				userWorldRank.textContent = `#${stats.world}`;
+				userKDR.textContent = (Math.max(1, stats.kills) / Math.max(1, stats.deaths)).toFixed(2);
+				userScore.textContent = abbreviateNumber(stats.score);
+				userLikes.textContent = abbreviateNumber(stats.likes);
+				userKills.textContent = abbreviateNumber(stats.kills);
+				userHats.textContent = stats.hatsTotal;
+				userDeaths.textContent = abbreviateNumber(stats.deaths);
 				// loadSocialButtons(stats);
 			} else {
 				serverMessage = stats;

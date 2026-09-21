@@ -15,5 +15,8 @@
 		"socket.io-client": "^4.8.3",
 		"vite": "^8.3.0"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"dompurify": "^3.4.15"
+	}
 }

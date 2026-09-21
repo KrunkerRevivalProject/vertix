@@ -6,6 +6,7 @@ import App from "./components/App.svelte";
 import { weaponNames } from "./loadouts.ts";
 import { Projectile } from "./logic/projectile.ts";
 import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.ts";
+import DOMPurify from "dompurify";
 import { st } from "./state.svelte.ts";
 import type {
 	Account,
@@ -2152,7 +2153,7 @@ function loadDefaultSprites(base: string) {
 var mainTitleText = document.getElementById("mainTitleText")!;
 function updateMenuInfo(info: string) {
 	// active security risk
-	mainTitleText.innerHTML = info;
+	mainTitleText.innerHTML = DOMPurify.sanitize(info);
 }
 
 var linkedMod = location.hash.replace("#", "");
@@ -2163,7 +2164,7 @@ var modInfo = document.getElementById("modInfo")!;
 function setModInfoText(info: string) {
 	if (modInfo) {
 		// active security risk
-		modInfo.innerHTML = info;
+		modInfo.innerHTML = DOMPurify.sanitize(info);
 	}
 }
 
