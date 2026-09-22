@@ -10,6 +10,69 @@ const BULLET_IMMUNITY_MS = 250;
 const LINE_INTERSECTION_EPSILON = 1e-7;
 const COLLISION_ADJUST_ATTEMPTS = 100;
 const COLLISION_ADJUST_STEP = 2;
+const GRID_CELL_SIZE = 512;
+const GRID_KEY_MULT = 1 << 16;
+
+// assumes tiles don't change during rounds
+function gridKey(cx: number, cy: number) {
+	return cy * GRID_KEY_MULT + cx;
+}
+
+class TileGrid {
+	private cells = new Map<number, Tile[]>();
+	private source: Tile[] | null = null;
+
+	get(tiles: Tile[]) {
+		if (this.source !== tiles) {
+			this.rebuild(tiles);
+			this.source = tiles;
+		}
+		return this.cells;
+	}
+
+	private rebuild(tiles: Tile[]) {
+		this.cells.clear();
+		for (const tl of tiles) {
+			if (!tl.wall || !tl.hasCollision) continue;
+			const cx = Math.floor(tl.x / GRID_CELL_SIZE);
+			const cy = Math.floor(tl.y / GRID_CELL_SIZE);
+			const key = gridKey(cx, cy);
+			let cell = this.cells.get(key);
+			if (!cell) {
+				cell = [];
+				this.cells.set(key, cell);
+			}
+			cell.push(tl);
+		}
+	}
+
+	// Collects tiles in all cells overlapping the segment's AABB into `out`.
+	query(
+		cells: Map<number, Tile[]>,
+		minX: number,
+		minY: number,
+		maxX: number,
+		maxY: number,
+		out: Tile[],
+	) {
+		out.length = 0;
+		const c0x = Math.floor(minX / GRID_CELL_SIZE);
+		const c1x = Math.floor(maxX / GRID_CELL_SIZE);
+		const c0y = Math.floor(minY / GRID_CELL_SIZE);
+		const c1y = Math.floor(maxY / GRID_CELL_SIZE);
+		for (let cy = c0y; cy <= c1y; cy++) {
+			for (let cx = c0x; cx <= c1x; cx++) {
+				const cell = cells.get(gridKey(cx, cy));
+				if (cell) {
+					for (const tl of cell) out.push(tl);
+				}
+			}
+		}
+		return out;
+	}
+}
+
+const sharedTileGrid = new TileGrid();
 
 export class Projectile {
 	width = 0;
@@ -50,6 +113,8 @@ export class Projectile {
 	bounce = false;
 	dustTimer = 0;
 	selfDamage = false;
+	private tileGrid = sharedTileGrid;
+	private scratchTiles: Tile[] = [];
 	update(
 		delta: number,
 		currentTime: number,
@@ -68,6 +133,7 @@ export class Projectile {
 			this.hitPlayers = [];
 
 			for (let updateStep = 0; updateStep < this.updateAccuracy; ++updateStep) {
+				if (!this.active) break;
 				let vel = this.speed * delta;
 
 				for (const playerIndex in this.playerImmunity) {
@@ -78,20 +144,24 @@ export class Projectile {
 				}
 
 				if (this.active) {
-					let changeX = (vel * Math.cos(this.dir)) / this.updateAccuracy;
-					let changeY = (vel * Math.sin(this.dir)) / this.updateAccuracy;
+					const cos = Math.cos(this.dir);
+					const sin = Math.sin(this.dir);
+					let changeX = (vel * cos) / this.updateAccuracy;
+					let changeY = (vel * sin) / this.updateAccuracy;
 
 					if (this.active && !this.skipMove && this.speed > 0) {
 						this.x += changeX;
 						this.y += changeY;
-						if (getDistance(this.startX, this.startY, this.x, this.y) >= this.trailMaxLength) {
+						const dx = this.x - this.startX;
+						const dy = this.y - this.startY;
+						if (dx * dx + dy * dy >= this.trailMaxLength * this.trailMaxLength) {
 							this.startX += changeX;
 							this.startY += changeY;
 						}
 					}
 
-					this.cEndX = this.x + ((vel + this.height) * Math.cos(this.dir)) / this.updateAccuracy;
-					this.cEndY = this.y + ((vel + this.height) * Math.sin(this.dir)) / this.updateAccuracy;
+					this.cEndX = this.x + ((vel + this.height) * cos) / this.updateAccuracy;
+					this.cEndY = this.y + ((vel + this.height) * sin) / this.updateAccuracy;
 
 					for (const [i, clt] of clutter.entries()) {
 						if (
@@ -109,39 +179,47 @@ export class Projectile {
 							}
 						}
 					}
-					if (this.active) {
-						for (const tl of tiles) {
-							if (this.active) {
-								if (tl.wall && tl.hasCollision && this.canSeeObject(tl, tl.scale)) {
-									if (tl.bottom) {
-										if (this.lineInRect(tl.x, tl.y, tl.scale, tl.scale, true)) {
-											this.active = false;
-										}
-									} else if (
-										this.lineInRect(
-											tl.x,
-											tl.y,
-											tl.scale,
-											tl.scale - this.owner!.height - this.jumpY,
-											true,
-										)
-									) {
+				if (this.active) {
+					const candidates = this.tileGrid.query(
+						this.tileGrid.get(tiles),
+						Math.min(this.x, this.cEndX),
+						Math.min(this.y, this.cEndY),
+						Math.max(this.x, this.cEndX),
+						Math.max(this.y, this.cEndY),
+						this.scratchTiles,
+					);
+					for (const tl of candidates) {
+						if (this.active) {
+							if (this.canSeeObject(tl, tl.scale)) {
+								if (tl.bottom) {
+									if (this.lineInRect(tl.x, tl.y, tl.scale, tl.scale, true)) {
 										this.active = false;
 									}
-									if (!this.active) {
-										if (this.bounce) {
-											this.bounceDir(!(this.cEndX <= tl.x) && !(this.cEndX >= tl.x + tl.scale));
-										} else {
-											this.hitSomething(
-												!(this.cEndX <= tl.x) && !(this.cEndX >= tl.x + tl.scale),
-												2,
-											);
-										}
+								} else if (
+									this.lineInRect(
+										tl.x,
+										tl.y,
+										tl.scale,
+										tl.scale - this.owner!.height - this.jumpY,
+										true,
+									)
+								) {
+									this.active = false;
+								}
+								if (!this.active) {
+									if (this.bounce) {
+										this.bounceDir(!(this.cEndX <= tl.x) && !(this.cEndX >= tl.x + tl.scale));
+									} else {
+										this.hitSomething(
+											!(this.cEndX <= tl.x) && !(this.cEndX >= tl.x + tl.scale),
+											2,
+										);
 									}
 								}
 							}
 						}
 					}
+				}
 					if (
 						this.active &&
 						(typeof window === "undefined" || this.owner!.index === st.player.index)
@@ -271,6 +349,19 @@ export class Projectile {
 		rectHeight: number,
 		shouldAdjustOnCollision: boolean,
 	) {
+		// fast reject: segment AABB vs rect AABB
+		// const segMinX = Math.min(this.x, this.cEndX);
+		// const segMaxX = Math.max(this.x, this.cEndX);
+		// const segMinY = Math.min(this.y, this.cEndY);
+		// const segMaxY = Math.max(this.y, this.cEndY);
+		// if (
+		// 	segMaxX < rectX ||
+		// 	segMinX > rectX + rectWidth ||
+		// 	segMaxY < rectY ||
+		// 	segMinY > rectY + rectHeight
+		// ) {
+		// 	return false;
+		// }
 		let lineStartX = this.x;
 		let lineStartY = this.y;
 		let minX = lineStartX;
