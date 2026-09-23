@@ -70,7 +70,7 @@ app.get("/getRooms", (c) => {
 		mxpl: r.game.maxPlayers,
 		lb: r.game.score.lb,
 	}));
-	return c.json(list);
+	return c.json(Array.from(list));
 });
 
 // TODO: replace generated data here with actual data.
