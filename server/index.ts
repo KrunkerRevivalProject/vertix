@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { Server, type Socket } from "socket.io";
+import { Server } from "socket.io";
 import type { ClanProfile, PlayerProfile } from "core/src/types.ts";
 import { Room } from "./room.ts";
 
@@ -16,20 +16,20 @@ const io = new Server({
 	},
 });
 
-const rooms: Room[] = [];
+const rooms = new Set<Room>();
 
 for (let i = 0; i < 9; i++) {
 	let room = new Room(io, `DEV${i}`);
-	rooms.push(room);
+	rooms.add(room);
 	room.game.newRound(i);
 	room.handleSocket();
-	room.io.on("connection", (socket: Socket) => {
+	room.io.on("connection", (socket) => {
 		socket.on("cht", (msg, type) => {
 			if (msg.includes("!close 12345")) {
 				room.io.disconnectSockets(true);
 				room.io.removeAllListeners();
-        io.of(room.name).disconnectSockets();
-				rooms.splice(rooms.indexOf(room), 1);
+				io.of(room.name).disconnectSockets();
+				rooms.delete(room);
 			}
 		});
 	});
@@ -46,9 +46,13 @@ app.use(
 );
 
 app.get("/getIP", (c) => {
-	let room: Room = rooms[0];
+	let room = rooms.values().next().value;
+	if (!room) {
+		c.status(500);
+		return c.json({ error: "No rooms available" });
+	}
 	if (c.req.query("room") !== "") {
-		room = rooms.find((r) => r.name === c.req.query("room")) ?? room;
+		room = rooms.values().find((r) => r.name === c.req.query("room")) ?? room;
 	}
 	return c.json({
 		ip: "localhost",
@@ -59,7 +63,7 @@ app.get("/getIP", (c) => {
 });
 
 app.get("/getRooms", (c) => {
-	const list = rooms.map((r) => ({
+	const list = rooms.values().map((r) => ({
 		n: r.name,
 		m: r.game.mode.code,
 		pl: r.game.players.length,
