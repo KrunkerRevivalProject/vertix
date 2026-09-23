@@ -41,7 +41,7 @@ somewhat of a mess
 
 ### Windows
 
-- Go to https://nodejs.org/en/download and follow the install instructions for windows for v25 of nodejs, not the LTS one
+- Go to https://nodejs.org/en/download and follow the install instructions for windows for nodejs v25 (or greater), not the LTS one
 - Go to https://pnpm.io/installation and follow the install instructions for windows
 - Go to https://git-scm.com/install/windows and download the installer, or use winget to install git, open powershell and run `git clone https://github.com/KrunkerRevivalProject/vertix.git` **OR** download the repo as a zip and extract it somewhere.
 - Open powershell in the vertix folder (the one you cloned or extracted), and run `pnpm i`, after that's done you won't need to run it again
@@ -49,7 +49,7 @@ somewhat of a mess
 
 ### Linux
 
-- If your package manager has v25 of nodejs, you can install everything from there, if not go to https://nodejs.org/en/download, https://pnpm.io/installation and follow the install instructions for linux.
+- If your package manager has nodejs v25 (or greater), you can install everything from there, if not go to https://nodejs.org/en/download, https://pnpm.io/installation and follow the install instructions for linux.
 - Install git from your package manager if you haven't already, run the following in your terminal
 
 ```
