@@ -39,18 +39,22 @@ somewhat of a mess
 
 ## How to install and play locally
 
+This will allow you to host vertix locally on your computer, though others will not be able to join the session.
+
 ### Windows
 
-- Go to https://nodejs.org/en/download and follow the install instructions for windows for nodejs v25 (or greater), not the LTS one
-- Go to https://pnpm.io/installation and follow the install instructions for windows
-- Go to https://git-scm.com/install/windows and download the installer, or use winget to install git, open powershell and run `git clone https://github.com/KrunkerRevivalProject/vertix.git` **OR** download the repo as a zip and extract it somewhere.
-- Open powershell in the vertix folder (the one you cloned or extracted), and run `pnpm i`, after that's done you won't need to run it again
-- To start the server run `pnpm dev` then go to http://localhost:5173 in your browser.
+- Follow the install instructions for Windows for [nodejs v25 (or greater)](https://nodejs.org/en/download). (Note that v25+ is not necessarily the LTS version, which is v24 as of this README's last update.) The default configurations suggested by the installer are ok to keep.
+- Follow the install instructions for Windows for [pnpm](https://pnpm.io/installation). Either the npm command method or the standalone script method should work.
+- Do **either one** of the following:
+  - Install git by using the [installer](https://git-scm.com/install/windows) or through winget. Then open powershell and run `git clone https://github.com/KrunkerRevivalProject/vertix.git`.
+  - Download the repo as a zip (an option available via the green "Code" button here) and extract it in a folder of your choice.
+- Open powershell in the vertix folder (the one you cloned or extracted). Run `pnpm i`; after that's done, you won't need to run it again.
+- To start the server, run `pnpm dev` in powershell. You should shortly see the game up on http://localhost:5173 in your browser.
 
 ### Linux
 
-- If your package manager has nodejs v25 (or greater), you can install everything from there, if not go to https://nodejs.org/en/download, https://pnpm.io/installation and follow the install instructions for linux.
-- Install git from your package manager if you haven't already, run the following in your terminal
+- If your package manager has nodejs v25 (or greater), you can install everything from there. If not, follow the install instructions for Linux for [nodejs v25 (or greater)](https://nodejs.org/en/download) and [pnpm](https://pnpm.io/installation).
+- Install git from your package manager if you haven't already. Run the following in your terminal:
 
 ```
 git clone https://github.com/KrunkerRevivalProject/vertix.git
@@ -58,4 +62,12 @@ cd vertix
 pnpm i
 ```
 
-- To start the server run `pnpm dev` then go to http://localhost:5173 in your browser.
+- To start the server, run `pnpm dev`, then go to http://localhost:5173 in your browser.
+
+## Playing with others
+
+These instructions briefly walk through a setup that uses cloudflared, but alternative options exist and can be similarly used to perform tunneling. As a prerequisite, ensure you have the local setup working first.
+
+- Follow the install instructions for [cloudflared](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/downloads/).
+- Start the local vertix server bu running `pnpm dev` in your terminal.
+- Open a new terminal while keeping the existing one running, and run `cloudflared tunnel --url http://localhost:5173`. Within a few seconds, this will give you a URL that you can then share with others.
