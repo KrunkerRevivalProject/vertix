@@ -279,7 +279,7 @@
 
 	.rewardText {
 		cursor:
-			url("./cursor_aim.png") 17 17,
+			url("../../assets/cursor_aim.png") 17 17,
 			default;
 		pointer-events: all;
 		position: relative;
