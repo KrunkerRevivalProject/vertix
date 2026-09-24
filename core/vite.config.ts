@@ -1,9 +1,9 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import type { UserConfig } from "vite";
+import { defineConfig } from "vite";
 
 // todo: when we start not using the dev server
 // https://vite.dev/guide/build#multi-page-app
-export default {
+export default defineConfig(({ mode }) => ({
 	appType: "mpa",
 	plugins: [
 		svelte({
@@ -12,7 +12,7 @@ export default {
 					async: true,
 				},
 				runes: true,
-				hmr: true,
+				hmr: mode === "development",
 				preserveComments: true,
 				// not ideal
 				warningFilter: (w) => !w.code.includes("a11y"),
@@ -33,4 +33,4 @@ export default {
 			},
 		},
 	},
-} satisfies UserConfig;
+}));
