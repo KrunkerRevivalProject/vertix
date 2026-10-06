@@ -123,6 +123,9 @@ export const st = $state({
 		author: string;
 	}[],
 	players: [] as Player[],
+	leaderboard: [] as number[],
+	ping: null as number | null,
+	fps: null as number | null,
 });
 
 declare global {

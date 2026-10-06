@@ -1,4 +1,5 @@
 import * as zip from "@zip.js/zip.js";
+import DOMPurify from "dompurify";
 import { io, type Socket } from "socket.io-client";
 import { flushSync, mount } from "svelte";
 import { resetCooldownAnimations } from "./components/ActionBar.svelte";
@@ -6,7 +7,6 @@ import App from "./components/App.svelte";
 import { weaponNames } from "./loadouts.ts";
 import { Projectile } from "./logic/projectile.ts";
 import { loadSounds, playSound, startSoundTrack, stopAllSounds } from "./sound.ts";
-import DOMPurify from "dompurify";
 import { st } from "./state.svelte.ts";
 import type {
 	Account,
@@ -138,7 +138,6 @@ var clanAdminPanel = document.getElementById("clanAdminPanel")!;
 var leaveClanButton = document.getElementById("leaveClanButton")!;
 var clanInvMessage = document.getElementById("clanInvMessage")!;
 var clanChtMessage = document.getElementById("clanChtMessage")!;
-var clanChatLink = document.getElementById("clanChatLink")!;
 var loginMessage = document.getElementById("loginMessage")!;
 var serverCreateMessage = document.getElementById("serverCreateMessage")!;
 
@@ -424,7 +423,7 @@ function kickPlayer(secondReason: string) {
 
 let pingStart = 0;
 function receivePing() {
-	document.getElementById("pingText")!.replaceChildren(<>PING {Date.now() - pingStart}</>);
+	st.ping = Date.now() - pingStart;
 }
 var pingInterval: ReturnType<typeof setInterval> | null = null;
 function setupSocket(sock: Socket) {
@@ -599,11 +598,7 @@ function setupSocket(sock: Socket) {
 		if (!a.newURL.match(/^https?:\/\//i)) {
 			a.newURL = `http://${a.newURL}`;
 		}
-		clanChatLink.replaceChildren(
-			<a target="_blank" href={a.newURL} rel="noopener">
-				Clan Chat
-			</a>,
-		);
+		st.clanData.chatUrl = a.newURL;
 	});
 	sock.on("dbChangeUserR", (a, d) => {
 		if (d) {
@@ -678,7 +673,9 @@ function setupSocket(sock: Socket) {
 			resize();
 		},
 	);
-	sock.on("lb", updateLeaderboard);
+	sock.on("lb", (data: number[]) => {
+		st.leaderboard = data;
+	});
 	sock.on("ts", updateTeamScores);
 	sock.on("rsd", receiveServerData);
 	sock.on("upd", updateUserValue);
@@ -1191,34 +1188,6 @@ function sortUsersByPosition(a: Player, b: Player) {
 	}
 }
 
-function updateLeaderboard(data: number[]) {
-	let test: Node[] = [];
-	test.push(<span class="title">LEADERBOARD</span>);
-
-	for (let i = 0; i < data.length; i++) {
-		let tmpPlayer = findUserByIndex(data[0 + i]);
-		if (tmpPlayer == null) continue;
-		test.push(<br />);
-		if (tmpPlayer.index === st.player.index) {
-			test.push(
-				<span class="me">
-					{i + 1}. {st.player.name}
-					{st.player.account.clan && ` [${st.player.account.clan}]`}
-				</span>,
-			);
-		} else if (tmpPlayer.name) {
-			test.push(
-				<>
-					<span class={tmpPlayer.team !== st.player.team ? "red" : "blue"}>
-						{i + 1}. {tmpPlayer.name}
-					</span>
-					{tmpPlayer.account.clan && <span class="me"> [{tmpPlayer.account.clan}]</span>}
-				</>,
-			);
-		}
-	}
-	document.getElementById("status")!.replaceChildren(...test);
-}
 function updateTeamScores(scoreRed: number, scoreBlue: number) {
 	var redProgress = document.getElementById("redProgress")!;
 	var blueText = document.getElementById("blueText")!;
@@ -1302,7 +1271,7 @@ function updateGameLoop() {
 	fpsUpdateDelta += delta;
 	if (fpsUpdateDelta >= 1000) {
 		const average = fpsSamples.reduce((a, b) => a + b) / fpsSamples.length;
-		document.getElementById("fpsText")!.textContent = `FPS ${Math.round(average)}`;
+		st.fps = Math.round(average);
 		fpsUpdateDelta = 0;
 		fpsSamples = [];
 	}

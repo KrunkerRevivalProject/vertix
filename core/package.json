@@ -9,7 +9,6 @@
 	"devDependencies": {
 		"@sveltejs/vite-plugin-svelte": "^7.3.0",
 		"@zip.js/zip.js": "^2.15.0",
-		"jsx-dom": "^8.1.6",
 		"socket.io-client": "^4.8.3",
 		"vite": "^8.3.0"
 	},

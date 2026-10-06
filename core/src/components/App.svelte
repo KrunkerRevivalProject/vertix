@@ -5,6 +5,7 @@
 	import Chatbox from "./Chatbox.svelte";
 	import DropUpLink from "./DropUpLink.svelte";
 	import GameStatsTable from "./GameStatsTable.svelte";
+	import Leaderboard from "./Leaderboard.svelte";
 	import RightMenu from "./RightMenu.svelte";
 	import RoomList from "./RoomList.svelte";
 	import StartMenu from "./StartMenu.svelte";
@@ -52,11 +53,11 @@
 		<div id="gameModeText"></div>
 	</div>
 	<div id="conStatContainer">
-		<div id="pingText" class="gameDevStat">PING 0</div>
-		<div id="fpsText" class="gameDevStat">FPS 60</div>
+		<div id="pingText" class="gameDevStat">PING {st.ping ?? "???"}</div>
+		<div id="fpsText" class="gameDevStat">FPS {st.fps ?? "???"}</div>
 	</div>
 	<div id="statContainer3">
-		<div id="status"><span class="title">LEADERBOARD</span></div>
+		<div id="status"><Leaderboard /></div>
 		<div id="scoreHolder">
 			<div id="score">
 				<span class="title" style="font-size: 18px">SCORE </span>
