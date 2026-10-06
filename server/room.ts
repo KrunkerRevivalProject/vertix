@@ -503,7 +503,12 @@ export class Room {
 		}
 	}
 
-	updateBullet(bullet: Projectile, player: Player, dir: number, shotToken: number) {
+	updateBullet(
+		bullet: Projectile,
+		player: Player,
+		dir: number,
+		shotToken: number,
+	) {
 		const tick = () => {
 			if (bullet.shotToken !== shotToken) {
 				// bullet pool entry was reassigned to a newer shot

@@ -179,47 +179,47 @@ export class Projectile {
 							}
 						}
 					}
-				if (this.active) {
-					const candidates = this.tileGrid.query(
-						this.tileGrid.get(tiles),
-						Math.min(this.x, this.cEndX),
-						Math.min(this.y, this.cEndY),
-						Math.max(this.x, this.cEndX),
-						Math.max(this.y, this.cEndY),
-						this.scratchTiles,
-					);
-					for (const tl of candidates) {
-						if (this.active) {
-							if (this.canSeeObject(tl, tl.scale)) {
-								if (tl.bottom) {
-									if (this.lineInRect(tl.x, tl.y, tl.scale, tl.scale, true)) {
+					if (this.active) {
+						const candidates = this.tileGrid.query(
+							this.tileGrid.get(tiles),
+							Math.min(this.x, this.cEndX),
+							Math.min(this.y, this.cEndY),
+							Math.max(this.x, this.cEndX),
+							Math.max(this.y, this.cEndY),
+							this.scratchTiles,
+						);
+						for (const tl of candidates) {
+							if (this.active) {
+								if (this.canSeeObject(tl, tl.scale)) {
+									if (tl.bottom) {
+										if (this.lineInRect(tl.x, tl.y, tl.scale, tl.scale, true)) {
+											this.active = false;
+										}
+									} else if (
+										this.lineInRect(
+											tl.x,
+											tl.y,
+											tl.scale,
+											tl.scale - this.owner!.height - this.jumpY,
+											true,
+										)
+									) {
 										this.active = false;
 									}
-								} else if (
-									this.lineInRect(
-										tl.x,
-										tl.y,
-										tl.scale,
-										tl.scale - this.owner!.height - this.jumpY,
-										true,
-									)
-								) {
-									this.active = false;
-								}
-								if (!this.active) {
-									if (this.bounce) {
-										this.bounceDir(!(this.cEndX <= tl.x) && !(this.cEndX >= tl.x + tl.scale));
-									} else {
-										this.hitSomething(
-											!(this.cEndX <= tl.x) && !(this.cEndX >= tl.x + tl.scale),
-											2,
-										);
+									if (!this.active) {
+										if (this.bounce) {
+											this.bounceDir(!(this.cEndX <= tl.x) && !(this.cEndX >= tl.x + tl.scale));
+										} else {
+											this.hitSomething(
+												!(this.cEndX <= tl.x) && !(this.cEndX >= tl.x + tl.scale),
+												2,
+											);
+										}
 									}
 								}
 							}
 						}
 					}
-				}
 					if (
 						this.active &&
 						(typeof window === "undefined" || this.owner!.index === st.player.index)
